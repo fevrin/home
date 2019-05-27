@@ -1,0 +1,15 @@
+screen
+
+chdir $HOME
+screen -t dev
+
+chdir $HOME
+screen -t "general work"
+
+#screen -t "update and hand-off"
+#stuff "vim -O \"$(date +%F)\"_update \"$(date +%F)\"_hand-off" #^M:spl todo^M
+
+screen -t top top
+
+select 1
+select 2

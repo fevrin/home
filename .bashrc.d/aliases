@@ -1,0 +1,133 @@
+#!/bin/bash
+
+# format is: alias NICKNAME='full command'
+# you may have to restart any open terminals for the changes to take effect
+
+# always run rm interactively, so as to not accidentally remove an object
+alias rm='rm -i'
+
+# always list the size in human-readable format
+alias df='df -h'
+
+# lists many info of almost all files in current directory
+alias ll='ls -Al'
+
+# lists all entries in current directory in human-readable block sizes, long format, and with executable and directory designations
+alias list='ls -halF'
+
+# same as "list", but doesn't list all
+alias lst='ls -hlF'
+
+# be verbose when making links
+alias ln='ln -v'
+
+# show the progress of the copy
+alias cp='cp -v'
+
+# show the progress of the move
+alias mv='mv -v'
+
+# get the sha-1 hash of a single file
+alias hash1='sha1sum'
+
+# get the sha-512 hash of a single file
+alias hash5='sha512sum'
+
+# get the sha-256 hash of a single file
+alias hash='sha256sum'
+
+# get the sha-256 hash of the current directory
+alias hashd='tar cf - ./ | sha256sum'
+
+# get the sha-256 hashes of each file in the current directory
+alias hashesd='sha256deep -r ./'
+
+# see if there are any package updates
+alias aptgrade='sudo apt-get update && sudo apt-get upgrade'
+
+# show all known information on a given package
+alias aptshow='apt-cache show'
+
+# search all repositories for a given package
+alias aptsearch='apt-cache search'
+
+# view a specified package's changelog
+alias aptchangelog='apt-get changelog'
+
+# install specified packages
+alias aptinstall='sudo apt-get install'
+
+# see if specified packages are installed or not
+alias packstat='dpkg-query -s'
+
+# go back to the previous working directory
+alias goback='cd ~-'
+
+# show each directory on its own line, and don't replace the home directory with ~
+alias dir='dir -v -l'
+
+# show the process id of processes
+alias jobs='jobs -l'
+
+# always grep recursively
+#alias grep='grep -r'
+
+# always create parent directories if they do not exist already
+alias mkdir='mkdir -p'
+
+# have qrencode take standard input
+alias qrencode='qrencode -o /tmp/$$.png && eog /tmp/$$.png'
+#'temp_file=/tmp/temp_ssh_key && { [[ -r $temp_file ]] || touch $temp_file && chmod 600 $temp_file; } && cat /media/$USER-1gb/key >$temp_file && ssh-add $temp_file && rm -f $temp_file'
+
+# for connecting to a remote desktop
+alias wconnect='vncviewer -truecolor -depth 24 -compresslevel 9 -quality 9 10.110.0.197:5900 && sshfs $USER@10.110.0.197:/ /tmp/casper'
+alias wdisconnect='pkill vncviewer && sudo umount /tmp/casper'
+
+# to easily upload standard config files to a new server
+alias up-config='rsync -avzPiR ~/./.{{bash,input,screen,top,vim}rc,bash_aliases,profile,my.cnf,ssh/key.pub}'
+
+alias nmap='nmap -T5 --reason -F -Pn'
+
+alias mtr='sudo mtr -s 1472 -i.1 -c1000'
+
+# more easily check customer droplets for ssh connectivity without having to deal with host key checks
+#alias sshc='ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -l root'
+alias sftpc='sftp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o User=root'
+
+alias grep-config='grep -Ev "^(\s*|#.*|\s*#.*)$"'
+
+# easier editing of ~/.bash_history when it's chattr'ed to prevent anything but appending
+#actually, this may not work if there are changes to the live file when editing the temp copy :(
+alias edit-history='sudo chattr -a ~/.bash_history && vim ~/.bash_history && sudo chattr +a ~/.bash_history'
+
+# Add an "alert" alias for long running commands.  Use like so:
+#   sleep 10; alert
+#alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
+
+alias parse-json='python -mjson.tool'
+
+# output apt history in a more readable format
+alias apt-history='sed -re "s;\), ([a-z]);)\n\1;g" -e "s;^(Install|Upgrade): ;\1:\n;" /var/log/apt/history.log'
+
+# from <https://unix.stackexchange.com/questions/152299/how-to-get-memory-usedram-used-using-linux-command/152301#152301>
+# this is obsolete in procps version >3.3.9.9, which shows an "available" column:
+# <https://bugzilla.redhat.com/show_bug.cgi?id=1158828>
+alias calculate-free-mem='free | awk '\''FNR == 3 {printf "%0.2f%%\n",$4/($3+$4)*100}'\'''
+alias calculate-used-mem='free | awk '\''FNR == 3 {printf "%0.2f%%\n",$3/($3+$4)*100}'\'''
+
+# make the output of 'dirs' more readable
+alias dirs="dirs -v"
+
+#############Directory Shortcuts############
+
+alias apt-archives='pushd /var/cache/apt/archives'
+
+alias qcd='. quickcd'
+
+alias pics='pushd "$HOME/pictures"'
+
+alias movs='pushd "$HOME/movies"'
+
+alias docs='pushd "$HOME/documents"'
+
+alias progs='pushd "$HOME/programs"'

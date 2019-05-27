@@ -1,0 +1,442 @@
+#!/bin/bash
+
+count-ips-from-tcpdump() {
+   # used to determine source IPs possibly involved in server issues based on overall occurrence in total traffic
+   # first run something like this on the server to get good sample data:
+   # tcpdump -i eth0 -nnc 1000
+
+   local file="$1"
+   [[ -r "$file" ]] || { echo "file doesn't exist or is unreadable!"; return 1; }
+   sed -rne "s;.*IP $ip_regex\.?.*;\1;p" "$file" | sort | uniq -c | sort -h
+}
+
+function get-ips() {
+   # input: nothing
+   # output: a list of common interfaces and their assigned IPv4 IPs
+
+   local ints="$1"
+   local ip
+   [[ -n "$ints" ]] || ints="$(ifconfig | sed -rne "s;^([^ :]+)[ :].*;\1;p")"
+   for int in $ints; do
+      if [[ "$int" =~ ^([-a-z_0-9]+)$ && $(ip address show "$int" &>/dev/null; echo $?) -eq 0 ]]; then
+         ip="$(ip address show $int | grep -Po "inet \K$ip_regex")"
+         [[ -n "$ip" ]] && echo "$int: $ip"
+      fi
+   done
+}
+
+# deal with the maximum buffer size of the clipboard from the command line
+#if possible, it'd be better to just open the file with a GUI editor, like gvim,
+#then Ctrl-A to select it all, then Ctrl-C to copy it
+clipit-copy() {
+
+   file="$1"
+
+   # display a better alternative and cut off leading spaces (kept just for prettier code)
+   echo -n "
+   A better option, if possible, is to:
+   1) open '$file' with a GUI editor, like gvim
+   2) Ctrl-A to select it all
+   3) Ctrl-C to copy it
+
+   Do you still wish to use $FUNCNAME? [y/N] "  | sed -re 's;^\s+;;g'
+
+	read
+
+	[[ $REPLY =~ [Yy] ]] || return 1
+	echo
+
+   total_remaining_bytes="$(wc -c $file | cut -d' ' -f1)"
+
+   buffer_size=4000
+   bytes_to_grab="$buffer_size"
+   chunk_ending_byte=0
+
+   while [[ $total_remaining_bytes -gt 0 ]]; do
+      if [[ $total_remaining_bytes -lt $buffer_size ]]; then
+         bytes_to_grab="$total_remaining_bytes"
+      fi
+
+      chunk_ending_byte="$((chunk_ending_byte + bytes_to_grab))"
+
+      #echo -e "chunk_ending_byte=$chunk_ending_byte for $bytes_to_grab"
+
+      head -c"$chunk_ending_byte" "$file" | tail -c$bytes_to_grab | xsel -b
+
+      total_remaining_bytes=$((total_remaining_bytes - bytes_to_grab))
+
+      #echo -e "total_remaining_bytes=$total_remaining_bytes"
+
+      if [[ $bytes_to_grab -ge $buffer_size ]]; then
+         echo -n "paste the current buffer, then press Enter to copy the next block of data"
+         read
+      fi
+   done
+}
+
+# more accurately convert an image to a PDF so it's not oversized
+img2pdf() {
+   echo convert /tmp/"$1" -density 150x150 -units PixelsPerInch -resize $((150*827/100))x$((150*1169/100)) /tmp/${1/\.*/.pdf}
+   #convert /tmp/sublease/* -density 150x150 -units PixelsPerInch -resize $((150*827/100))x$((150*1169/100)) -repage $((150*827/100))x$((150*1169/100)) /tmp/sublease.pdf
+}
+
+# get a VirtualBox guest's IP address (if Linux)
+# from <https://forums.virtualbox.org/viewtopic.php?f=1&t=36592>
+get-vb-ip() {
+   local guest="$1"
+   [[ -z "$guest" ]] && local guest="$(VBoxManage list runningvms | sed 's;"\([^"]\+\)".*;\1;')"
+   VBoxManage guestproperty get $guest "/VirtualBox/GuestInfo/Net/0/V4/IP" | cut -d' ' -f2
+}
+
+pushd() {
+   if [[ "$1" =~ ^[0-9]+$ ]]; then
+      local dir="+$1";
+   elif [[ -n "$1" ]]; then
+      local dir="$1"
+   else
+      local dir=
+   fi
+   builtin pushd $dir >/dev/null && dirs
+}
+
+popd() {
+   if [[ "$1" =~ ^[0-9]+$ ]]; then
+      local dir="+$1";
+   else
+      local dir=
+   fi
+   builtin popd $dir >/dev/null && dirs
+}
+
+seek-broken-links() {
+   # inspired by <https://sookocheff.com/post/bash/parsing-bash-script-arguments-with-shopts/>
+
+   # reset OPTIND since it's normally rest only at the beginning of a script execution, not function execution
+   OPTIND=1
+
+   while getopts ":d:t:" opt; do
+      case $opt in
+         d)
+            directory=$OPTARG
+            ;;
+         t)
+            timeout=$OPTARG
+            ;;
+         \?)
+            echo "$FUNCNAME [-d {directory}] [-t {timeout}]"
+            return 1
+            ;;
+      esac
+   done
+   shift $((OPTIND - 1))
+
+   # ensure these variables are set, one way or another
+   directory="${directory:-.}"
+   timeout="${timeout:-5}"
+
+   for link in $(egrep -Ihoir "$http_regex" "$directory"/* | sort -u); do
+      echo "checking $link" >&2
+      timeout $timeout curl -kIL "$link" &>/dev/null || echo "$link"
+   done
+}
+
+make-broken-link-table() {
+   # creates a table with the fields:
+   #URL
+   #file
+   #notes
+   #fixed
+   # to be run immediately after `find-broken-links` and before fixing any URLs
+   local file="${1:-urls}"
+   local url_base="${2:-https://github.com/$USER/documentation/blob/master/}"
+   # the first regex swaps around the order of the field name values for each found broken link
+   # the second regex gets the basename of the file
+   local contents="$(egrep -Iirf "$file" * | grep -v ^"$file" | sed -re "s;^([^:]+):.*($http_regex).*$;| \2 | [\1|$url_base\1] | | (x) |;" -e 's;\[[^|]+\/([^|]+)\|;[\1|;' | sort -k 4)"
+
+   if [[ "$contents" ]]; then
+      echo "|| URL || file || notes || fixed ||"
+      echo "$contents"
+   else
+      echo "no broken links in file!"
+   fi
+}
+
+find-dupes() {
+   local dirname="${1:-.}"
+   local tempfile="$(mktemp -p .)"
+   # find all files not matching the regex and write their names to the temp file
+   # then get the basename of each file, sort, remove duplicates, and ensure they have at least one letter
+   # then loop through the filenames, searching against the full filenames in the temp file
+   # if there is more than 1 match for the filename (there will always be at least one match, for the file itself), then print it out
+   sudo find "$dirname" -type f \! -iregex '.*\(\/\(\/\.[^/]+\|\.\(config\|mozilla\|config\|purple\|git\|fontconfig\|cache\|compiz-1\|thumbnail\|wine\)\/\)\|maverick-root\|\/lfs\/\|livedvd\|\.unison\.[^/]+\.unison\.tmp\/\).*' >"$tempfile"
+
+   echo "using temp file $tempfile"
+
+   sed 's;.*/;;' "$tempfile" |
+    sort |
+    uniq -d |
+    grep -i '[a-z]' |
+    while read fileName; do
+      local matches="$(sudo grep "/$fileName$" $tempfile)"
+      if [[ $(echo "$matches" | wc -l) -gt 1 ]]; then
+        # list the full filename, as well as file size and other attributes
+        #this enables easier determination of largest likely duplicated files
+
+        echo "$matches" | xargs -d'\n' sudo ls -halFdtr
+        echo
+      fi
+   done
+
+   echo "remove $tempfile once done"
+}
+
+yessh() {
+   # handy for ssh'ing into servers and getting some common basic environmental modifications without having to copy ~/.bashrc, ~/.bash_aliases, etc. to each server first; it's all done over one connection
+   # inspired by <https://superuser.com/a/503785>
+
+   # not great for running non-interactive commands on a host
+
+   # input: server name and optional arguments passed to 'ssh'
+   # output: connects to the specific node and sets up the environment contained in the ~/.bashrc.d/* files
+
+   local hostname
+   local port
+   local username
+   local ssh_args
+
+   if [[ $# -gt 1 ]]; then
+      while [[ $# -ge 1 ]]; do
+         local arg="$1"
+         #echo "arg = $arg"
+         case $arg in
+            -p|--port)
+               shift
+               port="$1"
+               ;;
+            *@*)
+               username="$(echo "$arg" | cut -d@ -f1)"
+               hostname="$(echo "$arg" | cut -d@ -f2)"
+               ;;
+            -*)
+               if [[ "$arg" =~ -[46AaCfGgKkMNnqsTtVvXxYy]+ ]]; then
+                  ssh_args="$ssh_args $arg"
+               else
+                  shift
+                  ssh_args="$ssh_args $1"
+               fi
+               ;;
+            *)
+               hostname="$arg"
+               ;;
+         esac
+         shift
+
+         #echo "hostname = $hostname"
+         #echo "port = $port"
+         #echo "username = $username"
+         #echo "ssh_args = $ssh_args"
+         #echo
+      done
+   else
+      if [[ "$1" =~ .*@.* ]]; then
+         username="$(echo "$1" | cut -d@ -f1)"
+         hostname="$(echo "$1" | cut -d@ -f2)"
+      else
+         hostname="$1"
+      fi
+   fi
+
+   port="${port:-22}"
+   username="${username:-$USER}"
+
+   #echo "final hostname = $hostname"
+   #echo "final port = $port"
+   #echo "final username = $username"
+   #echo "final ssh_args = $ssh_args"
+
+   if [[ "$hostname" ]]; then
+      [[ -d "$HOME/.bashrc.d" ]] ||
+         echo "$HOME/.bashrc.d doesn't exist!"
+
+      # inspired by <https://superuser.com/a/1078431>
+      local bashrc_contents="$(cat ~/.bashrc.d/remote/* | base64 -w0)"
+      ssh -t -p $port $ssh_args ${username}@${hostname} "bash --rcfile <(echo \"$bashrc_contents\" | base64 --decode)"
+   else
+      echo "you must specify a host!"
+   fi
+}
+
+tabular-to-csv() {
+   #takes a file of standard MySQL tabular output and converts it to CSV
+
+   local tabular_file="$1"
+
+   sed -rne 's; *\| *;,;gp' "$tabular_file" | sed -re 's;(^,|,$);;g'
+}
+
+list-to-quoted-csv() {
+   #takes a file of newline-separated output and converts it to quoted CSV
+
+   local newline_file="$1"
+   local no_quotes="$2"
+   local quotes='"'
+
+   [[ "$no_quotes" =~ nq ]] && quotes=""
+
+
+   sed -rne "s;^.*$;${quotes}&${quotes}\,;gp" "$newline_file" | tr -d '\n' | sed -re 's;(^,|,$);;g' -e 's;$;\n;'
+}
+
+copy-file-by-line() {
+   local file="$1"
+   local last_line=$(wc -l $file | cut -d' ' -f1)
+   for line in $(seq 1 $last_line); do
+      echo "press Enter to continue"
+      echo "line = $line/$last_line"
+      sed -ne ${line}p $file | tr -d '\n' | xsel -b
+      [[ $line -eq $last_line ]] || read
+   done
+}
+
+# show all known information on a given package, regardless of package manager
+showpkg() {
+   if [[ -x $(which apt-cache) ]]; then
+      apt-cache show $1
+   elif [[ -x $(which yum) ]]; then
+      yum show $1
+   fi
+}
+
+colorize() {
+# syntax
+# colorize [style] {color} "{text}"
+   color_off="\033[0m"       # Text Reset
+   color=
+   style="0;" # default style is "normal"
+   text=
+
+   while [[ ${#@} -gt 0 ]]; do
+      case "$1" in
+         normal) ;;
+         bold) style="1";;
+         dark) style="2";;
+         bgs) style="3";; # fg and bg are same color
+         underline) style="4";;
+         bg) color="$((color + 10))";;
+         light|intense) color="$((color + 60))";;
+
+         none) color="0";;
+         black) color="$(($color + 30))";;
+         red) color="$(($color + 31))";;
+         green) color="$(($color + 32))";;
+         yellow) color="$(($color + 33))";;
+         blue) color="$(($color + 34))";;
+         purple) color="$(($color + 35))";;
+         cyan) color="$(($color + 36))";;
+         white) color="$(($color + 37))";;
+
+         *) 
+            text="$1"
+            output="\033[${style};${color}m${text}${color_off}"
+
+            echo -en "$output"
+
+            # reset the style and color
+            style="0"
+            color=
+            ;;
+      esac
+      shift
+#   echo -e "color = $color\nstyle = $style\ntext = $text\n"
+   done
+}
+
+diff-home-files() {
+   for i in \
+   $HOME/home/.[a-fh-z]* \
+   $HOME/home/.bashrc.d/* \
+   $HOME/home/.{gitconfig,gitignore_global,gvimrc} \
+   ; do
+      [[ ! "$i" =~ \.toprc && ! $(file $i) =~ "Vim swap file" ]] || continue
+      [[ -d "$i" && "$i" =~ ".bashrc.d" ]] || [[ -f "$i" ]] || continue
+#      echo "i = $i"
+
+      if [[ "$i" =~ .bashrc.d ]]; then
+         file1="$(echo "$i" | sed -re "s;$HOME/home/(.*);$HOME/\1;")"
+      else
+         file1="$HOME/$(basename $i)"
+      fi
+#      echo file1="$file1"
+
+      file2=$i
+#      echo file2="$file2"
+      [[ $(md5sum $file1 2>/dev/null | cut -d" " -f1) != $(md5sum $file2 2>/dev/null | cut -d" " -f1) ]] && vimdiff $file1 $file2
+   done
+}
+
+verbose() {
+# input: an optional flag (-n or -e), an optional verbosity level (single digit), and the message to print
+#        -n    suppress trailling newline
+#        -e    interpret escape characters (like "\n")
+
+# output: if the specified verbosity level in the verbose() call is less than the set VERBOSE variable, the message is printed,
+#         taking into account the specified flags.
+
+# each verbosity level includes everything from the lower verbosity levels
+# verbosity level example guidelines:
+# 1 = misc
+# 2 = variable values
+# 3 = function entrances and exits
+
+   local flags
+   local verbosity
+
+   # default verbosity
+   verbosity=3
+
+   [[ "$1" =~ -(n|e) ]] &&
+   flags="$1" &&
+   shift
+
+   [[ "$1" =~ ^[0-9]$ ]] &&
+   verbosity="$1" &&
+   shift
+
+   if [[ $VERBOSE -ge $verbosity || -z $VERBOSE ]]; then
+      echo $flags "$@" >&2
+   fi
+}
+
+aptupchange() {
+   # view the changelogs of all packages to be upgraded
+
+   packages="$(sudo apt-get -us upgrade | sed -ne "s;^Inst \([^[]\+\) \([[(]\).*;\1;"p)"
+
+   cat <<-EOF
+	packages to be upgraded:
+	$packages
+	
+	EOF
+
+   for package in $packages; do
+      echo -n "view changelog for $package? [y/N]: "
+
+      read
+
+      [[ $REPLY = "y" ]] &&
+       aptchangelog "$package" &&
+       echo
+   done
+}
+
+# copy an encrypted ssh key to memory
+copy-skey() {
+   file="$1"
+
+   tmp_file="$(mktemp -p /tmp/)"
+
+   gpg -d $file >$tmp_file 2>/dev/null &&
+    chmod 400 $tmp_file &&
+    ssh-add $tmp_file &&
+    rm -f $tmp_file
+}

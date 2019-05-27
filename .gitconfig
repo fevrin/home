@@ -1,0 +1,36 @@
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = false
+	logallrefupdates = true
+	editor = vim
+	excludesfile = ~/.gitignore_global
+[color]
+	ui = true
+[alias]
+  co = checkout
+  ci = commit -v
+  st = status
+  br = branch
+  df = diff --word-diff=color
+  dfs = diff --word-diff=color --staged
+  diffs = diff --staged
+  hist = log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short
+  type = cat-file -t
+  dump = cat-file -p
+  ver = "!bash -c 'version=$0; git tag -am \"version $version\" v$version'"
+
+  # from <http://stackoverflow.com/questions/1057564/pretty-git-branch-graphs#answer-9074343>
+  lg1 = log --graph -15 --abbrev-commit --decorate --date=relative --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' --all
+  lg2 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n''          %C(white)%s%C(reset) %C(dim white)- %an%C(reset)' --all
+[merge]
+	conflictstyle = diff3
+	tool = vimdiff
+[push]
+	default = simple
+[rerere]
+   enabled = true # from <http://psung.blogspot.com/2011/02/reducing-merge-headaches-git-meets.html>
+[remote]
+	pushdefault = origin
+[branch "master"]
+	pushremote = no_push

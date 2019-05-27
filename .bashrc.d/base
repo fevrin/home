@@ -1,0 +1,63 @@
+#!/bin/bash
+
+if ! (grep -q '\[deep\]' /sys/power/mem_sleep); then
+   cat <<-EOF
+	deep sleep not currently configured!
+	
+	configure deep sleep by adding this line to the kernel command in the grub configuration:
+	mem_sleep_default=deep
+	
+	you can run this command to set it until the next boot:
+	
+	   echo deep | sudo tee /sys/power/mem_sleep
+	
+	EOF
+fi
+
+# output the following messages only on my local computer, not on servers
+if [[ -z "$SSH_CLIENT" && -n "$DISPLAY" ]]; then
+   # for LFS use (as recommended by <http://www.linuxfromscratch.org/hints/downloads/files/lfs_next_to_existing_systems.txt>
+   export LFS=/mnt/lfs
+   echo don\'t forget to execute: sudo mount --bind /media/programs/linux_from_scratch "$LFS"
+   echo
+
+   #remove the right alt hotkey behavior in unity
+   [[ -x /usr/bin/xmodmap ]] && /usr/bin/xmodmap -e 'remove mod1 = Alt_R'
+
+   #process the Apple keyboard mod if using an Apple keyboard
+   . $HOME/.apple_keyboard_mod.rc
+fi
+
+# print out the todo list
+if [[ -f ~/.todo && -s ~/.todo ]]; then
+   echo
+   echo 'things to do:'
+   cat ~/.todo
+fi
+
+# ensure ~/.bash_history is in append-only mode since there's craziness with it being inappropriately truncated
+# the `ls -lO` part is a Mac OS X compatibility crutch
+if [[ $MAC_OS_X -eq 0 ]]; then
+   [[ $(which lsattr) && $(lsattr $HOME/.bash_history) =~ ^.....a.*$ ]] ||
+      cat <<-EOF
+		warning: $HOME/.bash_history is not in append-only mode!
+
+		enable that with this command:
+
+		   sudo chattr +a $HOME/.bash_history
+
+		EOF
+else
+   [[ ! $(ls -lO "$HOME"/.bash_history) =~ uappnd ]] ||
+      cat <<-EOF
+		warning: $HOME/.bash_history is not in append-only mode!
+
+		enable that with this command:
+
+		   sudo chflags uappend $HOME/.bash_history
+
+		EOF
+fi
+
+# inform the user if the ~/.bash_history file is greater than or equal to the $HISTFILESIZE value for rotation
+[[ $(wc -l $HOME/.bash_history | cut -d' ' -f1) -ge $HISTFILESIZE ]] && echo "consider making a new $HOME/.bash_history file, as it's >= to $HISTFILESIZE lines"

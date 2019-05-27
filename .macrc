@@ -1,0 +1,95 @@
+#!/bin/bash
+
+if [[ "$TERM_PROGRAM" = "Apple_Terminal" || "$TERM_PROGRAM" =~ iTerm ]]; then
+   # additional config for Mac OS X to maintain sanity
+   alias aptsearch='brew search'
+   alias aptshow='brew info'
+   alias aptinstall='brew install'
+   alias aptgrade='softwareupdate --install --all'
+   alias md5sum='md5 -r'
+   alias sed='gsed'
+   alias timeout='gtimeout'
+   alias grep='ggrep'
+
+   brew_pkgs_to_install=(
+      git
+      gsed
+      grep
+      base64
+      coreutils
+      lastpass-cli
+      mysql
+      bash
+   )
+
+   # easier editing of ~/.bash_history when it's chattr'ed to prevent anything but appending
+   #actually, this may not work if there are changes to the live file when editing the temp copy :(
+   alias edit-history='chflags nouappend ~/.bash_history && vim ~/.bash_history && chflags uappend ~/.bash_history'
+
+   # unsets the 'whois' function from ~/.bashrc
+   unset -f whois
+
+   # change some Finder options
+   # <http://ianlunn.co.uk/articles/quickly-showhide-hidden-files-mac-os-x-mavericks/>
+   DEFAULTS_CHANGED=0
+   for option in \
+   AppleShowAllFiles \
+   _FXShowPosixPathInTitle; do
+      if [[ $(defaults read com.apple.finder "$option" | egrep -qi "no|0"; echo $?) = 0 ]]; then
+         defaults write com.apple.finder "$option" YES
+         DEFAULTS_CHANGED=1
+      fi
+   done
+
+   if [[ "$DEFAULTS_CHANGED" = 1 ]]; then
+      killall Finder /System/Library/CoreServices/Finder.app
+   fi
+
+   # auto-hide the dock, and reduce the delay in showing it
+#   defaults write com.apple.dock autohide -bool true &&
+#    defaults write com.apple.dock autohide-delay -float 0 &&
+#    defaults write com.apple.dock autohide-time-modifier -float 0.5 &&
+#    killall Dock
+   if [[ $(defaults read com.apple.notificationcenterui bannerTime) -ne 3 ]]; then
+      # reduce timeout for banner notifications
+      defaults write com.apple.notificationcenterui bannerTime 3
+      pkill -l NotificationCenter
+   fi
+
+   # reset timeout for banner notifications
+   #defaults delete com.apple.notificationcenterui bannerTime
+
+   #install terminal-notifier if it's not already installed
+   if [[ $(which ruby) ]]; then
+      [[ $(gem list | grep terminal-notifier) ]] ||
+      sudo gem install terminal-notifier
+   else 
+      echo "please install ruby to continue"
+   fi
+   
+   # enable color support of ls and also add handy aliases
+   if [[ "$TERM" != "dumb" ]]; then
+      alias ls='ls -G'
+   fi
+   
+   # remove any references to :/usr/local/bin in the PATH
+   [[ "$PATH" =~ :/usr/local/bin(:|$) ]] && PATH="${PATH//:\/usr\/local\/bin}"
+
+   # ensure /usr/local/bin is the first directory in the user's PATH
+   if [[ ! $(echo $PATH | grep "^/usr/local/bin") ]]; then
+      export PATH="/usr/local/bin:$PATH"
+   fi
+   [[ "$PATH" =~ /usr/local/Cellar/bin ]] || export PATH="$PATH:/usr/local/Cellar/bin/"
+
+   # don't disconnect from the network when locking the screen
+   # from <http://apple.stackexchange.com/a/97047>
+#   sudo /System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport en0 prefs DisconnectOnLogout=NO
+
+   # prevent Finder from showing up in the app switcher
+   # from <http://osxdaily.com/2012/02/13/remove-finder-from-the-commandtab-application-switcher-in-mac-os-x/>
+   # it seems impossible to edit the file under Mac OS X Sierra due to System Integrity Protection
+   #if [[ ! $(grep '<key>NSUIElement</key>\n\s+<string>1</string>' /System/Library/CoreServices/Finder.app/Contents/Info.plist) ]]; then
+   #   sudo sed '0,/<dict>/s;<dict>;<dict>\n        <key>NSUIElement</key>\n        <string>1</string>;' /System/Library/CoreServices/Finder.app/Contents/Info.plist
+   #fi
+
+fi
