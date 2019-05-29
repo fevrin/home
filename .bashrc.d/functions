@@ -440,3 +440,29 @@ copy-skey() {
     ssh-add $tmp_file &&
     rm -f $tmp_file
 }
+
+compact_history() {
+   # remove all duplicates in the history file since HISTCONTROL=ignoreboth doesn't seem to work the current setup :/
+
+#   cat ~/.bash_history | tr '\n' '^M' | sed -rne 's;^M(#[0-9]{10,11})^M([^^M]+);\1  \2^M;gp' | tr '^M' '\n' | egrep '^#[0-9]{10,11}' | sort -u -k 2 | sort | sed -rne 's;^(#[0-9]{10,11})   (.*)$;\1\n\2;p' >~/.bash_history.new
+#   sed -re 's;^(#[0-9]{10,11})$;\o0\1;' ~/.bash_history | tr '\n' '\1' | sed -rne 's;\o0(#[0-9]{10,11}[^\o0]+);\1\n;gp' | sort -uk2 | sort | tr -d '\n' | tr '\1' '\n' >~/.bash_history.new2
+#   sed -re 's;^(#[0-9]{10,11})$;\o0\1;' ~/.bash_history | tr '\n' '\1' | sed -rne 's;\o0([^\o0]+);\1\n;gp' | sort -uk2 | sort | tr -d '\n' | tr '\1' '\n' | less
+#   sed -re 's;^(#[0-9]{10,11})$;\o0\1;' ~/.bash_history | tr '\n' '\1' | sed -rne 's;\o0([^\o0]+);\1\n;gp' | sort -u -t$'\1' -k2 | sort | tr -d '\n' | tr '\1' '\n' | less
+
+   local history_file="$HOME/.bash_history"
+   local history_file_backup="${history_file}_$(date +'%F_%Hh%Mm%Ss').bak"
+   local temp_file="$(mktemp)"
+
+   # we might be able to change the octal characters used here so we can utilize sort's '-z' option, but that might not be as portable
+
+   sed -re 's;^(#[0-9]{10,11})$;\o0\1;' "$history_file" | # replace start of lines with a null character (000 octal) so we know the start of a history entry (assuming with a timestamp)
+   tr '\n' '\1' |                                         # replace all newlines with a 001 octal character so we can keep track of where the newlines should later go, including in multi-line entries
+   sed -rne 's;\o0([^\o0]+);\1\n;gp' |                    # re-insert newlines just at the end of each history entry so we can sort
+   sort -u -t$'\1' -k2 |                                  # sort by command to remove duplicates
+   sort |                                                 # sort again—this time by timestamp
+   tr -d '\n' |                                           # remove the newlines we'd previously inserted so they don't double up
+   tr '\1' '\n' >"$temp_file"                             # re-insert all newlines that were there from the beginning
+
+   # perform the actual move if the new temp file has data in it (after backing up the original history file)
+   [[ -s "$temp_file" ]] && mv "$history_file" "$history_file_backup" && mv "$temp_file" "$history_file" >/dev/null
+}

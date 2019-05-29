@@ -2,6 +2,10 @@
 
 # CHANGELOG
 =======
+### v2.0.4
+   .bashrc.d/functions  
+  \+ compact_history(): adding
+
 ### v2.0.3
    .bashrc  
   \* updating HISTIGNORE for efficiency  
