@@ -89,14 +89,48 @@ get-vb-ip() {
 }
 
 pushd() {
-   if [[ "$1" =~ ^[0-9]+$ ]]; then
-      local dir="+$1";
-   elif [[ -n "$1" ]]; then
-      local dir="$1"
+   local dir="$1"
+   local newdir
+   local VERBOSE=1
+
+   if [[ "$dir" =~ ^[0-9]+$ ]]; then
+      newdir="+$dir";
+   elif [[ -d "$dir" || -h "$dir" ]]; then
+      # we've been given an actual directory
+
+      dir="$(realpath "$1")"
+
+      # generate an array of the current dir stack and its indices
+      declare -A dirstack
+      local line
+      while read line; do
+          verbose 2 "line = '$line'"
+          local path="${line#*$'\1'}"     # grab the path from the line
+          path="${path/\~/$HOME}"         # replace ~ with $HOME so 'realpath' doesn't complain
+          local position="${line%$'\1'*}" # grab the position in the dir stack from the line
+
+          dirstack["$(realpath "${path}")"]="$position"
+          verbose 2 dirstack["$(realpath ${path})"]="$position"
+          unset path
+          unset position
+      done <<<$(dirs -v | sed -re "s;^ +([0-9]+) +(.*)$;\1\o1\2;") # delimite each field in the entry with octal 001
+
+      verbose 2 "echo ${!dirstack[*]} | grep -qf <(echo "$dir")"
+
+      if echo "${!dirstack[*]}" | grep -qf <(echo "$dir"); then
+         # the desired directory is already in the stack, so let's not duplicate it
+         verbose 2 echo "$dir is already in the stack"
+         newdir="+${dirstack[$dir]}"
+      else
+         newdir="$dir"
+      fi
    else
-      local dir=
+      newdir=
    fi
-   builtin pushd $dir >/dev/null && dirs
+   verbose 2 "newdir = $newdir"
+#   echo "dir = ${dir/~/\~}"
+
+   builtin pushd $newdir >/dev/null && dirs
 }
 
 popd() {

@@ -2,6 +2,10 @@
 
 # CHANGELOG
 =======
+### v2.0.5
+   .bashrc.d/functions  
+  \* pushd(): updating to prevent duplicate directories from getting added to the dir stack
+
 ### v2.0.4
    .bashrc.d/functions  
   \+ compact_history(): adding
