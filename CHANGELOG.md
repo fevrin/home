@@ -2,44 +2,68 @@
 
 # CHANGELOG
 =======
-### v2.0.5
+### v2.0.6
    .bashrc.d/functions  
-  \* pushd(): updating to prevent duplicate directories from getting added to the dir stack
+     pushd():  
+    \* simplified duplicate directory check  
+    \+ added another conditional to short circuit exit if the user provides an invalid directory  
+     yessh():  
+    \+ added functionality to just copy the config over to the target server as a temporary file if it's of a certain size (as was done before the base64 technique, though we now use base64 for it, too)  
+    \* updated config transfer to incorporate bzip2 compression to further reduce network bandwidth usage  
+  \+ sql-tab-to-jira-tab(): added  
+  \+ generate_luks_keyfile(): moved from lib_sec  
+  \+ added code to automatically export all functions within the file  
+
+### v2.0.5
+# Thu May 30 22:40:55 2019 -0400
+
+   .bashrc.d/functions  
+  \* pushd(): updated to prevent duplicate directories from getting added to the dir stack
 
 ### v2.0.4
+# Wed May 29 19:10:03 2019 -0400
+
    .bashrc.d/functions  
-  \+ compact_history(): adding
+  \+ compact_history(): added
 
 ### v2.0.3
+# Mon May 27 00:58:28 2019 -0400
+
    .bashrc  
-  \* updating HISTIGNORE for efficiency  
-  \- removing unneeded bits
+  \* updated HISTIGNORE for efficiency  
+  \- removed unneeded bits
 
    .bashrc.d/functions  
-  \* moving aptuochange() and copy-skey() from .bashrc.d/aliases to here
+  \* moved aptupchange() and copy-skey() from .bashrc.d/aliases to here
 
    .bashrc.d/aliases  
-  \- removing unneeded aliases
+  \- removed unneeded aliases
 
 ### v2.0.2
+# Sat May 25 23:31:06 2019 -0400
+
    .bashrc.d/functions  
-  \* get-ips(): updating to output contents only when an IP is found
+  \* get-ips(): updated to output contents only when an IP is found
 
 ### v2.0.1
+# Tue May 21 19:41:57 2019 -0400
+
    .bashrc  
-  \+ adding the $GOBIN variable
+  \+ added the $GOBIN variable
 
    .bashrc.d/functions  
-  \* yessh(): updating to copy over all files in ~/.bashrc.d/remote/\*  
-  \+ verbose(): adding
+  \* yessh(): updated to copy over all files in ~/.bashrc.d/remote/\*  
+  \+ verbose(): added
 
    .bashrc.d/remote  
-  \* moving to ~/.bashrc.d/remote/remote_base
+  \* moved to ~/.bashrc.d/remote/remote_base
 
    .screenrc_main  
-  \* updating the default directory for a couple of screens
+  \* updated the default directory for a couple of screens
 
 ### v2.0.0
+# Wed May 15 20:56:26 2019 -0400
+
    .bash_colors  
   \- contents moved to .bashrc.d/functions
 
@@ -68,10 +92,14 @@
   \* updated to include $HOME/.local/bin in $PATH if it exists
 
 ### v1.6.7
+# Mon May 13 20:56:57 2019 -0400
+
    .bashrc  
   \* reworked creation of PATH and GOPATH
 
 ### v1.6.5
+# Thu May 9 20:52:20 2019 -0400
+
    .bash_aliases  
   \* $ip_regex: updated to include "0" as a valid octet  
   \+ count-ips-from-tcpdump() : added  
@@ -81,62 +109,77 @@
   \* expand the conditions for which the PS1 string is updated
 
 ### v1.6.4
+# Wed Apr 24 18:29:14 2019 -0400
+
    .bash_aliases  
   \+ get-ips: added alias for retrieving assigned IPs  
   \* yessh(): updated to include additional usage information
 
    .bashrc  
-  \- removing HISTFILESIZE assignment since that seems to bomb out Bash in some cases; it seems as of bash version 4.4.19(1)-release, having the history file larger than this size causes a segfault
+  \- removed HISTFILESIZE assignment since that seems to bomb out Bash in some cases; it seems as of bash version 4.4.19(1)-release, having the history file larger than this size causes a segfault
 
 ### v1.6.3
+# Sat Apr 13 01:35:49 2019 -0400
+
    .bash_aliases  
-  \+ adding $ip_regex  
-  \+ copy-file-by-line(): adding
+  \+ added $ip_regex  
+  \+ copy-file-by-line(): added
 
    .bashrc_common  
-  \+ adding commands to output last login time
+  \+ added commands to output last login time
 
 ### v1.6.2
+# Thu Apr 11 21:19:04 2019 -0400
+
    .bash_aliases  
-  \+ adding calculate-free-mem and calculate-used-mem aliases  
-  \+ list-to-quoted-csv(): adding
+  \+ added calculate-free-mem and calculate-used-mem aliases  
+  \+ list-to-quoted-csv(): added
 
    .bashrc_common  
-  \* fixing the regex for determining if a hostname needs to include the region (in case it doesn't already)
+  \* fixed the regex for determining if a hostname needs to include the region (in case it doesn't already)
 
    .gitconfig  
-  \+ adding config to by default push to 'origin'  
-  \+ adding config to by default not be permitted to push directly to the master branch
+  \+ added config to by default push to 'origin'  
+  \+ added config to by default not be permitted to push directly to the master branch
 
 ### v1.6.1
+# Wed Apr 3 22:06:48 2019 -0400
+
    .bash_aliases  
-  \* updating clipit-copy() to recommend a better alternative  
-  \+ adding tabular-to-csv() for converting standard MySQL tabular output to CSV
+  \* updated clipit-copy() to recommend a better alternative  
+  \+ added tabular-to-csv() for converting standard MySQL tabular output to CSV
 
 ### v1.6.0
+# Wed Mar 27 17:44:28 2019 -0400
+
    .bash_aliases  
-  \* updating clipit-copy() to actually copy content to the clipboard  
-  \* updating yessh() to negate the need for a temporary file (an issue with the target host's disk is full)
+  \* updated clipit-copy() to actually copy content to the clipboard  
+  \* updated yessh() to negate the need for a temporary file (an issue when the target host's disk is full)
 
    .bashrc_common  
-  \* making terminal color setting commands more logical and readable  
-  \* making MOTD printing more robust
+  \* make terminal color setting commands more logical and readable  
+  \* make MOTD printing more robust
 
    .gvimrc  
-  \* updating config to include standard Ctrl-C and Ctrl-V keybindings for easier copy and paste
+  \* updated config to include standard Ctrl-C and Ctrl-V keybindings for easier copy and paste
 
 ### v1.5.9
+# Fri Mar 8 00:46:18 2019 -0500
+
    .bash_aliases  
-  \* updating clipit-copy() to work properly
+  \* updated clipit-copy() to work properly
 
    .bashrc_common  
-  \* updating PS1 to always have certain colors
+  \* updated PS1 to always have certain colors
 
 ### v.1.5.8
+# Wed Mar 6 23:36:26 2019 -0500
+
    .bash_aliases  
-  \* changing the find-broken-links alias to be seek-broken-links() for more flexibility (Bash doesn't like a function starting with the name of a command when it's separated by dashes instead of underscores, it seems)
+  \* changed the find-broken-links alias to be seek-broken-links() for more flexibility (Bash doesn't like a function starting with the name of a command when it's separated by dashes instead of underscores, it seems)
 
 ### v.1.5.7
+# Wed Mar 6 00:14:44 2019 -0500
    .bash_aliases  
   \+ added clipit-copy() to deal with the limited N_TTY_BUF_SIZE value  
   \* updated yessh() to handle ssh options better
@@ -145,51 +188,63 @@
   \* prepended a newline to PS1
 
    .gitignore_global  
-  \+ adding since this apparently wasn't being saved before
+  \+ added since this apparently wasn't being saved before
 
 ### v.1.5.6
+# Mon Mar 4 01:22:26 2019 -0500
+
    .apple_keyboard_mod.rc  
-  \+ adding reset_keyboard() for easier resetting  
-  \* disabling left key mods
+  \+ added reset_keyboard() for easier resetting  
+  \* disabled left key mods
 
    .bash_aliases  
-  \* updating diff-home-files() to ignore vim swap files  
-  \* updating find-dupes() to output file and file size to better pinpoint large duplicates
+  \* updated diff-home-files() to ignore vim swap files  
+  \* updated find-dupes() to output file and file size to better pinpoint large duplicates
 
    .bashrc  
-  \+ adding conditional to determine if the system is running Mac OS X
+  \+ added conditional to determine if the system is running Mac OS X
 
    .bashrc_common  
-  \+ specifying vim as the default editor  
-  \+ updating the PS1 variable to include region name, if needed, as well as some color
+  \+ specified vim as the default editor  
+  \+ updated the PS1 variable to include region name, if needed, as well as some color
 
 ### v1.5.4
+# Mon Feb 18 18:42:57 2019 -0500
+
    .bash_aliases  
-  \* addressing Mac OS X compatibility
+  \* addressed Mac OS X compatibility
 
    .bashrc  
-  \* addressing Mac OS X compatibility
+  \* addressed Mac OS X compatibility
 
    .bashrc_common  
-  \* addressing Mac OS X compatibility
+  \* addressed Mac OS X compatibility
 
 ### v1.5.3
+# Fri Feb 15 01:50:11 2019 -0500
+
    .bash_aliases  
-  \* fixing yessh() to better handle cases when the port or username is supplied (rather than using the defaults)
+  \* fixed yessh() to better handle cases when the port or username is supplied (rather than using the defaults)
 
 ### v1.5.2
+# Tue Feb 12 23:14:59 2019 -0500
+
    .bashrc_common  
-  \+ adding vimrc config
+  \+ added vimrc config
 
 ### v1.5.1
+# Mon Feb 11 18:35:10 2019 -0500
+
    .bash_aliases  
-  \* fixing a filename
+  \* fixed a filename
 
    .bashrc_common  
-  \* correcting stderr redirection  
-  \* updating an alias to always use color output
+  \* corrected stderr redirection  
+  \* updated an alias to always use color output
 
 ### v1.5.0
+# Sun Feb 10 19:11:16 2019 -0500
+
    .bashrc  
   \* updated terminal environment when using screen
 
@@ -200,26 +255,34 @@
  \+ added for tracking handy cron jobs
 
    .bash_aliases  
-  \* properly scoping variables  
+  \* scoped variables properly  
   \+ added find-dupes() for finding files sharing the same name in the given directory and its subdirectories  
   \+ added yessh() to source .bashrc_common, enabling use of common basic environment modifications, such as with servers
 
    .bashrc_common  
-  \+ adding to enable use of common basic environment modifications, such as with servers
+  \+ added to enable use of common basic environment modifications, such as with servers
 
 ### v1.4.8
+# Sun Jan 13 21:13:37 2019 -0500
+
    .bash_aliases  
   \* updated `diff-home-files` to give uesr the chance to create a missing file
 
 ### v1.4.7
+# Tue Jun 19 21:10:18 2018 -0400
+
    .bash_aliases  
   \+ added `fix-broken-links` and `make-broken-link-table`
 
 ### v1.4.6
+# Thu May 10 21:13:09 2018 -0400
+
    .bash_aliases  
   \* updated `apt-history`
 
 ### v1.4.5
+# Tue May 1 22:01:35 2018 -0400
+
    .bashrc  
   \* updated HISTIGNORE
 
@@ -227,29 +290,41 @@
   \+ added img2pdf()
 
 ### v1.4.4
+# Tue Apr 24 22:07:59 2018 -0400
+
    .screenrc_main  
   \* changed main directory
 
 ### v1.4.3
+# Wed Apr 18 16:35:57 2018 -0400
+
    .macrc  
   \+ added `edit-history` alias  
   \+ added code to prevent Finder from showing up in the app switcher
 
 ### v1.4.2
+# Thu Sep 7 20:01:26 2017 -0400
+
    .macrc  
   \+ added code to set banner notification timeout to 3s
 
 ### v1.4.1  
+# Wed Jul 19 19:31:19 2017 -0400
+
    .bash_aliases  
   \* updated the conditional in `diff-home-files` for accuracy
 
 ### v1.4.0
+# Tue Jul 4 22:51:25 2017 -0400
+
    .bashrc  
   \+ added timestamp to PS1 prompt string
 
 ### v1.3.9
+# Thu Jun 1 18:06:37 2017 -0400
+
    .bashrc  
-  \+ adding lines to remove extraneous stuff from $PATH  
+  \+ added lines to remove extraneous stuff from $PATH  
   \* update conditions under which ~/.macrc will be invoked  
   \* updated code for adding dirs to PATH
 
@@ -265,6 +340,8 @@
   \+ added some code for Mac-specific mods to PATH
 
 ### v1.3.8
+# Tue May 30 17:07:37 2017 -0400
+
    .bashrc  
   \* some changes to support Ubuntu 16.10 now starting at SHLVL 2  
   \* corrected logic for when to display .bash_history size message
@@ -274,6 +351,8 @@
   \+ added `apt-history` to display apt history in a more readable format
 
 ### v1.3.7
+# Sun Oct 30 22:10:00 2016 -0400
+
    .apple_keyboard_mod.rc  
   \* re-arranged logic to work better on all hardware
 
@@ -286,6 +365,8 @@
   \+ appended directories with forward slashes
 
 ### v1.3.6
+# Tue Oct 13 12:56:44 2015 -0400
+
    .gitconfig  
    \+ added 'dfs' and 'diffs' aliases for diffing staged files
 
@@ -294,6 +375,8 @@
    \* updated the screenrc file path to work with Mac OS X
 
 ### v1.3.5
+# Tue Sep 22 21:03:44 2015 -0400
+
    .toprc  
    \* updated to include full commands and arguments
 
@@ -303,6 +386,8 @@
    \+ added popd(), similar to pushd()
 
 ### v1.3.4
+# Mon Sep 21 23:02:37 2015 -0400
+
    added these files:  
    \* .screenrc_main  
    \* CHANGELOG.md.tpl  
@@ -319,12 +404,16 @@
    \+ added a pushd() function
 
 ### v1.3.3
+# Sun Sep 13 18:41:53 2015 -0400
+
    .gitignore_global  
    \+ added
 
    .gitconfig  
    \+ added gitignore file setting
 ### v1.3.2
+# Tue Aug 4 15:12:19 2015 -0400
+
    .bashrc  
    \* updated to source lib_all instead of just lib_main
 
@@ -332,6 +421,8 @@
    \+ added (mainly to ensure MySQL uses vi keybindings)
 
 ### v1.3.1
+# Wed Jul 29 03:21:47 2015 -0400
+
    .bashrc  
    \+ added work aliases in ~/.bash_work_aliases
    

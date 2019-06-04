@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# check into bash completion with functions:
+# <https://ubuntuforums.org/showthread.php?t=733397>
+# <https://unix.stackexchange.com/questions/4219/how-do-i-get-bash-completion-for-command-aliases/4220#4220>
+# <https://www.tldp.org/LDP/abs/html/tabexpansion.html>
+
 count-ips-from-tcpdump() {
    # used to determine source IPs possibly involved in server issues based on overall occurrence in total traffic
    # first run something like this on the server to get good sample data:
@@ -115,15 +120,18 @@ pushd() {
           unset position
       done <<<$(dirs -v | sed -re "s;^ +([0-9]+) +(.*)$;\1\o1\2;") # delimite each field in the entry with octal 001
 
-      verbose 2 "echo ${!dirstack[*]} | grep -qf <(echo "$dir")"
+      verbose 2 "[[ ${dirstack[$dir]} ]]"
 
-      if echo "${!dirstack[*]}" | grep -qf <(echo "$dir"); then
+      if [[ -n "${dirstack[$dir]}" ]]; then
          # the desired directory is already in the stack, so let's not duplicate it
          verbose 2 echo "$dir is already in the stack"
          newdir="+${dirstack[$dir]}"
       else
          newdir="$dir"
       fi
+   elif [[ -n "$dir" && ! -d "$dir" ]]; then
+      echo "$dir doesn't exist!"
+      return
    else
       newdir=
    fi
@@ -255,6 +263,7 @@ yessh() {
                if [[ "$arg" =~ -[46AaCfGgKkMNnqsTtVvXxYy]+ ]]; then
                   ssh_args="$ssh_args $arg"
                else
+                  ssh_args="$ssh_args $arg"
                   shift
                   ssh_args="$ssh_args $1"
                fi
@@ -293,8 +302,24 @@ yessh() {
          echo "$HOME/.bashrc.d doesn't exist!"
 
       # inspired by <https://superuser.com/a/1078431>
-      local bashrc_contents="$(cat ~/.bashrc.d/remote/* | base64 -w0)"
-      ssh -t -p $port $ssh_args ${username}@${hostname} "bash --rcfile <(echo \"$bashrc_contents\" | base64 --decode)"
+      local bashrc_contents="$(cat ~/.bashrc.d/remote/* | bzip2 | base64 -w0)"
+
+      if [[ $(echo "$bashrc_contents" | wc -c) -le 20480 ]]; then
+         ssh -t -p $port $ssh_args ${username}@${hostname} "bash --rcfile <(echo \"$bashrc_contents\" | base64 --decode | bunzip2)"
+      else
+         # ssh will complain the argument list is too long, so there's no way around just uploading the files to temporary files
+
+         # generate a temp file name
+         local tempbashrc="$(mktemp /tmp/tmp.XXXXXXXXXX)"
+         # workaround for use on Mac OS X, which has no option for a dry run
+         [[ -f "$tempbashrc" ]] && rm -f "$tempbashrc"
+         echo "$bashrc_contents" >"$tempbashrc"
+
+         rsync -avzPi -e "ssh -p $port" "$tempbashrc" ${username}@${hostname}:"$tempbashrc" && rm -f "$tempbashrc"
+         #scp -P $port "$tempbashrc" ${username}@${hostname}:"$tempbashrc"
+
+         ssh -t -p $port $ssh_args ${username}@${hostname} 'bash --rcfile <(cat '"$tempbashrc"' | base64 --decode | bunzip2) ; rm '$tempbashrc''
+      fi
    else
       echo "you must specify a host!"
    fi
@@ -306,6 +331,14 @@ tabular-to-csv() {
    local tabular_file="$1"
 
    sed -rne 's; *\| *;,;gp' "$tabular_file" | sed -re 's;(^,|,$);;g'
+}
+
+sql-tab-to-jira-tab() {
+   #takes a file of standard MySQL tabular output and converts it to Jira's format
+
+   local tabular_file="$1"
+
+   sed -e '1 s;|;||;g' -e 's;\s\s+; ;g' "$tabular_file" | egrep -v '^[+-]+$'
 }
 
 list-to-quoted-csv() {
@@ -500,3 +533,32 @@ compact_history() {
    # perform the actual move if the new temp file has data in it (after backing up the original history file)
    [[ -s "$temp_file" ]] && mv "$history_file" "$history_file_backup" && mv "$temp_file" "$history_file" >/dev/null
 }
+
+generate_luks_keyfile() {
+   # from <https://github.com/thrdroom/ManualFullSystemEncryption/blob/master/encryptinstallation#L1165>
+
+   local outfile="$1"
+   local count="${2:-1}"
+   local bs="${3:-512}"
+
+   if [[ "$outfile" ]]; then
+      if [[ -s "$outfile" ]]; then
+         echo -n "$outfile exists. overwrite it? [y/N] "
+         read
+         if [[ "$REPLY" =~ [Yy] ]]; then
+            sudo dd if=/dev/urandom of="$outfile" count="$count" bs="$bs"
+         else
+            echo "cancelling keyfile generation"
+         fi
+      else
+         sudo dd if=/dev/urandom of="$outfile" count="$count" bs="$bs"
+      fi
+   else
+      echo "you must specify an output file!"
+   fi
+}
+
+# export all the functions here so subshells can utilize them, if needed
+for func in $(sed -rne 's;^(function\s+)?([^( ]+)\(\) \{$;\2;p' "$BASH_SOURCE"); do
+   export -f "$func"
+done
