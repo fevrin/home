@@ -199,7 +199,7 @@ export HISTSIZE=20000
 
 # don't remember basic/common commands, including all bash aliases
 # i really need to make a level 0/level 6 script using perl or something to have greater control over regexes; plus, it can be annoying to have the commands immediately removed; lastly, duplicates aren't always removed like they should be
-export HISTIGNORE="bg:cd *:crontab -?:df -h:echo:edit-history:fg*:git br:git co master:git df:git diff:git lg1:git pull:git st:jobs:kill*:ls:list -tr:ping 8.8.8.8:popd:pushd:pwd:screen -r:screen -t *:vim:vim nodes:w:wc -l*:$(alias | sed -rne 's;^alias ([^=]*)=.*;:\1?;p' | sort | tr -d '\n')"
+export HISTIGNORE="bg:cd *:crontab -?:df -h:echo:edit-history:fg*:git br:git co master:git df:git diff:git lg1:git pull:git st:jobs:kill*:ls:list -tr:ping 8.8.8.8:popd:pushd:pwd:screen -r:screen -t *:vim:vim nodes:w:$(alias | sed -rne 's;^alias ([^=]*)=.*;:\1?;p' | sort | tr -d '\n')"
 
 # ensure vim is the default editor of choice
 export EDITOR="vim"

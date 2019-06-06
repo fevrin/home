@@ -245,11 +245,13 @@ yessh() {
    local port
    local username
    local ssh_args
+   local command
+   local VERBOSE="${VERBOSE:-1}"
 
    if [[ $# -gt 1 ]]; then
       while [[ $# -ge 1 ]]; do
          local arg="$1"
-         #echo "arg = $arg"
+         verbose 3 "arg = $arg"
          case $arg in
             -p|--port)
                shift
@@ -269,16 +271,23 @@ yessh() {
                fi
                ;;
             *)
-               hostname="$arg"
+               if [[ -z "$hostname" ]]; then
+                  hostname="$arg"
+               else
+                  # the last argument(s) should be the command, like with the ssh client
+                  command="$@"
+                  break
+               fi
                ;;
          esac
          shift
 
-         #echo "hostname = $hostname"
-         #echo "port = $port"
-         #echo "username = $username"
-         #echo "ssh_args = $ssh_args"
-         #echo
+         verbose 2 "hostname = $hostname"
+         verbose 2 "port = $port"
+         verbose 2 "username = $username"
+         verbose 2 "ssh_args = $ssh_args"
+         verbose 2 "command = $command"
+         verbose 2
       done
    else
       if [[ "$1" =~ .*@.* ]]; then
@@ -292,34 +301,40 @@ yessh() {
    port="${port:-22}"
    username="${username:-$USER}"
 
-   #echo "final hostname = $hostname"
-   #echo "final port = $port"
-   #echo "final username = $username"
-   #echo "final ssh_args = $ssh_args"
+   verbose 2 "final hostname = $hostname"
+   verbose 2 "final port = $port"
+   verbose 2 "final username = $username"
+   verbose 2 "final ssh_args = $ssh_args"
+   verbose 2 "final command = $command"
 
    if [[ "$hostname" ]]; then
       [[ -d "$HOME/.bashrc.d" ]] ||
-         echo "$HOME/.bashrc.d doesn't exist!"
+         verbose "$HOME/.bashrc.d doesn't exist!"
 
-      # inspired by <https://superuser.com/a/1078431>
-      local bashrc_contents="$(cat ~/.bashrc.d/remote/* | bzip2 | base64 -w0)"
+      if [[ -z "$command" ]]; then
+         # inspired by <https://superuser.com/a/1078431>
+         local bashrc_contents="$(cat ~/.bashrc.d/remote/* | bzip2 | base64 -w0)"
 
-      if [[ $(echo "$bashrc_contents" | wc -c) -le 20480 ]]; then
-         ssh -t -p $port $ssh_args ${username}@${hostname} "bash --rcfile <(echo \"$bashrc_contents\" | base64 --decode | bunzip2)"
-      else
-         # ssh will complain the argument list is too long, so there's no way around just uploading the files to temporary files
+         if [[ $(echo "$bashrc_contents" | wc -c) -le 20480 ]]; then
+            command="bash --rcfile <(echo \"$bashrc_contents\" | base64 --decode | bunzip2)"
+         else
+            # ssh will complain the argument list is too long, so there's no way around just uploading the files to temporary files
 
-         # generate a temp file name
-         local tempbashrc="$(mktemp /tmp/tmp.XXXXXXXXXX)"
-         # workaround for use on Mac OS X, which has no option for a dry run
-         [[ -f "$tempbashrc" ]] && rm -f "$tempbashrc"
-         echo "$bashrc_contents" >"$tempbashrc"
+            # generate a temp file name
+            local tempbashrc="$(mktemp /tmp/tmp.XXXXXXXXXX)"
+            # workaround for use on Mac OS X, which has no option for a dry run
+            [[ -f "$tempbashrc" ]] && rm -f "$tempbashrc"
+            echo "$bashrc_contents" >"$tempbashrc"
 
-         rsync -avzPi -e "ssh -p $port" "$tempbashrc" ${username}@${hostname}:"$tempbashrc" && rm -f "$tempbashrc"
-         #scp -P $port "$tempbashrc" ${username}@${hostname}:"$tempbashrc"
+            # copy the temporary bashrc file to the remote host, then delete it locally
+            rsync -avzPi -e "ssh -p $port" "$tempbashrc" ${username}@${hostname}:"$tempbashrc" && rm -f "$tempbashrc"
+            #scp -P $port "$tempbashrc" ${username}@${hostname}:"$tempbashrc"
 
-         ssh -t -p $port $ssh_args ${username}@${hostname} 'bash --rcfile <(cat '"$tempbashrc"' | base64 --decode | bunzip2) ; rm '$tempbashrc''
+            command='bash --rcfile <(cat '"$tempbashrc"' | base64 --decode | bunzip2) ; rm '$tempbashrc''
+         fi
+
       fi
+      ssh -t -p $port $ssh_args ${username}@${hostname} "$command"
    else
       echo "you must specify a host!"
    fi
@@ -458,16 +473,37 @@ verbose() {
    local flags
    local verbosity
 
-   # default verbosity
+   # default verbosity threshold
    verbosity=3
 
    [[ "$1" =~ -(n|e) ]] &&
    flags="$1" &&
    shift
 
-   [[ "$1" =~ ^[0-9]$ ]] &&
-   verbosity="$1" &&
-   shift
+   if [[ "$1" =~ ^([0-9]|(emerg|alert|crit|err|warn|notice|info|debug).*)$ ]]; then
+      case "$1" in
+      # levels taken from syslog
+         emerg*) # system is unusable
+            verbosity=1;;
+         alert) # action must be taken immediately
+            verbosity=2;;
+         crit*) # critical conditions
+            verbosity=3;;
+         err*) # error conditions
+            verbosity=4;;
+         warn*) # warning conditions
+            verbosity=5;;
+         notice) # normal, but significant, condition
+            verbosity=6;;
+         info) # informational message
+            verbosity=7;;
+         debug) # debug-level message
+            verbosity=8;;
+           [0-9])
+            verbosity="$1";;
+      esac
+      shift
+   fi
 
    if [[ $VERBOSE -ge $verbosity || -z $VERBOSE ]]; then
       echo $flags "$@" >&2
@@ -559,6 +595,7 @@ generate_luks_keyfile() {
 }
 
 # export all the functions here so subshells can utilize them, if needed
-for func in $(sed -rne 's;^(function\s+)?([^( ]+)\(\) \{$;\2;p' "$BASH_SOURCE"); do
-   export -f "$func"
+for func in $(sed -rne 's;^(function\s+)?([^#( ]+)\(\) \{$;\2;p' "$BASH_SOURCE"); do
+   # for some reason, exported pushd() causes issues in direnv allowed directories
+   [[ "$func" =~ pushd ]] || export -f "$func"
 done

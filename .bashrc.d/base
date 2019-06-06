@@ -18,8 +18,8 @@ fi
 if [[ -z "$SSH_CLIENT" && -n "$DISPLAY" ]]; then
    # for LFS use (as recommended by <http://www.linuxfromscratch.org/hints/downloads/files/lfs_next_to_existing_systems.txt>
    export LFS=/mnt/lfs
-   echo don\'t forget to execute: sudo mount --bind /media/programs/linux_from_scratch "$LFS"
-   echo
+#   echo don\'t forget to execute: sudo mount --bind /media/programs/linux_from_scratch "$LFS"
+#   echo
 
    #remove the right alt hotkey behavior in unity
    [[ -x /usr/bin/xmodmap ]] && /usr/bin/xmodmap -e 'remove mod1 = Alt_R'
