@@ -233,13 +233,13 @@ find-dupes() {
 }
 
 yessh() {
-   # handy for ssh'ing into servers and getting some common basic environmental modifications without having to copy ~/.bashrc, ~/.bash_aliases, etc. to each server first; it's all done over one connection
+   # handy for ssh'ing into servers and getting some common basic environmental modifications without having to copy ~/.bashrc, ~/.bash_aliases, etc. to each server first; it's all done over one connection, if possible
    # inspired by <https://superuser.com/a/503785>
 
    # not great for running non-interactive commands on a host
 
    # input: server name and optional arguments passed to 'ssh'
-   # output: connects to the specific node and sets up the environment contained in the ~/.bashrc.d/* files
+   # output: connects to the specific node and sets up the environment contained in the ~/.bashrc.d/remote/* files
 
    local hostname
    local port
