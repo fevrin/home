@@ -251,7 +251,7 @@ yessh() {
    if [[ $# -gt 1 ]]; then
       while [[ $# -ge 1 ]]; do
          local arg="$1"
-         verbose 3 "arg = $arg"
+         verbose 8 "arg = $arg"
          case $arg in
             -p|--port)
                shift
@@ -282,12 +282,12 @@ yessh() {
          esac
          shift
 
-         verbose 2 "hostname = $hostname"
-         verbose 2 "port = $port"
-         verbose 2 "username = $username"
-         verbose 2 "ssh_args = $ssh_args"
-         verbose 2 "command = $command"
-         verbose 2
+         verbose 8 "hostname = $hostname"
+         verbose 8 "port = $port"
+         verbose 8 "username = $username"
+         verbose 8 "ssh_args = $ssh_args"
+         verbose 8 "command = $command"
+         verbose 8
       done
    else
       if [[ "$1" =~ .*@.* ]]; then
@@ -301,11 +301,11 @@ yessh() {
    port="${port:-22}"
    username="${username:-$USER}"
 
-   verbose 2 "final hostname = $hostname"
-   verbose 2 "final port = $port"
-   verbose 2 "final username = $username"
-   verbose 2 "final ssh_args = $ssh_args"
-   verbose 2 "final command = $command"
+   verbose 8 "final hostname = $hostname"
+   verbose 8 "final port = $port"
+   verbose 8 "final username = $username"
+   verbose 8 "final ssh_args = $ssh_args"
+   verbose 8 "final command = $command"
 
    if [[ "$hostname" ]]; then
       [[ -d "$HOME/.bashrc.d" ]] ||
@@ -334,6 +334,7 @@ yessh() {
          fi
 
       fi
+      verbose 8 ssh -t -p $port $ssh_args ${username}@${hostname} "$command"
       ssh -t -p $port $ssh_args ${username}@${hostname} "$command"
    else
       echo "you must specify a host!"
