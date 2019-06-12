@@ -35,7 +35,17 @@ _verify_reqs() {
    declare -a failures
 
    for req in ${requirements[*]}; do
-      type -t "$req" &>/dev/null || failures+=("$req")
+      local needed_version="${req#*:}"
+#      echo "req = '$req'"
+#      echo "needed_version = '$needed_version'"
+      actual_version="$(${req%:*} --version 2>&1 | sed -rne '1s;.* ([0-9.a-z+]+\.[0-9.a-z+]+)([^0-9.a-z+].*|$);\1;p')"
+#      echo "actual_version = '$actual_version'"
+
+      # if no version was specified, pretend the actual version is what we want
+      [[ "$needed_version" == "$req" ]] && needed_version="$actual_version"
+
+      # make sure both the required command, as well as the version, if specified, are what we actually have
+      { type -t "$req" &>/dev/null && [[ "$needed_version" == "$actual_version" ]]; }|| failures+=("$req")
    done
 
    if [[ -n ${failures[*]} ]]; then
