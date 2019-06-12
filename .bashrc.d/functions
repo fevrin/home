@@ -5,6 +5,58 @@
 # <https://unix.stackexchange.com/questions/4219/how-do-i-get-bash-completion-for-command-aliases/4220#4220>
 # <https://www.tldp.org/LDP/abs/html/tabexpansion.html>
 
+_verify_reqs() {
+
+   # call this function using one of these two forms:
+   #
+   # form 1:
+   # _verify_reqs $input $values || return 1
+   #
+   # form 2:
+   # _verify_reqs <<-EOF || return 1
+   # $input
+   # $values
+   # $even with spaces
+   # EOF
+
+   if [[ -n "$@" ]]; then
+      declare -a requirements=($@)
+   elif [[ ! -t 0 ]]; then
+      # inspired by <https://unix.stackexchange.com/questions/484630/check-if-no-command-line-arguments-and-stdin-is-empty/484643#484643>
+      declare -a requirements=($(cat /dev/stdin))
+   else
+      echo "ERROR: you must supply a list of required files or functions!"
+
+      echo
+      echo "file: $(realpath ${BASH_SOURCE[1]})"
+      echo "function: ${FUNCNAME[1]}"
+      echo "line: ${BASH_LINENO[0]}";
+   fi
+   declare -a failures
+
+   for req in ${requirements[*]}; do
+      type -t "$req" &>/dev/null || failures+=("$req")
+   done
+
+   if [[ -n ${failures[*]} ]]; then
+      echo "ERROR: requirement(s) not met:"
+      echo
+
+      for failure in ${failures[*]}; do
+         echo "* $req"
+      done
+
+      echo
+      echo "file: $(realpath ${BASH_SOURCE[1]})"
+      echo "function: ${FUNCNAME[1]}"
+      echo "line: ${BASH_LINENO[0]}";
+
+      return 1
+   else
+      return 0
+   fi
+}
+
 count-ips-from-tcpdump() {
    # used to determine source IPs possibly involved in server issues based on overall occurrence in total traffic
    # first run something like this on the server to get good sample data:
@@ -233,13 +285,19 @@ find-dupes() {
 }
 
 yessh() {
+
    # handy for ssh'ing into servers and getting some common basic environmental modifications without having to copy ~/.bashrc, ~/.bash_aliases, etc. to each server first; it's all done over one connection, if possible
    # inspired by <https://superuser.com/a/503785>
 
-   # not great for running non-interactive commands on a host
-
    # input: server name and optional arguments passed to 'ssh'
    # output: connects to the specific node and sets up the environment contained in the ~/.bashrc.d/remote/* files
+
+   _verify_reqs <<-EOF || return 1
+   base64
+   bzip2
+   ssh
+   verbose
+	EOF
 
    local hostname
    local port
@@ -393,13 +451,14 @@ showpkg() {
 colorize() {
 # syntax
 # colorize [style] {color} "{text}"
-   color_off="\033[0m"       # Text Reset
-   color=
-   style="0;" # default style is "normal"
-   text=
+   local color_off="\033[0m"       # Text Reset
+   local color=
+   local style="0;" # default style is "normal"
+   local text=
+   local content="${@:-$(cat /dev/stdin)}"
 
-   while [[ ${#@} -gt 0 ]]; do
-      case "$1" in
+   for word in ${content}; do
+      case "$word" in
          normal) ;;
          bold) style="1";;
          dark) style="2";;
@@ -419,7 +478,7 @@ colorize() {
          white) color="$(($color + 37))";;
 
          *) 
-            text="$1"
+            text="$word"
             output="\033[${style};${color}m${text}${color_off}"
 
             echo -en "$output"
@@ -429,7 +488,6 @@ colorize() {
             color=
             ;;
       esac
-      shift
 #   echo -e "color = $color\nstyle = $style\ntext = $text\n"
    done
 }
@@ -600,3 +658,4 @@ for func in $(sed -rne 's;^(function\s+)?([^#( ]+)\(\) \{$;\2;p' "$BASH_SOURCE")
    # for some reason, exported pushd() causes issues in direnv allowed directories
    [[ "$func" =~ pushd ]] || export -f "$func"
 done
+unset func

@@ -75,3 +75,5 @@ add control = Control_R
 !add control = Control_L
 !add control = Control_R
 EOF
+
+unset addtl_cmds
