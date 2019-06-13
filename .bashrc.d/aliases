@@ -13,7 +13,7 @@ alias df='df -h'
 alias ll='ls -Al'
 
 # lists all entries in current directory in human-readable block sizes, long format, and with executable and directory designations
-alias list='ls -halF'
+alias list='ls -halF --color=auto'
 
 # same as "list", but doesn't list all
 alias lst='ls -hlF'
@@ -27,20 +27,8 @@ alias cp='cp -v'
 # show the progress of the move
 alias mv='mv -v'
 
-# get the sha-1 hash of a single file
-alias hash1='sha1sum'
-
-# get the sha-512 hash of a single file
-alias hash5='sha512sum'
-
-# get the sha-256 hash of a single file
-alias hash='sha256sum'
-
 # get the sha-256 hash of the current directory
 alias hashd='tar cf - ./ | sha256sum'
-
-# get the sha-256 hashes of each file in the current directory
-alias hashesd='sha256deep -r ./'
 
 # see if there are any package updates
 alias aptgrade='sudo apt-get update && sudo apt-get upgrade'
@@ -119,10 +107,6 @@ alias calculate-used-mem='free | awk '\''FNR == 3 {printf "%0.2f%%\n",$3/($3+$4)
 alias dirs="dirs -v"
 
 #############Directory Shortcuts############
-
-alias apt-archives='pushd /var/cache/apt/archives'
-
-alias qcd='. quickcd'
 
 alias pics='pushd "$HOME/pictures"'
 

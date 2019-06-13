@@ -1,0 +1,33 @@
+#!/bin/bash
+
+##########################################################
+######Global Variables#######
+#############################
+
+http_regex='https?://[-a-zA-Z0-9_/@%.#:?&=]+[-a-zA-Z0-9/]'
+ip_regex='(((2([0-4][0-9]|5[0-5])|1[0-9][0-9]|[1-9][0-9]?|0)\.){3}(2([0-4][0-9]|5[0-5])|1[0-9][0-9]|[1-9][0-9]?|0))'
+
+# ignore same sucessive entries and delete duplicate lines in history.
+export HISTCONTROL="erasedups:ignoreboth"
+
+# include timestamps for all commands
+export HISTTIMEFORMAT="%Y-%m-%d %H:%M:%S "
+
+# remember many more than the default of 500 history commands
+export HISTSIZE=20000
+# this must be set really high or not set at all; it seems as of bash version 4.4.19(1)-release, having the history file larger than this size causes a segfault
+export HISTFILESIZE=20000
+
+# ensure vim is the default editor of choice
+export EDITOR="vim"
+export LESS="QFRX"
+
+# set default pager for manpages to "less -Qc" so the terminal bell doesn't ring and refreshes from the top instead of the bottom
+export MANPAGER="less -$(echo $LESS)"
+
+# needed to ensure windows aren't open if it's not desired
+# invoke no windows using a command like `SCREEN_CONF= screen`
+# from <https://pbrisbin.com/posts/screen_tricks/>
+export SCREEN_CONF="$HOME/.screenrc_main"
+
+##########################################################

@@ -2,6 +2,37 @@
 
 # CHANGELOG
 -------
+### v2.0.9
+##### Wed, Jun 12, 2019
+
+   .bashrc.d/vars  
+   * renamed to be .bashrc.d/00_vars
+
+   .bashrc  
+   * moved some content to .bashrc.d/base
+
+   .bashrc.d/aliases  
+   - removed some outdated and unused aliases
+
+   .apple_keyboard_mod.rc  
+   * unset a variable so it doesn't show up in the environment needlessly
+
+   .bashrc.d/functions  
+  \+ added code to unset a variable after exporting the functions  
+  \+ _verify_reqs(): added for verifying functions' requirements to run  
+  \+ _print_var_vals(): added  
+     compact_history():  
+     \+ added support for an immutable history file  
+     \+ added support for removing history entries matching a given regex  
+     \+ added support for simulating a run  
+     yessh():  
+     \* updating information on which files are sourced  
+     \* updating verbosity levels for certain messages  
+     \+ added requirements  
+     colorize():  
+     \* localized variables  
+     \+ added the ability to accept input from stdin
+
 ### v2.0.7
 ##### Mon, Jun 10, 2019
 

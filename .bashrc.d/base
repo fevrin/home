@@ -61,3 +61,34 @@ fi
 
 # inform the user if the ~/.bash_history file is greater than or equal to the $HISTFILESIZE value for rotation
 [[ $(wc -l $HOME/.bash_history | cut -d' ' -f1) -ge $HISTFILESIZE ]] && echo "consider making a new $HOME/.bash_history file, as it's >= to $HISTFILESIZE lines"
+
+# enable color support of ls and also add handy aliases
+if [[ "$TERM" != "dumb" && "$TERM_PROGRAM" != "Apple_Terminal" && ! "$TERM_PROGRAM" =~ iTerm ]]; then
+   eval "`dircolors -b`"
+fi
+
+# don't overwrite ~/.bash_history file upon logging out
+shopt -s histappend
+
+# start screen upon login only if screen is not already opened and there
+#are no detached sessions
+SHLVL_threshold=1
+# always use just "screen" as the terminal so servers don't go ballistic
+# ugh, `export TERM=screen` causes weird stuff on the local machine, like italicizing text instead of highlighting it when copying using screen's commands
+#export TERM=screen
+# open a new screen session if we're not already using screen
+[[ ! $TERM =~ screen && $(env | sed -n "s;SHLVL=\([1-9][1-9]*\);\1;p") = $SHLVL_threshold && ! $(screen -ls | grep -i detached) ]] && screen
+
+# list detached screens, if any, to explain why screen wasn't started
+SCREEN_LIST=$(screen -ls)
+[[ $(echo "$SCREEN_LIST" | grep -i detached) ]] && echo "$SCREEN_LIST"
+
+# read in latest bash history.  for some reason, this must come last (or at least after the "shopt" line);
+# otherwise, the timestamps in ~/.bash_history are also considered commands
+#history -n
+
+# don't remember basic/common commands, including all bash aliases
+# i really need to make a level 0/level 6 script using perl or something to have greater control over regexes; plus, it can be annoying to have the commands immediately removed; lastly, duplicates aren't always removed like they should be
+export HISTIGNORE="bg:cd *:crontab -?:df -h:echo:edit-history:fg*:git br:git co master:git df:git diff:git lg1:git pull:git st:jobs:kill*:ls:list -tr:ping 8.8.8.8:popd:pushd:pwd:screen -r:screen -t *:vim:vim nodes:w:$(alias | sed -rne 's;^alias ([^=]*)=.*;:\1?;p' | sort | tr -d '\n')"
+
+set -o vi
