@@ -1,0 +1,20 @@
+# network-related functions
+
+get-public-ip() {
+# returns the public ip of the local computer.  help from <http://www.go2linux.org/what-is-my-public-ip-address-with-linux>
+#   curl ifconfig.me/all/json
+   wget -q -O - icanhazip.com || wget -q -O - checkip.dyndns.org | grep -oE '[0-9.]{7,15}' || curl -s checkip.dyndns.org | grep -oE '[0-9.]{7,15}'
+   #if [[ $(which curl) ]]; then
+   #   #curl http://www.whatismyip.com/automation/n09230945.asp ||
+   #   curl http://automation.whatismyip.com/n09230945.asp ||
+   #   curl http://ip.pipeface.com/ ||
+   #   curl -s checkip.dyndns.org | grep -oE '[0-9.]{7,15}'
+   #else
+   #   wget -q -O - checkip.dyndns.org | grep -oE '[0-9.]{7,15}'
+   #fi
+}
+
+get-ip-location() {
+   ip="$(get-public-ip)"
+   curl -s http://api.db-ip.com/v2/free/$ip
+}

@@ -568,7 +568,7 @@ verbose() {
    flags="$1" &&
    shift
 
-   if [[ "$1" =~ ^([0-9]|(emerg|alert|crit|err|warn|notice|info|debug).*)$ ]]; then
+   if [[ "$1" =~ ^([0-9]+|(emerg|alert|crit|err|warn|notice|info|debug).*)$ ]]; then
       case "$1" in
       # levels taken from syslog
          emerg*) # system is unusable
@@ -746,6 +746,43 @@ generate_luks_keyfile() {
       echo "you must specify an output file!"
    fi
 }
+
+time-between-now-and() {
+# determine the hours, minutes, and seconds since the specified time
+   pdate="$1";
+   pdate_sec="$(date -d "$pdate" +%s)"
+   now_sec="$(date +%s)"
+
+   if [[ $now_sec -gt $pdate_sec ]]; then
+      newer=$now_sec
+      older=$pdate_sec
+   else
+      newer=$pdate_sec
+      older=$now_sec
+   fi
+
+   hours=$(echo "($newer - $older) / 60 / 60" | bc);
+   mins=$(echo "($newer - $older) / 60 % 60" | bc);
+   milli=$(echo "($newer - $older) % 60" | bc);
+   [[ $hours -lt 10 ]] && hours="0$hours"
+   [[ $mins -lt 10 ]] && mins="0$mins"
+   [[ $milli -lt 10 ]] && milli="0$milli"
+   printf "%02dh %02dm %02ds\n" ${hours} ${mins} ${milli}
+}
+
+#bar_graph() {
+#   graphChar=".";
+#   scale=1;
+#   for date in 03; do
+#      for hour in {01..23}; do
+#         echo -n "2013-01-$date $hour: ";
+#         emails=$(shuf -i10-200 -n1);
+#			printf "$graphChar%.0s" $(seq 1 $emails)
+#         echo;
+#      done;
+#      echo;
+#   done
+#}
 
 # export all the functions here so subshells can utilize them, if needed
 for func in $(sed -rne 's;^(function\s+)?([^#( ]+)\(\) \{$;\2;p' "$BASH_SOURCE"); do

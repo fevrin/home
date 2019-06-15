@@ -2,6 +2,31 @@
 
 # CHANGELOG
 -------
+### v2.1.0
+##### Fri, Jun 14, 2019
+
+   .bashrc  
+  \* skip directories when finding files to source
+
+   .bashrc.d/aliases  
+  \+ num-file: added for numbering lines in a file
+
+   .bashrc.d/aliases_laptop  
+  \+ added for including aliases relevant mainly on laptops (like battery percentage)
+
+   .bashrc.d/functions_dns  
+  \+ added for DNS-related functions
+
+   .bashrc.d/functions_net  
+  \+ added for network-related functions
+
+   .bashrc.d/functions_sec  
+  \+ added for security-related functions
+
+   .bashrc.d/functions  
+  \* renamed to be .bashrc.d/functions_general to differentiate with other function categories  
+  \+ time-between-now-and(): added for calcaulting relative time differences
+
 ### v2.0.9
 ##### Wed, Jun 12, 2019
 

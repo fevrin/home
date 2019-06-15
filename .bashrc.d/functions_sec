@@ -1,0 +1,91 @@
+# security-related functions
+
+hash_pw() {
+
+   #<http://www.slashroot.in/how-are-passwords-stored-linux-understanding-hashing-shadow-utils>
+   #<http://unix.stackexchange.com/questions/81240/manually-generate-password-for-etc-shadow>
+   #$1 = MD5 hashing algorithm.
+   #$2 =Blowfish Algorithm is in use.
+   #$2a=eksblowfish Algorithm
+   #$5 =SHA-256 Algorithm
+   #$6 =SHA-512 Algorithm
+
+   _verify_reqs <<-EOF || return 1
+   openssl
+   verbose
+	EOF
+
+   local help="\
+   SYNOPSIS:
+   hash_pw [password] [hash_type] [salt]
+
+   hash_type      crypt = Unix
+                  1     = MD5
+                  apr1  = Apache variant MD5
+
+   EXAMPLE:
+   hash_pw testpass crypt testsalt"
+
+   [[ $1 =~ -(h|-?help) ]] && echo "$help" && return
+
+   local rand_string="$(tr -cd '[:graph:]' </dev/urandom | fold -w 12 | head -n1)"
+
+   local salt=${3// /}
+   local type=${2// /}
+   local password=${1// /:-$rand_string}
+
+   salt=${salt:-$rand_string}
+   type=${type:-1}
+
+   verbose 8 openssl passwd -$type -salt $salt $password
+
+   if [[ "$type" == crypt ]]; then
+      openssl passwd -$type -salt $salt $password
+   else
+      openssl passwd -$type $password
+   fi
+}
+
+gen_pw() {
+
+   _verify_reqs <<-EOF || return 1
+   fold
+	EOF
+
+   OPTIND=1
+
+   local help="\
+   SYNOPSIS:
+   gen_pw [-l length_of_password(s)] [number_of_passwords]
+
+   -l             length of the password(s) generated. default is 12
+   -n             number of passwords to generate. default is 1
+
+   EXAMPLE:
+   $FUNCNAME 15 2
+   "
+
+   while getopts l:n:h opt; do
+      case "$opt" in
+         l) local length="$OPTARG";;
+         n) local number="$OPTARG";;
+         h) echo "$help"; return;;
+      esac
+   done
+
+   [[ $length =~ ^[0-9]{1,20}$ ]] || length=12
+   number="${number:-1}"
+
+   echo "$(tr -cd '[:graph:]' </dev/urandom | fold -w $length | head -n$number)"
+}
+
+get_ssl_cert() {
+
+   _verify_reqs <<-EOF || return 1
+   openssl
+	EOF
+
+   local host="$1"
+   host="${host/*:\/\//}"
+   echo Q | openssl s_client -connect $host:443 | openssl x509 -noout -text
+}

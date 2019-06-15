@@ -114,6 +114,7 @@ for file in ${files_to_source[*]}; do
     [[ -z "$SSH_CLIENT" || -z "$SSH_TTY" || -z "$SSH_CONNECTION" ]] &&
     continue
 
+   [[ -d "$file" ]] && continue
    [[ -r "$file" ]] && . "$file"
 done
 unset files_to_source file

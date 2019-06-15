@@ -106,7 +106,10 @@ alias calculate-used-mem='free | awk '\''FNR == 3 {printf "%0.2f%%\n",$3/($3+$4)
 # make the output of 'dirs' more readable
 alias dirs="dirs -v"
 
-#############Directory Shortcuts############
+# number the lines of a file on standard output
+alias num-file="nl -bp -w3"
+
+############# Directory Shortcuts ############
 
 alias pics='pushd "$HOME/pictures"'
 

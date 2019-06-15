@@ -1,0 +1,67 @@
+# DNS-related functions
+
+get-arin-look-up() {
+# returns the arin whois information for the given ip
+   #FIXME: explore the possibility for resolving domain names to ips (could get complicated with domains that resolve to multiple ips)
+
+   NS=0
+
+   # return nameserver info, if requested
+   if [[ $1 = "--ns" ]]; then
+      IP=$2
+      NS=1
+   else
+      IP=$1
+   fi
+
+   if [[ ! "$IP" =~ ^$ip_regex$ ]]; then
+      return 1
+   fi
+
+   # returns the arin ip block information for a given ip
+   wget --quiet -O - http://whois.arin.net/rest/ip/$IP.txt
+
+   if [[ $NS -eq 1 ]]; then
+      rIP=$(echo $IP | sed -re 's;([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3}).*;\3.\2.\1;')
+      rIP=$rIP.in-addr.arpa.
+      wget -q -O - http://whois.arin.net/rest/rdns/$rIP.txt
+      echo
+   fi
+}
+
+get-whois-from-domain() {
+# returns the WHOIS information for the IP address of the given
+#domain's DNS records of the given type (defaults to A record)
+# input: a valid domain name and (optionally) the DNS record type
+# output: WHOIS for the given IPs
+   domain=$1
+   type=${2:-a}
+
+   for address in $(host -t$type $domain | tail -n1 | awk '{print $NF}'); do
+      whois $address | less;
+   done
+}
+get-orgname-from-domain() {
+# returns the OrgName for IP address of the given domain's DNS records
+#of the given type (defaults to A record)
+# input: a valid domain name and (optionally) the DNS record type
+# output: OrgName for the given IPs
+   domain=$1
+   type=${2:-a}
+
+   for address in $(host -t$type $domain | awk '{print $NF}'); do
+      whois $address | grep -Ei '^(OrgName|org-name|descr|owner|Organization):';
+   done | sort -u
+}
+get-nameservers() {
+   domain="$1"
+   nameservers="$(whois "$domain" | sed -ne 's; *n\(ame\)\? \?servers\?: *\([^ ]\+\)\.$;nameserver: \2;ip' | awk '{print $NF}')"
+   [[ -n "$nameservers" ]] && nameservers="$nameservers\n"
+   # get NS record nameservers, as well
+   nameservers="$(dig ns "$domain" +short | sed 's;\.$;;')"
+   echo -e "$nameservers" | dd conv=lcase 2>/dev/null | sort -u | sort -t'.' -k2
+}
+whois() {
+# make whois a little more awesome
+   /usr/bin/whois -H $@ | less
+}
