@@ -560,6 +560,7 @@ verbose() {
 
    local flags
    local verbosity
+   local DEBUG
 
    # default verbosity threshold
    verbosity=3
@@ -595,7 +596,9 @@ verbose() {
    fi
 
    if [[ $VERBOSE -ge $verbosity || -z $VERBOSE ]]; then
-      echo $flags "$@" >&2
+      [[ $verbosity -eq 8 ]] && DEBUG="${FUNCNAME[1]} (line ${BASH_LINENO[0]}): "
+
+      echo $flags "$DEBUG$@" >&2
    fi
 }
 
