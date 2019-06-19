@@ -1,0 +1,9 @@
+#!/bin/bash
+
+tabular-to-csv() {
+   #takes a file of standard MySQL tabular output and converts it to CSV
+
+   local tabular_file="$1"
+
+   sed -rne 's; *\| *;,;gp' "$tabular_file" | sed -re 's;(^,|,$);;g'
+}

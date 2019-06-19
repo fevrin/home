@@ -1,0 +1,22 @@
+#!/bin/bash
+
+make-broken-link-table() {
+   # creates a table with the fields:
+   #URL
+   #file
+   #notes
+   #fixed
+   # to be run immediately after `find-broken-links` and before fixing any URLs
+   local file="${1:-urls}"
+   local url_base="${2:-https://github.com/$USER/documentation/blob/master/}"
+   # the first regex swaps around the order of the field name values for each found broken link
+   # the second regex gets the basename of the file
+   local contents="$(egrep -Iirf "$file" * | grep -v ^"$file" | sed -re "s;^([^:]+):.*($HTTP_REGEX).*$;| \2 | [\1|$url_base\1] | | (x) |;" -e 's;\[[^|]+\/([^|]+)\|;[\1|;' | sort -k 4)"
+
+   if [[ "$contents" ]]; then
+      echo "|| URL || file || notes || fixed ||"
+      echo "$contents"
+   else
+      echo "no broken links in file!"
+   fi
+}

@@ -1,0 +1,23 @@
+#!/bin/bash
+
+aptupchange() {
+   # view the changelogs of all packages to be upgraded
+
+   packages="$(sudo apt-get -us upgrade | sed -ne "s;^Inst \([^[]\+\) \([[(]\).*;\1;"p)"
+
+   cat <<-EOF
+	packages to be upgraded:
+	$packages
+	
+	EOF
+
+   for package in $packages; do
+      echo -n "view changelog for $package? [y/N]: "
+
+      read
+
+      [[ $REPLY = "y" ]] &&
+       aptchangelog "$package" &&
+       echo
+   done
+}

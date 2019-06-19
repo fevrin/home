@@ -1,0 +1,50 @@
+#!/bin/bash
+
+# deal with the maximum buffer size of the clipboard from the command line
+#if possible, it'd be better to just open the file with a GUI editor, like gvim,
+#then Ctrl-A to select it all, then Ctrl-C to copy it
+clipit-copy() {
+
+   file="$1"
+
+   # display a better alternative and cut off leading spaces (kept just for prettier code)
+   echo -n "
+   A better option, if possible, is to:
+   1) open '$file' with a GUI editor, like gvim
+   2) Ctrl-A to select it all
+   3) Ctrl-C to copy it
+
+   Do you still wish to use $FUNCNAME? [y/N] "  | sed -re 's;^\s+;;g'
+
+   read
+
+   [[ $REPLY =~ [Yy] ]] || return 1
+   echo
+
+   total_remaining_bytes="$(wc -c $file | cut -d' ' -f1)"
+
+   buffer_size=4000
+   bytes_to_grab="$buffer_size"
+   chunk_ending_byte=0
+
+   while [[ $total_remaining_bytes -gt 0 ]]; do
+      if [[ $total_remaining_bytes -lt $buffer_size ]]; then
+         bytes_to_grab="$total_remaining_bytes"
+      fi
+
+      chunk_ending_byte="$((chunk_ending_byte + bytes_to_grab))"
+
+      #echo -e "chunk_ending_byte=$chunk_ending_byte for $bytes_to_grab"
+
+      head -c"$chunk_ending_byte" "$file" | tail -c$bytes_to_grab | xsel -b
+
+      total_remaining_bytes=$((total_remaining_bytes - bytes_to_grab))
+
+      #echo -e "total_remaining_bytes=$total_remaining_bytes"
+
+      if [[ $bytes_to_grab -ge $buffer_size ]]; then
+         echo -n "paste the current buffer, then press Enter to copy the next block of data"
+         read
+      fi
+   done
+}

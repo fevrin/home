@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# show all known information on a given package, regardless of package manager
+showpkg() {
+   if [[ -x $(which apt-cache) ]]; then
+      apt-cache show $1
+   elif [[ -x $(which yum) ]]; then
+      yum show $1
+   fi
+}

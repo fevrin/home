@@ -1,0 +1,33 @@
+#!/bin/bash
+
+seek-broken-links() {
+   # inspired by <https://sookocheff.com/post/bash/parsing-bash-script-arguments-with-shopts/>
+
+   # reset OPTIND since it's normally rest only at the beginning of a script execution, not function execution
+   OPTIND=1
+
+   while getopts ":d:t:" opt; do
+      case $opt in
+         d)
+            directory=$OPTARG
+            ;;
+         t)
+            timeout=$OPTARG
+            ;;
+         \?)
+            echo "$FUNCNAME [-d {directory}] [-t {timeout}]"
+            return 1
+            ;;
+      esac
+   done
+   shift $((OPTIND - 1))
+
+   # ensure these variables are set, one way or another
+   directory="${directory:-.}"
+   timeout="${timeout:-5}"
+
+   for link in $(egrep -Ihoir "$HTTP_REGEX" "$directory"/* | sort -u); do
+      echo "checking $link" >&2
+      timeout $timeout curl -kIL "$link" &>/dev/null || echo "$link"
+   done
+}

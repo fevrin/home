@@ -1,0 +1,12 @@
+#!/bin/bash
+
+copy-file-by-line() {
+   local file="$1"
+   local last_line=$(wc -l $file | cut -d' ' -f1)
+   for line in $(seq 1 $last_line); do
+      echo "press Enter to continue"
+      echo "line = $line/$last_line"
+      sed -ne ${line}p $file | tr -d '\n' | xsel -b
+      [[ $line -eq $last_line ]] || read
+   done
+}

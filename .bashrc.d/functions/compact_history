@@ -1,0 +1,91 @@
+#!/bin/bash
+
+compact_history() {
+
+   # remove all duplicates in the history file since HISTCONTROL=ignoreboth doesn't seem to work the current setup :/
+
+   # input: optional file to compact (expected to be in the typical history file format, including timestamps
+   # output: nothing on success, but the temporary file name for you to peruse if run with the simulate/dry-run option
+
+   _verify_reqs <<-EOF || return 1
+   verbose
+	EOF
+
+   local DRY_RUN=0
+   local VERBOSE=1
+   local HISTORY_FILE
+   local REMOVAL_REGEX
+
+   while [[ $# -ge 1 ]]; do
+      local arg="$1"
+      verbose 8 "arg = $arg"
+      case $arg in
+         -n|--dry-run)
+            DRY_RUN="1"
+            ;;
+         -r|--regex)
+            shift
+            REMOVAL_REGEX="$1"
+            ;;
+         *)
+            if [[ -s "$arg" ]]; then
+               HISTORY_FILE="$arg"
+            fi
+            ;;
+      esac
+      shift
+   done
+
+   HISTORY_FILE="${HISTORY_FILE:-$HOME/.bash_history}"
+   local HISTORY_FILE_BACKUP="${HISTORY_FILE}_$(date +'%F_%Hh%Mm%Ss').bak"
+   local TEMP_FILE="$(mktemp)"
+
+   _print_var_vals \
+    DRY_RUN \
+    VERBOSE \
+    HISTORY_FILE \
+    REMOVAL_REGEX
+   verbose 8
+
+#   cat ~/.bash_history | tr '\n' '^M' | sed -rne 's;^M(#[0-9]{10,11})^M([^^M]+);\1  \2^M;gp' | tr '^M' '\n' | egrep '^#[0-9]{10,11}' | sort -u -k 2 | sort | sed -rne 's;^(#[0-9]{10,11})   (.*)$;\1\n\2;p' >~/.bash_history.new
+#   sed -re 's;^(#[0-9]{10,11})$;\o0\1;' ~/.bash_history | tr '\n' '\1' | sed -rne 's;\o0(#[0-9]{10,11}[^\o0]+);\1\n;gp' | sort -uk2 | sort | tr -d '\n' | tr '\1' '\n' >~/.bash_history.new2
+#   sed -re 's;^(#[0-9]{10,11})$;\o0\1;' ~/.bash_history | tr '\n' '\1' | sed -rne 's;\o0([^\o0]+);\1\n;gp' | sort -uk2 | sort | tr -d '\n' | tr '\1' '\n' | less
+#   sed -re 's;^(#[0-9]{10,11})$;\o0\1;' ~/.bash_history | tr '\n' '\1' | sed -rne 's;\o0([^\o0]+);\1\n;gp' | sort -u -t$'\1' -k2 | sort | tr -d '\n' | tr '\1' '\n' | less
+
+   # we might be able to change the octal characters used here so we can utilize sort's '-z' option, but that might not be as portable
+
+   sed -re 's;^(#[0-9]{10,11})$;\o0\1;' "$HISTORY_FILE" | # replace start of lines with a null character (000 octal) so we know the start of a history entry (assuming with a timestamp)
+   tr '\n' '\1' |                                         # replace all newlines with a 001 octal character so we can keep track of where the newlines should later go, including in multi-line entries
+   sed -rne 's;\o0([^\o0]+);\1\n;gp' |                    # re-insert newlines just at the end of each history entry so we can sort
+   sort -u -t$'\1' -k2 |                                  # sort by command to remove duplicates
+   sort |                                                 # sort again—this time by timestamp, the original order of the entries
+   egrep -v $'\1'"$REMOVAL_REGEX"$'\1' |                  # remove all entries matching the provided regex, if any (this is safe to run, even if the regex isn't provided or is blank
+   tr -d '\n' |                                           # remove the newlines we'd previously inserted so they don't double up
+   tr '\1' '\n' >"$TEMP_FILE"                             # re-insert all newlines that were there from the beginning
+
+   # perform the actual move if the new temp file has data in it (after backing up the original history file)
+   if [[ -s "$TEMP_FILE" ]]; then
+      if [[ $DRY_RUN -eq 1 ]]; then
+         ls -halF "$TEMP_FILE"
+      else
+         local APPEND_ONLY=0
+
+         if lsattr -l "$HISTORY_FILE" | grep -qi append_only; then
+            verbose 0 "attempting to remove append-only mode for '$HISTORY_FILE'"
+            sudo chattr -a "$HISTORY_FILE"
+            APPEND_ONLY=1
+         fi
+
+         # move the new history file to the default one
+         mv "$HISTORY_FILE" "$HISTORY_FILE_BACKUP" &&
+          mv "$TEMP_FILE" "$HISTORY_FILE" >/dev/null
+
+         if [[ $APPEND_ONLY -eq 1 ]]; then
+            verbose 0 "attempting to re-apply append-only mode for '$HISTORY_FILE'"
+            sudo chattr +a "$HISTORY_FILE"
+         fi
+      fi
+   else
+      verbose 1 "error: '$TEMP_FILE' couldn't be made or is empty!"
+   fi
+}

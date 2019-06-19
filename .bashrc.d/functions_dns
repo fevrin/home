@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # DNS-related functions
 
 get-arin-look-up() {
@@ -14,7 +16,7 @@ get-arin-look-up() {
       IP=$1
    fi
 
-   if [[ ! "$IP" =~ ^$ip_regex$ ]]; then
+   if [[ ! "$IP" =~ ^$IP_REGEX$ ]]; then
       return 1
    fi
 

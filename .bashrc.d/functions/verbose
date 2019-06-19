@@ -1,0 +1,78 @@
+#!/bin/bash
+
+verbose() {
+   # this function outputs the given text only if the associated verbosity
+   # meets or exceeds the currently set verbosity level
+
+   # if the verbosity level is the maximum (8), this also prefixes the given
+   # text with some debugging information
+
+   # input: an optional flag (-n or -e, passed directly to `echo`), an optional verbosity level (single
+   # digit), and the message to print
+
+   #        -n    suppress trailling newline
+   #        -e    interpret escape characters (like "\n")
+   
+   # output: if the specified verbosity level in the verbose() call is less than the set VERBOSE variable, the message is printed,
+   #         taking into account the specified flags.
+   
+   # examples:
+   # verbose 1 test message <--- printed if VERBOSE is set to 1 or higher
+   # verbose 8 test message <--- printed if VERBOSE is set to 8 or higher
+
+   # each verbosity level includes everything from the lower verbosity levels
+   # verbosity level example guidelines:
+   # 1 = misc
+   # 2 = variable values
+   # 3 = function entrances and exits
+
+   # the actual implemented levels are taken from syslog and may be overboard
+
+   local flags
+   local verbosity
+   local DEBUG
+   local funcname_lineno_index=0
+   local VERBOSE="${VERBOSE:-1}"
+
+   # if we got called via the log() function, set the index accordingly
+   [[ ${FUNCNAME[1]} =~ log ]] && funcname_lineno_index=1
+
+   # default verbosity threshold
+   verbosity=3
+
+   [[ "$1" =~ -(n|e) ]] &&
+   flags="$1" &&
+   shift
+
+   if [[ "$1" =~ ^([0-9]+|(emerg|alert|crit|err|warn|notice|info|debug).*)$ ]]; then
+      case "$1" in
+      # levels taken from syslog
+         emerg*) # system is unusable
+            verbosity=1;;
+         alert) # action must be taken immediately
+            verbosity=2;;
+         crit*) # critical conditions
+            verbosity=3;;
+         err*) # error conditions
+            verbosity=4;;
+         warn*) # warning conditions
+            verbosity=5;;
+         notice) # normal, but significant, condition
+            verbosity=6;;
+         info) # informational message
+            verbosity=7;;
+         debug) # debug-level message
+            verbosity=8;;
+           [0-9]*)
+            verbosity="$1"
+            [[ $verbosity -gt 8 ]] && verbosity=8;;
+      esac
+      shift
+   fi
+
+   if [[ $VERBOSE -ge $verbosity ]]; then
+      [[ $verbosity -eq 8 ]] && DEBUG="${FUNCNAME[$((funcname_lineno_index + 1))]} (line ${BASH_LINENO[$funcname_lineno_index]}): "
+
+      echo $flags "$DEBUG$@" | tee -a /tmp/3 >&2
+   fi
+}

@@ -1,0 +1,45 @@
+#!/bin/bash
+
+colorize() {
+# syntax
+# colorize [style] {color} "{text}"
+   local color_off="\033[0m"       # Text Reset
+   local color=
+   local style="0;" # default style is "normal"
+   local text=
+   local content="${@:-$(cat /dev/stdin)}"
+
+   for word in ${content}; do
+      case "$word" in
+         normal) ;;
+         bold) style="1";;
+         dark) style="2";;
+         bgs) style="3";; # fg and bg are same color
+         underline) style="4";;
+         bg) color="$((color + 10))";;
+         light|intense) color="$((color + 60))";;
+
+         none) color="0";;
+         black) color="$(($color + 30))";;
+         red) color="$(($color + 31))";;
+         green) color="$(($color + 32))";;
+         yellow) color="$(($color + 33))";;
+         blue) color="$(($color + 34))";;
+         purple) color="$(($color + 35))";;
+         cyan) color="$(($color + 36))";;
+         white) color="$(($color + 37))";;
+
+         *) 
+            text="$word"
+            output="\033[${style};${color}m${text}${color_off}"
+
+            echo -en "$output"
+
+            # reset the style and color
+            style="0"
+            color=
+            ;;
+      esac
+#   echo -e "color = $color\nstyle = $style\ntext = $text\n"
+   done
+}

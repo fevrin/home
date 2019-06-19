@@ -1,0 +1,24 @@
+#!/bin/bash
+
+time-between-now-and() {
+# determine the hours, minutes, and seconds since the specified time
+   pdate="$1";
+   pdate_sec="$(date -d "$pdate" +%s)"
+   now_sec="$(date +%s)"
+
+   if [[ $now_sec -gt $pdate_sec ]]; then
+      newer=$now_sec
+      older=$pdate_sec
+   else
+      newer=$pdate_sec
+      older=$now_sec
+   fi
+
+   hours=$(echo "($newer - $older) / 60 / 60" | bc);
+   mins=$(echo "($newer - $older) / 60 % 60" | bc);
+   milli=$(echo "($newer - $older) % 60" | bc);
+   [[ $hours -lt 10 ]] && hours="0$hours"
+   [[ $mins -lt 10 ]] && mins="0$mins"
+   [[ $milli -lt 10 ]] && milli="0$milli"
+   printf "%02dh %02dm %02ds\n" ${hours} ${mins} ${milli}
+}

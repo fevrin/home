@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# more accurately convert an image to a PDF so it's not oversized
+img2pdf() {
+   echo convert /tmp/"$1" -density 150x150 -units PixelsPerInch -resize $((150*827/100))x$((150*1169/100)) /tmp/${1/\.*/.pdf}
+   #convert /tmp/sublease/* -density 150x150 -units PixelsPerInch -resize $((150*827/100))x$((150*1169/100)) -repage $((150*827/100))x$((150*1169/100)) /tmp/sublease.pdf
+}

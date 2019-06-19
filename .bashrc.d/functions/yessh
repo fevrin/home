@@ -1,0 +1,131 @@
+#!/bin/bash
+
+yessh() {
+
+   # handy for ssh'ing into servers and getting some common basic environmental modifications without having to copy ~/.bashrc, ~/.bash_aliases, etc. to each server first; it's all done over one connection, if possible
+   # inspired by <https://superuser.com/a/503785>
+
+   # input: server name and optional arguments passed to 'ssh'
+   # output: connects to the specific node and sets up the environment contained in the ~/.bashrc.d/remote/* files
+
+   # examples:
+   # yessh reg1node22
+   # yessh reg1node22 'cat /proc/cmdline'
+
+   # any files or symlinks in the ~/.bashrc.d/remote/ directory will be passed
+   # as-is from the local to the remote host.
+
+   # they should be directly executable by bash on the remote host
+
+   # they will not be sourced or evaluated on the local host
+
+   # to define functions available locally on the remote host, you can run a
+   # command like this to combine existing functions into a single file
+   # just replace the paths, as needed:
+   # cat ~/.bashrc.d/functions/* >~/.bashrc.d/remote/functions
+
+   _verify_reqs <<-EOF || return 1
+   base64
+   bzip2
+   ssh
+   verbose
+	EOF
+
+   local hostname
+   local port
+   local username
+   local ssh_args
+   local command
+
+   if [[ $# -gt 1 ]]; then
+      while [[ $# -ge 1 ]]; do
+         local arg="$1"
+         verbose 8 "arg = $arg"
+         case $arg in
+            -p|--port)
+               shift
+               port="$1"
+               ;;
+            *@*)
+               username="$(echo "$arg" | cut -d@ -f1)"
+               hostname="$(echo "$arg" | cut -d@ -f2)"
+               ;;
+            -*)
+               if [[ "$arg" =~ -[46AaCfGgKkMNnqsTtVvXxYy]+ ]]; then
+                  ssh_args="$ssh_args $arg"
+               else
+                  ssh_args="$ssh_args $arg"
+                  shift
+                  ssh_args="$ssh_args $1"
+               fi
+               ;;
+            *)
+               if [[ -z "$hostname" ]]; then
+                  hostname="$arg"
+               else
+                  # the last argument(s) should be the command, like with the ssh client
+                  command="$@"
+                  break
+               fi
+               ;;
+         esac
+         shift
+
+         verbose 8 "hostname = $hostname"
+         verbose 8 "port = $port"
+         verbose 8 "username = $username"
+         verbose 8 "ssh_args = $ssh_args"
+         verbose 8 "command = $command"
+         verbose 8
+      done
+   else
+      if [[ "$1" =~ .*@.* ]]; then
+         username="$(echo "$1" | cut -d@ -f1)"
+         hostname="$(echo "$1" | cut -d@ -f2)"
+      else
+         hostname="$1"
+      fi
+   fi
+
+   port="${port:-22}"
+   username="${username:-$USER}"
+
+   verbose 8 "final hostname = $hostname"
+   verbose 8 "final port = $port"
+   verbose 8 "final username = $username"
+   verbose 8 "final ssh_args = $ssh_args"
+   verbose 8 "final command = $command"
+
+   if [[ "$hostname" ]]; then
+      [[ -d "$HOME/.bashrc.d" ]] ||
+         verbose "$HOME/.bashrc.d doesn't exist!"
+
+      if [[ -z "$command" ]]; then
+         # inspired by <https://superuser.com/a/1078431>
+         local bashrc_contents="$(cat ~/.bashrc.d/remote/* | bzip2 | base64 -w0)"
+
+         if [[ $(echo "$bashrc_contents" | wc -c) -le 20480 ]]; then
+            command="bash --rcfile <(echo \"$bashrc_contents\" | base64 --decode | bunzip2)"
+         else
+            # ssh will complain the argument list is too long, so there's no way around just uploading the files to temporary files
+
+            # generate a temp file name
+            local tempbashrc="$(mktemp /tmp/tmp.XXXXXXXXXX)"
+            # workaround for use on Mac OS X, which has no option for a dry run
+            [[ -f "$tempbashrc" ]] && rm -f "$tempbashrc"
+            echo "$bashrc_contents" >"$tempbashrc"
+
+            # copy the temporary bashrc file to the remote host, then delete it locally
+            rsync -avzPi -e "ssh -p $port" "$tempbashrc" ${username}@${hostname}:"$tempbashrc" && rm -f "$tempbashrc"
+            #scp -P $port "$tempbashrc" ${username}@${hostname}:"$tempbashrc"
+
+            command='bash --rcfile <(cat '"$tempbashrc"' | base64 --decode | bunzip2) ; rm '$tempbashrc''
+         fi
+
+      fi
+      verbose 8 ssh -t -p $port $ssh_args ${username}@${hostname} "$command"
+      ssh -t -p $port $ssh_args ${username}@${hostname} "$command"
+   else
+      echo "you must specify a host!"
+   fi
+}

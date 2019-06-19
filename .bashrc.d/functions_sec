@@ -89,3 +89,27 @@ get_ssl_cert() {
    host="${host/*:\/\//}"
    echo Q | openssl s_client -connect $host:443 | openssl x509 -noout -text
 }
+
+generate_luks_keyfile() {
+   # from <https://github.com/thrdroom/ManualFullSystemEncryption/blob/master/encryptinstallation#L1165>
+
+   local outfile="$1"
+   local count="${2:-1}"
+   local bs="${3:-512}"
+
+   if [[ "$outfile" ]]; then
+      if [[ -s "$outfile" ]]; then
+         echo -n "$outfile exists. overwrite it? [y/N] "
+         read
+         if [[ "$REPLY" =~ [Yy] ]]; then
+            sudo dd if=/dev/urandom of="$outfile" count="$count" bs="$bs"
+         else
+            echo "cancelling keyfile generation"
+         fi
+      else
+         sudo dd if=/dev/urandom of="$outfile" count="$count" bs="$bs"
+      fi
+   else
+      echo "you must specify an output file!"
+   fi
+}

@@ -1,0 +1,24 @@
+#!/bin/bash
+
+diff-home-files() {
+   for i in \
+   $HOME/home/.[a-fh-z]* \
+   $HOME/home/.bashrc.d/* \
+   $HOME/home/.{gitconfig,gitignore_global,gvimrc} \
+   ; do
+      [[ ! "$i" =~ \.toprc && ! $(file $i) =~ "Vim swap file" ]] || continue
+      [[ -d "$i" && "$i" =~ ".bashrc.d" ]] || [[ -f "$i" ]] || continue
+#      echo "i = $i"
+
+      if [[ "$i" =~ .bashrc.d ]]; then
+         file1="$(echo "$i" | sed -re "s;$HOME/home/(.*);$HOME/\1;")"
+      else
+         file1="$HOME/$(basename $i)"
+      fi
+#      echo file1="$file1"
+
+      file2=$i
+#      echo file2="$file2"
+      [[ $(md5sum $file1 2>/dev/null | cut -d" " -f1) != $(md5sum $file2 2>/dev/null | cut -d" " -f1) ]] && vimdiff $file1 $file2
+   done
+}

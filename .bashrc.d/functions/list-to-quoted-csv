@@ -1,0 +1,14 @@
+#!/bin/bash
+
+list-to-quoted-csv() {
+   #takes a file of newline-separated output and converts it to quoted CSV
+
+   local newline_file="$1"
+   local no_quotes="$2"
+   local quotes='"'
+
+   [[ "$no_quotes" =~ nq ]] && quotes=""
+
+
+   sed -rne "s;^.*$;${quotes}&${quotes}\,;gp" "$newline_file" | tr -d '\n' | sed -re 's;(^,|,$);;g' -e 's;$;\n;'
+}

@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# copy an encrypted ssh key to memory
+copy-skey() {
+   file="$1"
+
+   tmp_file="$(mktemp -p /tmp/)"
+
+   gpg -d $file >$tmp_file 2>/dev/null &&
+    chmod 400 $tmp_file &&
+    ssh-add $tmp_file &&
+    rm -f $tmp_file
+}

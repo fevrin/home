@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#bar_graph() {
+#   graphChar=".";
+#   scale=1;
+#   for date in 03; do
+#      for hour in {01..23}; do
+#         echo -n "2013-01-$date $hour: ";
+#         emails=$(shuf -i10-200 -n1);
+#			printf "$graphChar%.0s" $(seq 1 $emails)
+#         echo;
+#      done;
+#      echo;
+#   done
+#}

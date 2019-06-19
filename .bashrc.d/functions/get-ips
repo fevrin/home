@@ -1,0 +1,16 @@
+#!/bin/bash
+
+function get-ips() {
+   # input: nothing
+   # output: a list of common interfaces and their assigned IPv4 IPs
+
+   local ints="$1"
+   local ip
+   [[ -n "$ints" ]] || ints="$(ifconfig | sed -rne "s;^([^ :]+)[ :].*;\1;p")"
+   for int in $ints; do
+      if [[ "$int" =~ ^([-a-z_0-9]+)$ && $(ip address show "$int" &>/dev/null; echo $?) -eq 0 ]]; then
+         ip="$(ip address show $int | grep -Po "inet \K$IP_REGEX")"
+         [[ -n "$ip" ]] && echo "$int: $ip"
+      fi
+   done
+}

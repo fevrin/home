@@ -1,0 +1,71 @@
+#!/bin/bash
+
+_verify_reqs() {
+
+   # this is a function helper that ensures commands required by the calling
+   # function are available to it this function will return an error with a
+   # list of commands unavailable to the calling function having this function
+   # saves coding a similar check in each function individually
+
+   # input: list of commands required for the function to run
+
+   # call this function using one of these two forms:
+   #
+   # form 1:
+   # _verify_reqs $input $values || return 1
+   #
+   # form 2:
+   # _verify_reqs <<-EOF || return 1
+   # $input
+   # $values
+   # $even with spaces
+   # EOF
+
+   if [[ -n "$@" ]]; then
+      declare -a requirements=($@)
+   elif [[ ! -t 0 ]]; then
+      # input isn't a terminal, i.e., use stdin
+      # inspired by <https://unix.stackexchange.com/questions/484630/check-if-no-command-line-arguments-and-stdin-is-empty/484643#484643>
+      declare -a requirements=($(cat /dev/stdin))
+   else
+      echo "ERROR: you must supply a list of required files or functions!"
+
+      echo
+      echo "file: $(realpath ${BASH_SOURCE[1]})"
+      echo "function: ${FUNCNAME[1]}"
+      echo "line: ${BASH_LINENO[0]}";
+   fi
+   declare -a failures
+
+   for req in ${requirements[*]}; do
+      local needed_version="${req#*:}"
+#      echo "req = '$req'"
+#      echo "needed_version = '$needed_version'"
+      actual_version="$(${req%:*} --version 2>&1 | sed -rne '1s;.* ([0-9.a-z+]+\.[0-9.a-z+]+)([^0-9.a-z+].*|$);\1;p')"
+#      echo "actual_version = '$actual_version'"
+
+      # if no version was specified, pretend the actual version is what we want
+      [[ "$needed_version" == "$req" ]] && needed_version="$actual_version"
+
+      # make sure both the required command, as well as the version, if specified, are what we actually have
+      { type -t "$req" &>/dev/null && [[ "$needed_version" == "$actual_version" ]]; }|| failures+=("$req")
+   done
+
+   if [[ -n ${failures[*]} ]]; then
+      echo "ERROR: requirement(s) not met:"
+      echo
+
+      for failure in ${failures[*]}; do
+         echo "* $req"
+      done
+
+      echo
+      echo "file: $(realpath ${BASH_SOURCE[1]})"
+      echo "function: ${FUNCNAME[1]}"
+      echo "line: ${BASH_LINENO[0]}";
+
+      return 1
+   else
+      return 0
+   fi
+}

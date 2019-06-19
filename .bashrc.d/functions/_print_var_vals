@@ -1,0 +1,21 @@
+#!/bin/bash
+
+_print_var_vals() {
+
+   # takes all arguments and prints out their values (for debugging)
+   # this assumes all arguments are indeed variables
+   # any argumentsthat aren't variables, are unset, or have no assigned
+   # value are still accepted and simply printed to indicate no value
+
+   # input: a list of variable names
+   # output: the list of variable names, along with their values, if any
+
+   _verify_reqs <<-EOF || return 1
+   verbose
+	EOF
+
+   for i in $@; do
+      declare -n _variable="$i"
+      verbose 8 "$i = $_variable"
+   done
+}

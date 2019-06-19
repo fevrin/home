@@ -1,0 +1,9 @@
+#!/bin/bash
+
+sql-tab-to-jira-tab() {
+   #takes a file of standard MySQL tabular output and converts it to Jira's format
+
+   local tabular_file="$1"
+
+   sed -e '1 s;|;||;g' -e 's;\s\s+; ;g' "$tabular_file" | egrep -v '^[+-]+$'
+}
