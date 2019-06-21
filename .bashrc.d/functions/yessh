@@ -27,6 +27,7 @@ yessh() {
    _verify_reqs <<-EOF || return 1
    base64
    bzip2
+   rsync
    ssh
    verbose
 	EOF
@@ -102,7 +103,7 @@ yessh() {
 
       if [[ -z "$command" ]]; then
          # inspired by <https://superuser.com/a/1078431>
-         local bashrc_contents="$(cat ~/.bashrc.d/remote/* | bzip2 | base64 -w0)"
+         local bashrc_contents="$(ls -1 ~/.bashrc.d/remote/* 2>/dev/null | grep -v \.md$ | xargs cat | bzip2 | base64 -w0)"
 
          if [[ $(echo "$bashrc_contents" | wc -c) -le 20480 ]]; then
             command="bash --rcfile <(echo \"$bashrc_contents\" | base64 --decode | bunzip2)"

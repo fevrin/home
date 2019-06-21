@@ -56,6 +56,7 @@ set autoindent " ai; autoindent all subsequent lines
 set indentexpr="" " inde; indicates when to indent; comment out in $VIMRUNTIME/indent/html.vim
 " filetype indent off " disables filetype-based indentation settings
 set copyindent " ci; new line indents use same characters (spaces, tabs, etc.) as previous line
+"set textwidth=125 " tw; maximum formatted width before text starts wrapping around to the next line; 125, as that's the maximum monospace width in GHE's editing window before a horizontal scroll bar appears
 
 " 16 folding
 "set foldmethod=indent " fdm; sets folding type
@@ -69,6 +70,7 @@ set history=4000 " hi; allow for ample command history
 ":so ~/.vim/extenders/.vim.wrap
 ":so ~/.vim/extenders/.vim.loadtemplate
 
+set term=xterm " needed for the colorscheme to show as more bold and vibrant than 'screen.xterm-256color'
 colorscheme ron
 
 syntax sync minlines=50 " ensure vim doesn't keep changing syntax highlighting; from <http://vim.wikia.com/wiki/Fix_Syntax_Highlighting>

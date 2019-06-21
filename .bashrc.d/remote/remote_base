@@ -1,3 +1,10 @@
+#!/bin/bash
+
+# this is an example file for setting up a temporary comfortable environment on
+# a remote host in conjunction with yessh()
+
+# see the `yessh` file for more info
+
 [[ -r ~/.bashrc ]] && . ~/.bashrc
 
 infocmp -x 2>/dev/null | grep -q $TERM || export TERM=screen

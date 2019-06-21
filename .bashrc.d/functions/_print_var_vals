@@ -11,11 +11,14 @@ _print_var_vals() {
    # output: the list of variable names, along with their values, if any
 
    _verify_reqs <<-EOF || return 1
-   verbose
+	verbose
 	EOF
 
+   local i
    for i in $@; do
+      # ensure the given arg is actually a variable and has been set
+      [[ -v $i ]] || continue
       declare -n _variable="$i"
-      verbose 8 "$i = $_variable"
+      verbose 8 "${FUNCNAME[$((funcname_lineno_index + 1))]} (line ${BASH_LINENO[$funcname_lineno_index]}): $i = $_variable"
    done
 }

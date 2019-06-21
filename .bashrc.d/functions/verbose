@@ -73,6 +73,6 @@ verbose() {
    if [[ $VERBOSE -ge $verbosity ]]; then
       [[ $verbosity -eq 8 ]] && DEBUG="${FUNCNAME[$((funcname_lineno_index + 1))]} (line ${BASH_LINENO[$funcname_lineno_index]}): "
 
-      echo $flags "$DEBUG$@" | tee -a /tmp/3 >&2
+      echo $flags "$DEBUG$@" >&2
    fi
 }

@@ -1,20 +1,18 @@
 #!/bin/bash
 
 diff-home-files() {
-   for i in \
-   $HOME/home/.[a-fh-z]* \
-   $HOME/home/.bashrc.d/* \
-   $HOME/home/.{gitconfig,gitignore_global,gvimrc} \
-   ; do
-      [[ ! "$i" =~ \.toprc && ! $(file $i) =~ "Vim swap file" ]] || continue
-      [[ -d "$i" && "$i" =~ ".bashrc.d" ]] || [[ -f "$i" ]] || continue
+   for i in $(find $HOME/home/ -type f ! -iregex '.*\/\.git\/.*'); do
+      # the item is within the .bashrc.d directory
+      [[ -f "$i" ]] || continue
+
+      # and it isn't .toprc, and it's not a vim swap file
+      [[ ! "$i" =~ \.toprc &&
+      ! $(file $i) =~ "Vim swap file" &&
+      ! "$i" =~ \.md &&
+      ! "$i" =~ \.vim\/ ]] || continue
 #      echo "i = $i"
 
-      if [[ "$i" =~ .bashrc.d ]]; then
-         file1="$(echo "$i" | sed -re "s;$HOME/home/(.*);$HOME/\1;")"
-      else
-         file1="$HOME/$(basename $i)"
-      fi
+      file1="$(echo "$i" | sed -re "s;$HOME/home/(.*);$HOME/\1;")"
 #      echo file1="$file1"
 
       file2=$i
