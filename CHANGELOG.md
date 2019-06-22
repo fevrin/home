@@ -2,6 +2,62 @@
 
 # CHANGELOG
 -------
+### v2.1.5
+##### Sat, Jun 22, 2019
+
+   .bashrc.d/functions_general  
+  \* split out all functions to individual files in the `functions` subdirectory for easier maintenance  
+  \* updated to support the new split out function files  
+  \* fleshed out comments on functions' purposes and usage in the individual files
+
+   .bashrc.d/functions/compact_history  
+  \* regexes with start and end of line anchors will have those stripped since those won't work in the context of the final regex  
+  \* updated the regex removal line to account for leading and trailing whitespace
+
+   .bashrc.d/functions/yessh  
+  \* you can now run functions sent to the host without actually logging in  
+  \* updated to not bomb out if ~/.bashrc.d/remote/* doesn't exist
+
+   .bashrc.d/functions/_print_var_vals  
+  \* you can now specify a verbosity level  
+  \* fixed so it doesn't bomb out if given an unset or non-variable
+
+   .bashrc.d/functions/get-ips  
+  \* just IPs are printed out when given interfaces
+
+   .bashrc.d/functions/_verify_reqs  
+  \* fixed a bug in which failures weren't correctly listed
+
+   .bashrc.d/functions/diff-home-files  
+  \* updated to build a more complete list of files to compare
+
+   .bashrc.d/functions/verbose  
+  \- removed teeing to a file
+
+   .bashrc.d/remote/remote_base  
+  \+ added a note regarding the purpose of this file
+
+   .docker/config.json  
+  \+ added
+
+   .vimrc  
+  \+ added some config directives
+
+   CONTRIBUTING.md  
+  \+ added
+
+   .bashrc.d/00_vars  
+  \* updated variable names to be uppercase for better global scope indication
+
+   Fixed variables not properly scoped in these files:  
+   .bashrc.d/functions/_verify_reqs  
+   .bashrc.d/functions/aptupchange  
+   .bashrc.d/functions/colorize  
+   .bashrc.d/functions/copy-file-by-line  
+   .bashrc.d/functions/seek-broken-links  
+   .bashrc.d/functions_dns  
+   .bashrc.d/functions/diff-home-files
+
 ### v2.1.0
 ##### Fri, Jun 14, 2019
 
@@ -497,6 +553,6 @@
 
    .bashrc  
    \+ added work aliases in ~/.bash_work_aliases
-   
+
    .macrc  
    \+ added an alias for md5sum

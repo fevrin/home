@@ -8,7 +8,7 @@ aptupchange() {
    cat <<-EOF
 	packages to be upgraded:
 	$packages
-	
+
 	EOF
 
    local package
