@@ -76,6 +76,7 @@ fi
 
 # attempt to output the motd
 MOTD_RUN=0
+
 for file in /{var/,}run/motd{,.dynamic} /snap/core/current/etc/motd; do
    [[ -s "$file" ]] && cat "$file" && MOTD_RUN=1 && break
 done

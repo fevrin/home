@@ -4,7 +4,7 @@ seek-broken-links() {
    # inspired by <https://sookocheff.com/post/bash/parsing-bash-script-arguments-with-shopts/>
 
    # reset OPTIND since it's normally rest only at the beginning of a script execution, not function execution
-   OPTIND=1
+   local OPTIND=1
 
    while getopts ":d:t:" opt; do
       case $opt in
@@ -26,6 +26,7 @@ seek-broken-links() {
    directory="${directory:-.}"
    timeout="${timeout:-5}"
 
+   local link
    for link in $(egrep -Ihoir "$HTTP_REGEX" "$directory"/* | sort -u); do
       echo "checking $link" >&2
       timeout $timeout curl -kIL "$link" &>/dev/null || echo "$link"

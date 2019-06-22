@@ -3,7 +3,7 @@
 aptupchange() {
    # view the changelogs of all packages to be upgraded
 
-   packages="$(sudo apt-get -us upgrade | sed -ne "s;^Inst \([^[]\+\) \([[(]\).*;\1;"p)"
+   local packages="$(sudo apt-get -us upgrade | sed -ne "s;^Inst \([^[]\+\) \([[(]\).*;\1;"p)"
 
    cat <<-EOF
 	packages to be upgraded:
@@ -11,6 +11,7 @@ aptupchange() {
 	
 	EOF
 
+   local package
    for package in $packages; do
       echo -n "view changelog for $package? [y/N]: "
 

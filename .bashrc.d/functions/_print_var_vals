@@ -7,6 +7,8 @@ _print_var_vals() {
    # any argumentsthat aren't variables, are unset, or have no assigned
    # value are still accepted and simply printed to indicate no value
 
+   # note that this can't resolve certain reserved variables ($@, $1, etc.)
+
    # input: a list of variable names
    # output: the list of variable names, along with their values, if any
 
@@ -14,11 +16,39 @@ _print_var_vals() {
 	verbose
 	EOF
 
+   local verbosity=8
+
+   if [[ "$1" =~ ^([0-9]+|(emerg|alert|crit|err|warn|notice|info|debug).*)$ ]]; then
+      case "$1" in
+      # levels taken from syslog
+         emerg*) # system is unusable
+            verbosity=1;;
+         alert) # action must be taken immediately
+            verbosity=2;;
+         crit*) # critical conditions
+            verbosity=3;;
+         err*) # error conditions
+            verbosity=4;;
+         warn*) # warning conditions
+            verbosity=5;;
+         notice) # normal, but significant, condition
+            verbosity=6;;
+         info) # informational message
+            verbosity=7;;
+         debug) # debug-level message
+            verbosity=8;;
+           [0-9]*)
+            verbosity="$1"
+            [[ $verbosity -gt 8 ]] && verbosity=8;;
+      esac
+      shift
+   fi
+
    local i
    for i in $@; do
       # ensure the given arg is actually a variable and has been set
       [[ -v $i ]] || continue
       declare -n _variable="$i"
-      verbose 8 "${FUNCNAME[$((funcname_lineno_index + 1))]} (line ${BASH_LINENO[$funcname_lineno_index]}): $i = $_variable"
+      verbose $verbosity "${FUNCNAME[$((funcname_lineno_index + 1))]} (line ${BASH_LINENO[$funcname_lineno_index]}): $i = '$_variable'"
    done
 }

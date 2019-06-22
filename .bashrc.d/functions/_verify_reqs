@@ -38,6 +38,7 @@ _verify_reqs() {
 
    declare -a failures
 
+   local req
    for req in ${requirements[*]}; do
       local needed_version="${req#*:}"
 #      echo "req = '$req'"
@@ -56,6 +57,7 @@ _verify_reqs() {
       echo "ERROR: requirement(s) not met:"
       echo
 
+      local failure
       for failure in ${failures[*]}; do
          echo "* $failure"
       done

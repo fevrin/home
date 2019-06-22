@@ -1,16 +1,31 @@
 #!/bin/bash
 
 function get-ips() {
-   # input: nothing
-   # output: a list of common interfaces and their assigned IPv4 IPs
 
-   local ints="$1"
+   # this takes any specified interfaces and outputs their IPv4 IPs
+   # in the absence of input, this outputs all identified interfaces and their IPv4 IPs
+
+   # input: optional interface names
+   # output: a list of either the specified or the common interfaces and their assigned IPv4 IPs
+
+   local IP_ONLY
+   local ints="$@"
+   [[ -n "$ints" ]] && IP_ONLY=1 # used later to print just the IPs, not the interfaces
    local ip
+
    [[ -n "$ints" ]] || ints="$(ifconfig | sed -rne "s;^([^ :]+)[ :].*;\1;p")"
+
+   local int
    for int in $ints; do
       if [[ "$int" =~ ^([-a-z_0-9]+)$ && $(ip address show "$int" &>/dev/null; echo $?) -eq 0 ]]; then
          ip="$(ip address show $int | grep -Po "inet \K$IP_REGEX")"
-         [[ -n "$ip" ]] && echo "$int: $ip"
+         if [[ -n "$ip" ]]; then
+            if [[ "$IP_ONLY" -eq 1 ]]; then
+               echo "$ip"
+            else
+               echo "$int: $ip"
+            fi
+         fi
       fi
    done
 }

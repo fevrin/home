@@ -36,9 +36,10 @@ get-whois-from-domain() {
 #domain's DNS records of the given type (defaults to A record)
 # input: a valid domain name and (optionally) the DNS record type
 # output: WHOIS for the given IPs
-   domain=$1
-   type=${2:-a}
+   local domain=$1
+   local type=${2:-a}
 
+   local address
    for address in $(host -t$type $domain | tail -n1 | awk '{print $NF}'); do
       whois $address | less;
    done
@@ -48,9 +49,10 @@ get-orgname-from-domain() {
 #of the given type (defaults to A record)
 # input: a valid domain name and (optionally) the DNS record type
 # output: OrgName for the given IPs
-   domain=$1
-   type=${2:-a}
+   local domain=$1
+   local type=${2:-a}
 
+   local address
    for address in $(host -t$type $domain | awk '{print $NF}'); do
       whois $address | grep -Ei '^(OrgName|org-name|descr|owner|Organization):';
    done | sort -u

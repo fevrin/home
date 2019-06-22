@@ -9,6 +9,7 @@ colorize() {
    local text=
    local content="${@:-$(cat /dev/stdin)}"
 
+   local word
    for word in ${content}; do
       case "$word" in
          normal) ;;
