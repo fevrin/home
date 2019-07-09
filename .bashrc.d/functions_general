@@ -13,9 +13,9 @@ done
 
 for func in $(realpath $(dirname "$BASH_SOURCE"))/functions/*; do
    # for some reason, exported pushd() causes issues in direnv allowed directories
-   if [[ ! "$func" =~ pushd ]] && egrep -q '^(function\s+)?([^#( ]+)\(\) \{$' "$func"; then
+   if egrep -q '^(function\s+)?([^#( ]+)\(\) \{$' "$func"; then
       . "$func"
-      export -f "${func//*\/}"
+      [[ "$func" =~ pushd ]] || export -f "${func//*\/}"
    fi
 done
 unset func

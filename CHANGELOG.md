@@ -2,6 +2,15 @@
 
 # CHANGELOG
 -------
+### v2.1.6
+##### Tue, Jul 9, 2019
+
+   .bashrc.d/functions/yessh  
+  \* commenting the new code that permits running a command without logging in
+
+   .gvimrc  
+  \+ adding config to undo some changes mswin.vim makes
+
 ### v2.1.5
 ##### Sat, Jun 22, 2019
 

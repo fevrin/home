@@ -36,6 +36,7 @@ yessh() {
    local port
    local username
    local ssh_args
+   local orig_command
    local command
 
    if [[ $# -gt 1 ]]; then
@@ -138,17 +139,17 @@ yessh() {
 
          # necessary mess to mark just the output of the command (not any rcfile output)
          # then decode it once the last sed is given the entire output
-         [[ -n "$orig_command" ]] && command="$command -ci '$orig_command | tr '\n' '\2' | sed -re 's;^;\o3;'\" | sed -rne 's;.*\o3;;' -e 's;\o2;\n;gp'"
+         [[ -n "$orig_command" ]] &&
+         command="$command -ci \"$orig_command |
+         tr '\n' '\2' |                         # convert all newlines to octal #2 so the output is a single line
+         sed -re 's;^;\o3;'\" |                 # insert an octal #3 at the beginning of the command output's one line
+         sed -rne 's;.*\o3;;' -e 's;\o2;\n;gp'" # now with the command's output alongside any other output from the rcfile, delete everything before the command output marker (octal #3) and convert back all octal #2s to newlines
 
          command="$command; rm '$tempbashrc'"
       fi
 
       verbose 8 ssh -qt -p $port $ssh_args ${username}@${hostname} "$command"
-      if [[ -n "$orig_command" ]]; then
-         ssh -qt -p $port $ssh_args ${username}@${hostname} "$command"
-      else
-         ssh -qt -p $port $ssh_args ${username}@${hostname} "$command"
-      fi
+      ssh -qt -p $port $ssh_args ${username}@${hostname} "$command"
    else
       echo "you must specify a host!"
    fi
