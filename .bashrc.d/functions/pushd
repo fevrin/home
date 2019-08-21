@@ -3,7 +3,9 @@
 pushd() {
    local dir="$1"
    local newdir
-   local VERBOSE=1
+   local VERBOSE="${VERBOSE:-1}"
+
+   dir_list="$(dirs -v -l)"
 
    if [[ "$dir" =~ ^[0-9]+$ ]]; then
       newdir="+$dir";
@@ -24,7 +26,7 @@ pushd() {
           verbose 2 dirstack["$(realpath ${path})"]="$position"
           unset path
           unset position
-      done <<<$(dirs -v -l | sed -re "s;^ +([0-9]+) +(.*)$;\1\o1\2;") # delimite each field in the entry with octal 001
+      done <<<$(echo "$dir_list" | sed -re "s;^ +([0-9]+) +(.*)$;\1\o1\2;") # delimit each field in the entry with octal 001
 
       verbose 2 "[[ ${dirstack[$dir]} ]]"
 

@@ -5,5 +5,5 @@ sql-tab-to-jira-tab() {
 
    local tabular_file="$1"
 
-   sed -e '1 s;|;||;g' -e 's;\s\s+; ;g' "$tabular_file" | egrep -v '^[+-]+$'
+   egrep -v '^([+-]+)?$' "$tabular_file" | sed -e '1 s;|;||;g' -e 's;\s\s+; ;g'
 }
