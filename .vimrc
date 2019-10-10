@@ -95,6 +95,11 @@ imap img<tab> <img src="" alt="" /><esc>10hi
 :let @c=":w\n:!javac %\n" " 'c' for 'compile'
 :let @r=":!java $(echo % | sed 's;\.[^.]*$;;')\n" " 'r' for 'run'
 
+" from <https://shapeshed.com/vim-netrw/#changing-the-directory-view-in-netrw>
+:let g:netrw_liststyle = 3 " set netrw's default list style
+":let g:netrw_winsize = 25 " set netrw's default window size percentage
+:let g:netrw_altv = 1 " set netrw's default window split
+
 
 " some good resources on:
 " general info:
