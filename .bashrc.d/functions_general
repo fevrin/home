@@ -12,8 +12,12 @@ for func in $(sed -rne 's;^(function\s+)?([^#( ]+)\(\) \{$;\2;p' "$BASH_SOURCE")
 done
 
 for func in $(realpath $(dirname "$BASH_SOURCE"))/functions/*; do
+   funcname="$(sed -rne '3 s;^(function\s+)?([^#( ]+)\(\) \{$;\2;p' "$func")"
+
    # for some reason, exported pushd() causes issues in direnv allowed directories
-   if egrep -q '^(function\s+)?([^#( ]+)\(\) \{$' "$func"; then
+   if [[ ! -d "$func" ]] &&
+      [[ "$funcname" = "${func//*\/}" ]] &&
+      bash -n "$func" 2>/dev/null; then
       . "$func"
       [[ "$func" =~ pushd ]] || export -f "${func//*\/}"
    fi

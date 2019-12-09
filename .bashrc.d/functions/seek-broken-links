@@ -5,17 +5,40 @@ seek-broken-links() {
 
    # reset OPTIND since it's normally rest only at the beginning of a script execution, not function execution
    local OPTIND=1
+   local dry_run=0
+   local path
+   local timeout
 
-   while getopts ":d:t:" opt; do
+   _verify_reqs <<-EOF || return 1
+	_print_var_vals
+	verbose
+	EOF
+
+	local arg
+	local new_args
+	for arg in $@; do
+
+      # if the path isn't set, and the current arg fits the bill, set it
+      # and remove it from the options list
+      # inspiration from <https://unix.stackexchange.com/questions/258512/how-to-remove-a-positional-parameter-from/258514#258514>
+      [[ -z "$path" && -e "$arg" ]] && path="$arg" && shift && continue
+
+      new_args="$new_args $arg"
+	done
+
+   # reset the options to exclude the path since getopts chokes when flags aren't first
+	set -- "${new_args## }"
+
+   while getopts ":dt:" opt; do
       case $opt in
          d)
-            directory=$OPTARG
+            dry_run=1
             ;;
          t)
             timeout=$OPTARG
             ;;
          \?)
-            echo "$FUNCNAME [-d {directory}] [-t {timeout}]"
+            echo "$FUNCNAME [-d] [-t {timeout}]"
             return 1
             ;;
       esac
@@ -23,12 +46,15 @@ seek-broken-links() {
    shift $((OPTIND - 1))
 
    # ensure these variables are set, one way or another
-   directory="${directory:-.}"
+   path="${path:-.}"
    timeout="${timeout:-5}"
 
    local link
-   for link in $(egrep -Ihoir "$HTTP_REGEX" "$directory"/* | sort -u); do
+   _print_var_vals dry_run path
+   for link in $(egrep -Ihoir "$HTTP_REGEX" "$path" | sort -u); do
       echo "checking $link" >&2
-      timeout $timeout curl -kIL "$link" &>/dev/null || echo "$link"
+      if [[ $dry_run -ne 1 ]]; then
+         timeout $timeout curl -kIL "$link" &>/dev/null || echo "$link"
+      fi
    done
 }
