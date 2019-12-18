@@ -118,3 +118,25 @@ imap img<tab> <img src="" alt="" /><esc>10hi
 " from <https://github.com/tpope/vim-pathogen>
 " this allows you to install plugins without having to restart vim
 execute pathogen#infect()
+
+
+" for vim-go to automatically grab imports, as needed
+" from <https://github.com/fatih/vim-go#install>
+" and <https://meet.google.com/linkredirect?authuser=0&dest=https%3A%2F%2Fgithub.com%2Ffatih%2Fvim-go-tutorial>
+"
+" automatically install vim-plug
+" <https://github.com/junegunn/vim-plug/wiki/tips#automatic-installation>
+if empty(glob('~/.vim/autoload/plug.vim'))
+  silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
+    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+endif
+
+" git clone https://github.com/fatih/vim-go.git ~/.vim/bundle/vim-go
+" git clone https://github.com/fatih/vim-go.git ~/.vim/plugged/vim-go
+call plug#begin('~/.vim/plugged')
+Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries' }
+Plug 'https://github.com/ElmCast/elm-vim'
+call plug#end()
+let g:go_fmt_command = "goimports"
+let g:elm_format_autosave = 0

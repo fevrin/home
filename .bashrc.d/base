@@ -77,11 +77,19 @@ SHLVL_threshold=1
 # ugh, `export TERM=screen` causes weird stuff on the local machine, like italicizing text instead of highlighting it when copying using screen's commands
 #export TERM=screen
 # open a new screen session if we're not already using screen
-[[ ! $TERM =~ screen && $(env | sed -n "s;SHLVL=\([1-9][1-9]*\);\1;p") = $SHLVL_threshold && ! $(screen -ls | grep -i detached) ]] && screen
+if [[ -x $(which tmux) ]]; then
+   TMUX_LIST=$(tmux ls)
+   [[ ! $TERM =~ tmux && $(env | sed -n "s;SHLVL=\([1-9][1-9]*\);\1;p") = $SHLVL_threshold && ! $(echo "$TMUX_LIST" | grep -vi attached) ]] && tmux
 
-# list detached screens, if any, to explain why screen wasn't started
-SCREEN_LIST=$(screen -ls)
-[[ $(echo "$SCREEN_LIST" | grep -i detached) ]] && echo "$SCREEN_LIST"
+   # list detached tmux instances, if any, to explain why tmux wasn't started
+   [[ $(echo "$TMUX_LIST" | grep -vi attached) ]] && echo "$TMUX_LIST"
+else
+   SCREEN_LIST=$(screen -ls)
+   [[ ! $TERM =~ screen && $(env | sed -n "s;SHLVL=\([1-9][1-9]*\);\1;p") = $SHLVL_threshold && ! $(echo "$SCREEN_LIST" | grep -i detached) ]] && screen
+
+   # list detached screens, if any, to explain why screen wasn't started
+   [[ $(echo "$SCREEN_LIST" | grep -i detached) ]] && echo "$SCREEN_LIST"
+fi
 
 # read in latest bash history.  for some reason, this must come last (or at least after the "shopt" line);
 # otherwise, the timestamps in ~/.bash_history are also considered commands

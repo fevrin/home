@@ -109,6 +109,12 @@ alias dirs="dirs -v"
 # number the lines of a file on standard output
 alias num-file="nl -bp -w3"
 
+if [[ $TMUX =~ tmate ]]; then
+   alias tsm="tmate show-messages"
+else
+   alias tsm="echo 'this alias works only when run in a tmate session!'"
+fi
+
 ############# Directory Shortcuts ############
 
 alias pics='pushd "$HOME/pictures"'
