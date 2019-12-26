@@ -3,44 +3,87 @@
 colorize() {
 # syntax
 # colorize [style] {color} "{text}"
-   local color_off="\033[0m"       # Text Reset
+   local color_off="\e[0m"       # Text Reset
    local color=
-   local style="0;" # default style is "normal"
+   local style= # default style is "normal"
    local text=
+   local output=
    local content="${@:-$(cat /dev/stdin)}"
+
+   declare -A colors=(
+      [black]=0
+      [red]=1
+      [green]=2
+      [yellow]=3
+      [blue]=4
+      [purple]=5
+      [cyan]=6
+      [white]=7
+   )
+
+   declare -A styles=(
+      [bold]="bold"
+      [dark]="dim"
+      [dim]="dim"
+#      [bgs]=3
+      [underline]="smul"
+      [flash]="flash"
+#      [light]=
+#      bg) color="$((color + 10))";;
+#      light|intense) color="$((color + 60))";;
+   )
 
    local word
    for word in ${content}; do
-      case "$word" in
-         normal) ;;
-         bold) style="1";;
-         dark) style="2";;
-         bgs) style="3";; # fg and bg are same color
-         underline) style="4";;
-         bg) color="$((color + 10))";;
-         light|intense) color="$((color + 60))";;
+      if [[ -n "${colors[$word]}" ]]; then
+         color="$(tput setaf "${colors[$word]}")"
+      elif [[ -n "${styles[$word]}" ]]; then
+         style="$(tput "${styles[$word]}")"
+      elif [[ "$word" =~ ^none$ ]]; then
+         color=
+         style=
+      else
+         text="$word"
+         output="${color}${style}${text}${color_off}"
 
-         none) color="0";;
-         black) color="$(($color + 30))";;
-         red) color="$(($color + 31))";;
-         green) color="$(($color + 32))";;
-         yellow) color="$(($color + 33))";;
-         blue) color="$(($color + 34))";;
-         purple) color="$(($color + 35))";;
-         cyan) color="$(($color + 36))";;
-         white) color="$(($color + 37))";;
+#         echo -en "$output"
+         printf "%b" "$output"
 
-         *) 
-            text="$word"
-            output="\033[${style};${color}m${text}${color_off}"
+         # reset the style and color
+#         style="0"
+#         color=
+      fi
 
-            echo -en "$output"
-
-            # reset the style and color
-            style="0"
-            color=
-            ;;
-      esac
+#      case "$word" in
+#         normal) ;;
+#         bold) style="1";;
+#         dark) style="2";;
+#         bgs) style="3";; # fg and bg are same color
+#         underline) style="4";;
+#         bg) color="$((color + 10))";;
+#         light|intense) color="$((color + 60))";;
+#
+#         none) color="0";;
+#         black) color="$(($color + 30))";;
+#         red) color="$(($color + 31))";;
+#         green) color="$(($color + 32))";;
+#         yellow) color="$(($color + 33))";;
+#         blue) color="$(($color + 34))";;
+#         purple) color="$(($color + 35))";;
+#         cyan) color="$(($color + 36))";;
+#         white) color="$(($color + 37))";;
+#
+#         *) 
+#            text="$word"
+#            output="\e[${style};${color}m${text}${color_off}"
+#
+#            echo -en "$output"
+#
+#            # reset the style and color
+#            style="0"
+#            color=
+#            ;;
+#      esac
 #   echo -e "color = $color\nstyle = $style\ntext = $text\n"
    done
 }

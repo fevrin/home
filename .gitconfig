@@ -20,6 +20,13 @@
   dump = cat-file -p
   ver = "!bash -c 'version=$0; git tag -am \"version $version\" v$version'"
 
+  # push current branch to all remotes
+  # from <https://stackoverflow.com/questions/5785549/able-to-push-to-all-git-remotes-with-the-one-command/18674313#18674313>
+  # and <https://stackoverflow.com/questions/6245570/how-to-get-the-current-branch-name-in-git/6245587#6245587>
+   pushall = "!git remote | xargs -L1 -I{} git push -v --tags {} $(git rev-parse --abbrev-ref HEAD)"
+
+  fet = "fetch --all -p"
+
   # from <http://stackoverflow.com/questions/1057564/pretty-git-branch-graphs#answer-9074343>
   lg1 = log --graph -15 --abbrev-commit --decorate --date=relative --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' --all
   lg2 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n''          %C(white)%s%C(reset) %C(dim white)- %an%C(reset)' --all
