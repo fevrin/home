@@ -41,3 +41,8 @@
 	pushdefault = origin
 [branch "master"]
 	pushremote = no_push
+#[user]
+#	email = 
+#	name = 
+#[url "git@website.com:"]
+#	insteadOf = https://website.com/
