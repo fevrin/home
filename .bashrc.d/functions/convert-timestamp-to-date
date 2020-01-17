@@ -12,22 +12,22 @@ convert-timestamp-to-date() {
 
    local input="${@:-$(cat /dev/stdin)}"
 
+   if [[ -f "$@" || -h "$@" || -p "$@" ]]; then
+      # use `cat` if the argument is a file, symbolic link, or pipe
 
-   if [[ "$@" ]]; then
-      while IFS= read -r i; do
-         if [[ $i =~ (^.*[^0-9])([0-9]{10})([^0-9].*$|$) ]]; then
-            printf '%s%(%F %T)T%s\n' "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}" "${BASH_REMATCH[3]}";
-         else
-            printf '%s\n' "$i"
-         fi
-      done <"$input"
+      output_command="cat"
    else
-      echo "$input" | while IFS= read -r i; do
-         if [[ $i =~ (^.*[^0-9])([0-9]{10})([^0-9].*$|$) ]]; then
-            printf '%s%(%F %T)T%s\n' "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}" "${BASH_REMATCH[3]}";
-         else
-            printf '%s\n' "$i"
-         fi
-      done
+      # otherwise, use `echo`
+      output_command="echo"
    fi
+
+   _print_var_vals 8 output_command
+
+   $output_command "$input" | while IFS= read -r i; do
+      if [[ $i =~ (^.*[^0-9])([0-9]{10})([^0-9].*$|$) ]]; then
+         printf '%s%(%F %T)T%s\n' "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}" "${BASH_REMATCH[3]}";
+      else
+         printf '%s\n' "$i"
+      fi
+   done
 }
