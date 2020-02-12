@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # security-related functions
 
 hash_pw() {

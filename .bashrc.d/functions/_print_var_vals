@@ -12,6 +12,7 @@ _print_var_vals() {
    # input: a list of variable names
    # output: the list of variable names, along with their values, if any
 
+   local FUNCNEST=5
    _verify_reqs <<-EOF || return 1
 	verbose
 	EOF

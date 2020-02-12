@@ -24,8 +24,11 @@
   # from <https://stackoverflow.com/questions/5785549/able-to-push-to-all-git-remotes-with-the-one-command/18674313#18674313>
   # and <https://stackoverflow.com/questions/6245570/how-to-get-the-current-branch-name-in-git/6245587#6245587>
   pushall = "!bash -c 'git remote | xargs -L1 -I{} git push -v --tags {} $(git rev-parse --abbrev-ref HEAD)'"
+  pushallf = "!bash -c 'git remote | xargs -L1 -I{} git push -v --tags {} $(git rev-parse --abbrev-ref HEAD) -f'$@"
 
   fet = "fetch --all -p"
+
+  changelog = "!git log --format='### %cd%n%B' master..$(git rev-parse --abbrev-ref HEAD) | tr '\n' '\\1' | sed -re 's;(\\o1\\o1?)([^-+*#\\o1]+);\\1#### \\2;g' | tr '\\1' '\n'"
 
   # from <http://stackoverflow.com/questions/1057564/pretty-git-branch-graphs#answer-9074343>
   lg1 = log --graph -15 --abbrev-commit --decorate --date=relative --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' --all

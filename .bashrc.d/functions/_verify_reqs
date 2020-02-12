@@ -3,23 +3,33 @@
 _verify_reqs() {
 
    # this is a function helper that ensures commands required by the calling
-   # function are available to it this function will return an error with a
-   # list of commands unavailable to the calling function having this function
-   # saves coding a similar check in each function individually
+   # function are available to it
 
-   # input: list of commands required for the function to run
+   # this function will return an error to the calling function with a list
+   # of unavailable commands
+
+   # input: list of commands required for the function to run (spaces are permitted)
+   # output: errors for any commands that are not available
 
    # call this function using one of these two forms:
    #
    # form 1:
-   # _verify_reqs $input $values || return 1
+   # _verify_reqs $input_value1[:version_string][ $input_value2[:version_string]...] || return 1
    #
    # form 2:
    # _verify_reqs <<-EOF || return 1
-   # $input
-   # $values
-   # $even with spaces
+   #    $input_value1[:version_string]
+   #    [$input_value2[:version_string]...]
    # EOF
+
+   # example:
+   #  _verify_reqs <<-EOF || return 1
+   #		base64
+   #		bzip2
+   #		rsync:3.1.2
+   #		ssh
+   #		verbose
+   #	EOF
 
    if [[ -n "$@" ]]; then
       declare -a requirements=($@)
@@ -40,11 +50,13 @@ _verify_reqs() {
 
    local req
    for req in ${requirements[*]}; do
+      local actual_version
       local needed_version="${req#*:}"
-#      echo "req = '$req'"
-#      echo "needed_version = '$needed_version'"
+      req="${req%:*}"
+
       actual_version="$(${req%:*} --version 2>&1 | sed -rne '1s;.* ([0-9.a-z+]+\.[0-9.a-z+]+)([^0-9.a-z+].*|$);\1;p')"
-#      echo "actual_version = '$actual_version'"
+      [[ "$actual_version" ]] || actual_version="$(${req%:*} -v 2>&1 | sed -rne '1s;.* ([0-9.a-z+]+\.[0-9.a-z+]+)([^0-9.a-z+].*|$);\1;p')"
+      [[ "$actual_version" ]] || actual_version="$(${req%:*} -V 2>&1 | sed -rne '1s;.* ([0-9.a-z+]+\.[0-9.a-z+]+)([^0-9.a-z+].*|$);\1;p')"
 
       # if no version was specified, pretend the actual version is what we want
       [[ "$needed_version" == "$req" ]] && needed_version="$actual_version"

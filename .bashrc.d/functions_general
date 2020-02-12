@@ -5,18 +5,14 @@
 # <https://unix.stackexchange.com/questions/4219/how-do-i-get-bash-completion-for-command-aliases/4220#4220>
 # <https://www.tldp.org/LDP/abs/html/tabexpansion.html>
 
-# export all the functions here so subshells can utilize them, if needed
-for func in $(sed -rne 's;^(function\s+)?([^#( ]+)\(\) \{$;\2;p' "$BASH_SOURCE"); do
-   # for some reason, exported pushd() causes issues in direnv allowed directories
-   [[ "$func" =~ pushd ]] || export -f "$func"
-done
-
 for func in $(realpath $(dirname "$BASH_SOURCE"))/functions/*; do
    funcname="$(sed -rne '3 s;^(function\s+)?([^#( ]+)\(\) \{$;\2;p' "$func")"
 
+   # export all the functions here so subshells can utilize them, if needed
    # for some reason, exported pushd() causes issues in direnv allowed directories
+   # also, we don't want to source and export files with functions that don't match their filenames
    if [[ ! -d "$func" ]] &&
-      [[ "$funcname" = "${func//*\/}" ]] &&
+      [[ "$funcname" =~ ^${func//*\/}$ ]] &&
       bash -n "$func" 2>/dev/null; then
       . "$func"
       [[ "$func" =~ pushd ]] || export -f "${func//*\/}"
