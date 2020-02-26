@@ -2,7 +2,8 @@
 
 diff-home-files() {
    local i
-   for i in $(find $HOME/home/ -type f ! -iregex '.*\/\.git\/.*'); do
+   local HOME_DIR="$HOME/home"
+   for i in $(find $HOME_DIR -type f ! -iregex '.*\/\.git\/.*'); do
       # the item is within the .bashrc.d directory
       [[ -f "$i" ]] || continue
 
@@ -13,11 +14,23 @@ diff-home-files() {
       ! "$i" =~ \.vim\/ ]] || continue
 #      echo "i = $i"
 
-      file1="$(echo "$i" | sed -re "s;$HOME/home/(.*);$HOME/\1;")"
+      local file1="$(echo "$i" | sed -re "s;$HOME_DIR/(.*);$HOME/\1;")"
 #      echo file1="$file1"
 
-      file2=$i
+      local file2=$i
 #      echo file2="$file2"
       [[ $(md5sum $file1 2>/dev/null | cut -d" " -f1) != $(md5sum $file2 2>/dev/null | cut -d" " -f1) ]] && vimdiff $file1 $file2
    done
+
+   local missed_files
+   for i in $HOME/.bashrc.d/*/*; do
+      [[ -h "$i" ]] && continue
+      [[ -f ${i/$HOME\//$HOME_DIR/} ]] || missed_files+=$'\1'"$i"
+   done
+
+   if [[ "$missed_files" ]]; then
+      echo
+      echo "you may want to copy these to $HOME_DIR:"
+      echo "$missed_files" | tr '\1' '\n'
+   fi
 }

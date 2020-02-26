@@ -2,9 +2,9 @@
 
 time-between-now-and() {
 # determine the hours, minutes, and seconds since the specified time
-   pdate="$1";
-   pdate_sec="$(date -d "$pdate" +%s)"
-   now_sec="$(date +%s)"
+   local pdate="$1";
+   local pdate_sec="$(date -d "$pdate" +%s)"
+   local now_sec="$(date +%s)"
 
    if [[ $now_sec -gt $pdate_sec ]]; then
       newer=$now_sec

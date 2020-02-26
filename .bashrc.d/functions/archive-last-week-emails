@@ -1,0 +1,18 @@
+#!/bin/bash
+
+archive-last-week-emails() {
+   local dateFormat="%m-%d-%Y"
+   local weekOf="$(date -d "now - $(($(date +%w) + 6)) days" +%F)" # default to the beginning of last week
+   if [[ "$@" ]]; then
+      weekOf="$(date -d "$@ - $(($(date -d "$@" +%w) - 1)) days" +%F)"
+   fi
+   _print_var_vals weekOf
+
+   date -d "$weekOf" +%w &>/dev/null || return 1
+
+   local weekStart="$(date -d "$weekOf - 1 day")"
+   local weekEnd="$(date -d "$weekStart + 8 days")"
+   _print_var_vals weekOf weekStart weekEnd
+
+   echo "https://mail.google.com/mail/u/0/#search/after%3A$(date -d "$weekStart" "+$dateFormat")+before%3A$(date -d "$weekEnd" "+$dateFormat")+in%3Ainbox"
+}
