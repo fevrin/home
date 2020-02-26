@@ -5,6 +5,8 @@ time-between-now-and() {
    local pdate="$1";
    local pdate_sec="$(date -d "$pdate" +%s)"
    local now_sec="$(date +%s)"
+   local newer
+   local older
 
    if [[ $now_sec -gt $pdate_sec ]]; then
       newer=$now_sec
@@ -14,9 +16,9 @@ time-between-now-and() {
       older=$now_sec
    fi
 
-   hours=$(echo "($newer - $older) / 60 / 60" | bc);
-   mins=$(echo "($newer - $older) / 60 % 60" | bc);
-   milli=$(echo "($newer - $older) % 60" | bc);
+   local hours=$(echo "($newer - $older) / 60 / 60" | bc);
+   local mins=$(echo "($newer - $older) / 60 % 60" | bc);
+   local milli=$(echo "($newer - $older) % 60" | bc);
    [[ $hours -lt 10 ]] && hours="0$hours"
    [[ $mins -lt 10 ]] && mins="0$mins"
    [[ $milli -lt 10 ]] && milli="0$milli"

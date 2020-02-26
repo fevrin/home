@@ -1,6 +1,12 @@
 #!/bin/bash
 
-archive-last-week-emails() {
+archive-emails() {
+   # input: optional time specification to indicate the week you'd like to review (defaults to last week)
+   # output: a GMail URL that searches for emails received during the specified (or default) week
+
+   # example:
+   # google-chrome $(archive-last-week-emails '3 weeks ago')
+
    local dateFormat="%m-%d-%Y"
    local weekOf="$(date -d "now - $(($(date +%w) + 6)) days" +%F)" # default to the beginning of last week
    if [[ "$@" ]]; then

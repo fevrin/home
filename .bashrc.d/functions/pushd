@@ -5,7 +5,7 @@ pushd() {
    local newdir
    local VERBOSE="${VERBOSE:-1}"
 
-   dir_list="$(dirs -v -l)"
+   local dir_list="$(dirs -v -l)"
 
    if [[ "$dir" =~ ^[0-9]+$ ]]; then
       newdir="+$dir";
