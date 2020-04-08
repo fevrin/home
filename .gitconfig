@@ -9,7 +9,24 @@
 	ui = true
 [alias]
   co = checkout
-  ci = commit -v
+  ci = "!bash -c '\
+           echo \"REBASING ON MASTER\";\
+           \
+           echo \"STASHING CURRENT INDEX\";\
+           STAGED_FILES=\"$(git diff --cached --name-only)\";\
+           git stash push -m \"git ci temp stash\";\
+           \
+           echo -e \"\nATTEMPTING TO GIT REBASE MASTER\";\
+           git rebase master || { [[ -f .git/rebase-merge/done ]] && git rebase --abort; };\
+           \
+           echo -e \"\nPOPPING GIT STASH\";\
+           git stash pop;\
+           git add $STAGED_FILES;\
+           \
+           echo -e \"\npress ENTER to continue with commit\";\
+           read;\
+           git commit -v '$@'\
+        '"
   st = status
   br = branch
   df = diff --word-diff=color
@@ -19,6 +36,7 @@
   type = cat-file -t
   dump = cat-file -p
   ver = "!bash -c 'version=$0; git tag -am \"version $version\" v$version'"
+  who = shortlog -n -s --no-merges # from <https://thoughtbot.com/blog/streamline-your-git-workflow-with-aliases>
 
   # push current branch to all remotes
   # from <https://stackoverflow.com/questions/5785549/able-to-push-to-all-git-remotes-with-the-one-command/18674313#18674313>
@@ -36,6 +54,8 @@
 [merge]
 	conflictstyle = diff3
 	tool = vimdiff
+[pull]
+	ff = only
 [push]
 	default = simple
 [rerere]

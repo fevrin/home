@@ -88,7 +88,18 @@ get_ssl_cert() {
 	EOF
 
    local host="$1"
+
+   [[ "$host" =~ $DOMAIN_REGEX ]] || {
+      echo "error: not a valid URL:"
+      echo "$host"
+      return 1
+   }
+
    host="${host/*:\/\//}"
+   host="${host/\/*}"
+
+   _print_var_vals host
+
    echo Q | openssl s_client -connect $host:443 | openssl x509 -noout -text
 }
 

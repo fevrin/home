@@ -14,6 +14,29 @@ alias nmap='nmap -T5 --reason -F -Pn'
 alias mtr='sudo mtr -s 1472 -i.1 -c1000'
 #alias vim='vim -c "set bg=dark" -c "set nu"' # shorter version of below, but limited to 10 '-c' args
 
+run-check() {
+   local check_name="$1"
+   local check_command
+   local output
+
+   check_command="$(grep -ir "$check_name" /etc/nagios/nrpe* | cut -d= -f2)"
+
+   [[ "$check_command" ]] || {
+      echo "error: command not found: '$check_command'"
+      return 1
+   }
+
+   output="$(bash "$check_command" 2>&1)"
+
+   [[ "$output" =~ Permission" "denied$ ]] && {
+      # retry with sudo
+      output="$(sudo bash "$check_command")"
+      echo "$check_command" >&2
+   }
+
+   echo "$output"
+}
+
 if [[ ! -s "$HOME/.vimrc" ]]; then
    cat <<-EOF >>"$HOME/.vimrc"
 	set bg=dark
@@ -77,15 +100,16 @@ fi
 # attempt to output the motd
 MOTD_RUN=0
 
-for file in /{var/,}run/motd{,.dynamic} /snap/core/current/etc/motd; do
+for file in /{var/,}run/motd{,.dynamic} /etc/motd /snap/core/current/etc/motd; do
    [[ -s "$file" ]] && cat "$file" && MOTD_RUN=1 && break
 done
 if [[ $MOTD_RUN -eq 0 ]]; then
    for i in /etc/update-motd.d/*; do
+      [[ -r "$i" ]] || continue
       grep -q exec $i || { $i && MOTD_RUN=1; }
    done
 fi
-if [[ $MOTD_RUN -eq 0 ]]; then
+if [[ $MOTD_RUN -eq 0 && $(which run-parts 2>/dev/null) ]]; then
    run-parts /etc/update-motd.d/ > /dev/null && MOTD_RUN=1
 fi
 unset MOTD_RUN
