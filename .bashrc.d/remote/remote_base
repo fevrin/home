@@ -56,6 +56,11 @@ fi
 
 export EDITOR=vim
 
+# set up auto-complete since that doesn't always happen
+if [[ $(which complete 2>/dev/null) || $(type complete 2>/dev/null) ]] && [[ -f /etc/bash_completion ]]; then
+   [[ $(complete -p) ]] || . /etc/bash_completion
+fi
+
 declare -A colors=(
 [none]="00"
 [black]="30"
