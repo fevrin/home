@@ -107,7 +107,16 @@ yessh() {
       local bashrc_contents="$(ls -1 ~/.bashrc.d/remote/* 2>/dev/null | grep -v \.md$ | xargs cat | bzip2 | base64 -w0)"
 
       if [[ $(echo "$bashrc_contents" | wc -c) -le 20480 ]]; then
-         command="bash --rcfile <(echo \"$bashrc_contents\" | base64 --decode | bunzip2)"
+         command="
+            bash --rcfile <(
+               which bunzip2 &>/dev/null || {
+                  which yum &>/dev/null &&
+                   echo \"echo \\\"installing bzip2...\\\"\" &&
+                    yum install -qy bzip2 &>/dev/null;
+               };
+               echo \"$bashrc_contents\" | base64 --decode | bunzip2
+            )
+         "
 
          # inspired by <https://superuser.com/questions/671372/running-command-in-new-bash-shell-with-rcfile-and-c/671488#671488>
          # necessary mess to mark just the output of the command (not any rcfile output)

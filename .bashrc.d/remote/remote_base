@@ -16,17 +16,33 @@ alias mtr='sudo mtr -s 1472 -i.1 -c1000'
 
 run-check() {
    local check_name="$1"
+   local sudo=
    local check_command
    local output
 
-   check_command="$(grep -ir "$check_name" /etc/nagios/nrpe* | cut -d= -f2)"
+   [[ "$1" =~ ^-s$ ]] && {
+      sudo="sudo"
+      check_name="$2"
+   }
+
+   check_command="$(grep -hir "\[$check_name\]" /etc/nagios/nrpe* | sed -rne 's;^command\[[^=]+=(.*);\1;p')"
 
    [[ "$check_command" ]] || {
       echo "error: command not found: '$check_command'"
+      echo "available checks:"
+      grep --color=never --directories=skip -P '^command\[' /etc/nagios/nrpe*
       return 1
    }
 
-   output="$(bash "$check_command" 2>&1)"
+   [[ -x "${check_command%% *}" ]] || {
+      echo "error: command not executable: '$check_command'"
+      return 1
+   }
+
+   [[ "$sudo" ]] && echo -n "$sudo "
+   echo "$check_command"
+
+   output="$($sudo bash -c "$check_command" 2>&1)"
 
    [[ "$output" =~ Permission" "denied$ ]] && {
       # retry with sudo

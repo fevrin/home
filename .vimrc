@@ -57,6 +57,20 @@ set indentexpr="" " inde; indicates when to indent; comment out in $VIMRUNTIME/i
 " filetype indent off " disables filetype-based indentation settings
 set copyindent " ci; new line indents use same characters (spaces, tabs, etc.) as previous line
 "set textwidth=125 " tw; maximum formatted width before text starts wrapping around to the next line; 125, as that's the maximum monospace width in GHE's editing window before a horizontal scroll bar appears
+set formatoptions=crqlt " fo; ensures any text width that's set will take effect
+                         " c.......Auto-wrap comments using textwidth, inserting the current comment
+                         "         leader automatically.
+                         " r.......Automatically insert the current comment leader after hitting
+                         "         <Enter> in Insert mode.
+                         " o.......Automatically insert the current comment leader after hitting 'o' or
+                         "         'O' in Normal mode.
+                         " q.......Allow formatting of comments with "gq".
+                         "         Note that formatting will not change blank lines or lines containing
+                         "         only the comment leader.  A new paragraph starts after such a line,
+                         "         or when the comment leader changes.
+                         " l.......Long lines are not broken in insert mode: When a line was longer than
+                         "         'textwidth' when the insert command started, Vim does not
+                         "         automatically format it.
 
 " 16 folding
 "set foldmethod=indent " fdm; sets folding type

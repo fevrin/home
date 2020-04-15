@@ -2,9 +2,15 @@
 
 time-between-now-and() {
 # determine the hours, minutes, and seconds since the specified time
+
+   _verify_reqs <<-EOF || return 1
+   _print_var_vals
+	EOF
+
    local pdate="$1";
    local pdate_sec="$(date -d "$pdate" +%s)"
    local now_sec="$(date +%s)"
+   local timediff
    local newer
    local older
 
@@ -16,11 +22,42 @@ time-between-now-and() {
       older=$now_sec
    fi
 
-   local hours=$(echo "($newer - $older) / 60 / 60" | bc);
-   local mins=$(echo "($newer - $older) / 60 % 60" | bc);
-   local milli=$(echo "($newer - $older) % 60" | bc);
+   timediff="$((newer - older))"
+   _print_var_vals older newer timediff
+
+   local days=$(echo "scale=10; $timediff / 60 / 60 / 24" | bc);
+   verbose 8 "days = '$days'"
+   verbose 8 "\${days%%.*} = '${days%%.*}'"
+
+   # take the remainder of time after whole days (which inherently will be a
+   # fraction) and multiply it back by 24
+   # this should result in a whole number with a fraction
+   local hours=$(echo "scale=10; ($days - ${days%%.*}) * 24" | bc);
+   verbose 8 "hours = '$hours'"
+   verbose 8 "\${hours%%.*} = '${hours%%.*}'"
+   days="${days%%.*}"
+
+   # take the number of hours and multiply it by 60 to get the minutes
+   local mins=$(echo "scale=10; $hours * 60" | bc);
+   verbose 8 "mins = '$mins'"
+   verbose 8 "\${mins%%.*} = '${mins%%.*}'"
+   hours="${hours%%.*}"
+
+   # take the remainder of time after whole days (which inherently will be a
+   # fraction) and multiply it back by 24
+   # this should result in a whole number with a fraction
+   local seconds=$(echo "scale=10; ($mins - ${mins%%.*}) * 60" | bc);
+   verbose 8 "seconds = '$seconds'"
+   verbose 8 "\${seconds%%.*} = '${seconds%%.*}'"
+   mins="${mins%%.*}"
+   seconds="${seconds%%.*}"
+
+   [[ $days -lt 10 ]] && days="0$hours"
    [[ $hours -lt 10 ]] && hours="0$hours"
    [[ $mins -lt 10 ]] && mins="0$mins"
-   [[ $milli -lt 10 ]] && milli="0$milli"
-   printf "%02dh %02dm %02ds\n" ${hours} ${mins} ${milli}
+   [[ $seconds -lt 10 ]] && seconds="0$seconds"
+
+   _print_var_vals ${days} ${hours} ${mins} ${seconds}
+
+   printf "%02dd %02dh %02dm %02ds\n" ${days} ${hours} ${mins} ${seconds}
 }

@@ -3,7 +3,26 @@
 diff-home-files() {
    local i
    local HOME_DIR="$HOME/home"
+
+   # list files that should be ignored
+   # filenames relative to $HOME_DIR
+   declare -a skip_files=(
+   ".bashrc"
+   ".bashrc.d/functions/_verify_reqs"
+   ".bashrc.d/functions/yessh"
+   ".htoprc"
+   ".zshrc"
+   "etc/hosts"
+   "etc/sudoers"
+   "var/spool/cron/crontabs/username"
+   )
    for i in $(find $HOME_DIR -type f ! -iregex '.*\/\.git\/.*'); do
+      # check if the file should be skipped
+      echo "$i" | grep -qxf <(for i in  ${skip_files[*]}; do echo "$HOME_DIR/$i"; done) && {
+         echo "skipping ignored file '$i'..."
+         continue
+      }
+
       # the item is within the .bashrc.d directory
       [[ -f "$i" ]] || continue
 
