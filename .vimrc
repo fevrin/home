@@ -1,3 +1,6 @@
+" =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+" MAIN OPTIONS
+" =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 " 1 important
 set nocompatible " cp; do *not* behave very Vi compatible
 
@@ -89,11 +92,25 @@ colorscheme ron
 
 syntax sync minlines=50 " ensure vim doesn't keep changing syntax highlighting; from <http://vim.wikia.com/wiki/Fix_Syntax_Highlighting>
 
-" abbreviations
+
+" =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+" FILETYPE OPTIONS
+" =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+" help from <https://stackoverflow.com/questions/11023194/automatically-wrap-long-git-commit-messages-in-vim/11023282#11023282>
+au FileType gitcommit set spell
+
+
+" =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+" ABBREVIATIONS
+" =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 " CSS
 "ab { {<CR>   <CR><C-H>}<Up> " substitutes { with a CSS construct
 
-" maps
+
+" =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+" MAPS
+" =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 "imap '' <esc> " allows for an easier way to escape 
 "map "" i"<esc>ea"<esc> " quotes word under cursor (to improve, have it quote everything from start to next white space 
 "map "" i"<esc>/ <cr>i"<esc> " quotes word under cursor (to improve, have it quote everything from start to next white space 
@@ -105,6 +122,7 @@ imap img<tab> <img src="" alt="" /><esc>10hi
 "map <S-Enter> O<esc> " inserts a newline above current line from within normal mode
 "nmap @c :w<cr>:!javac %<cr>
 "nmap @r :!java $(echo % | sed 's;\.[^.]*$;;')<cr>
+
 
 :let @c=":w\n:!javac %\n" " 'c' for 'compile'
 :let @r=":!java $(echo % | sed 's;\.[^.]*$;;')\n" " 'r' for 'run'
@@ -131,6 +149,8 @@ imap img<tab> <img src="" alt="" /><esc>10hi
 
 " from <https://github.com/tpope/vim-pathogen>
 " this allows you to install plugins without having to restart vim
+
+
 execute pathogen#infect()
 
 

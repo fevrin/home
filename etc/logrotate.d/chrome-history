@@ -1,0 +1,8 @@
+/home/user/.config/google-chrome/Default/History
+{
+	rotate 16
+	weekly
+	copy
+	compress
+	maxsize 104857600
+}

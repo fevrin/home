@@ -13,6 +13,7 @@ diff-home-files() {
    ".htoprc"
    ".zshrc"
    "etc/hosts"
+   "etc/logrotate.d/chrome-history"
    "etc/sudoers"
    "var/spool/cron/crontabs/username"
    )
