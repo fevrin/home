@@ -2,14 +2,30 @@
 
 export SSH_AUTH_SOCK=/run/user/$(id -u)/keyring/ssh
 
-DIRS=(
-#"$HOME"/home
-#"$HOME"/digitalocean/repos/documentation
-${1:-$PWD}
-#"$HOME"/digitalocean/repos/chef
-#"$HOME"/digitalocean/repos/cthulhu
-#"$HOME"/digitalocean/repos/teams/service-catalog
-)
+declare -a DIRS
+STASH="1"
+
+for arg in $@; do
+   if [[ -d "$arg" ]]; then
+      DIRS+=("$arg")
+   elif [[ "$arg" =~ ^(-n|--no-stash)$ ]]; then
+      STASH="0"
+   fi
+done
+
+[[ ${#DIRS[*]} -gt 0 ]] || DIRS+=("$PWD")
+
+#echo "DIRS = '"${DIRS[*]}"'"
+#echo "STASH = '$STASH'"
+#echo "DIRS LENGTH = '${#DIRS[*]}'"
+
+#DIRS=(
+##"$HOME"/home
+##"$HOME"/repos/documentation
+##"$HOME"/repos/chef
+##"$HOME"/repos/cthulhu
+##"$HOME"/repos/teams/service-catalog
+#)
 
 GITBIN="/usr/bin/git"
 
@@ -30,11 +46,11 @@ for DIR in ${DIRS[*]}; do
 #      $GITBIN stash push 
 #   else
 
-   THERE_WERE_CHANGES="$($GITBIN status --untracked-files=no --porcelain)"
+   THERE_WERE_LOCAL_CHANGES="$($GITBIN status --untracked-files=no --porcelain)"
    TEMP_ID="$(mktemp -u XXXXXXXXXX) @ $(date +%s)"
    GIT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 
-   if [[ $THERE_WERE_CHANGES ]]; then
+   if [[ $THERE_WERE_LOCAL_CHANGES && $STASH = 1 ]]; then
       echo "STASHING CURRENT INDEX AND UNSTAGED FILES IN BRANCH '$GIT_BRANCH'"
 
       # stashing doesn't retain files' index status, so we have to track that
@@ -47,21 +63,24 @@ for DIR in ${DIRS[*]}; do
       echo
    fi
 
-
    echo "UPDATING MASTER..."
-   $GITBIN checkout master &&
+   [[ $GIT_BRANCH =~ ^master$ ]] || $GITBIN checkout master
    $GITBIN pull --ff-only
    echo
 
-   echo "ATTEMPTING TO GIT REBASE '$GIT_BRANCH' FROM MASTER"
-   $GITBIN checkout - &&
-   $GITBIN rebase master || {
-      [[ -f .git/rebase-merge/done ]] &&
-         $GITBIN rebase --abort
-   }
-   echo
+   # if the original branch wasn't master, switch back to it
+   # and rebase it from master
+   if [[ ! $GIT_BRANCH =~ ^master$ ]]; then
+      echo "ATTEMPTING TO GIT REBASE '$GIT_BRANCH' FROM MASTER"
+      $GITBIN checkout -
+      $GITBIN rebase master || {
+         [[ -f .git/rebase-merge/done ]] &&
+            $GITBIN rebase --abort
+      }
+      echo
+   fi
 
-   if [[ $THERE_WERE_CHANGES ]]; then
+   if [[ $THERE_WERE_LOCAL_CHANGES && $STASH = 1 ]]; then
       echo "POPPING GIT STASH"
       $GITBIN stash pop --index "$STASH_REF"
 

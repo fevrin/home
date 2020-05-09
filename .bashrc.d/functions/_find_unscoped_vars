@@ -1,12 +1,30 @@
 #!/bin/bash
 
 _find_unscoped_vars() {
-   local file
+   local files="${@:-$HOME/.bashrc.d/functions/*}"
    local unscoped_vars
+   local var_chars="[a-zA-Z_0-9]"
+   local var_assignment_chars="([][()*/%+&^|<>-]|<<|>>)"
 
-   for file in $HOME/.bashrc.d/functions/*; do
-      for var in $(grep -hoP '^ *\K[^][ ]+=' "$file" | cut -d= -f1); do
-         grep -q "local $var" "$file" || unscoped_vars+=("$(cat -n "$file" | sed -rne "s;^\s+([0-9]+)\s+("$var")=.*;\1:\2;p" | head -n1)")
+   for file in $files; do
+      [[ -f "$file" && -r "$file" ]] || {
+         echo "can't read file: '$file'"
+         echo "skipping..."
+         continue
+      }
+
+      # grab all vars from the given file, including those with special assignment operators
+      # this assumes Bash is the language used, and there could be issues with arrays
+      for var in $(sed -rne "s;^\s*([^ #=[]$var_chars+)$var_assignment_chars?=.*;\1;p" "$file" | sort -u); do
+#         echo "var = '$var'"
+         # ensure the variable is locally defined
+         egrep -q "((declare|typeset)( -[^g])?|local) $var" "$file" || {
+            # if it's not locally defined
+#            echo [[ ${unscoped_vars[*]} =~ $var ]]
+            [[ ${unscoped_vars[*]} =~ $var ]] ||
+            # and it's not already in the unscoped_vars array, then add it to the array
+            unscoped_vars+=("$(cat -n "$file" | sed -rne "s;^\s+([0-9]+)\s+("$var")\+?=.*;\1:\2;p" | head -n1)")
+         }
       done
 
       if [[ ${#unscoped_vars[*]} -gt 0 ]]; then
@@ -14,7 +32,7 @@ _find_unscoped_vars() {
 
          for i in ${unscoped_vars[*]}; do
             echo "$i"
-         done
+         done | sort -nu
 
          echo
 

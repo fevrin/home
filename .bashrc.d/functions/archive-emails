@@ -8,11 +8,24 @@ archive-emails() {
    # google-chrome $(archive-last-week-emails '3 weeks ago')
 
    local dateFormat="%m-%d-%Y"
-   local weekOf="$(date -d "now - $(($(date +%w) + 6)) days" +%F)" # default to the beginning of last week
-   if [[ "$@" ]]; then
-      weekOf="$(date -d "$@ - $(($(date -d "$@" +%w) - 1)) days" +%F)"
-   fi
-   _print_var_vals weekOf
+   local beginning_of_week="1" # numeric version of day
+   declare -A beginning_of_week_designation=(
+   [0]="w"
+   [1]="u"
+   )
+   local given_date="${@:-1 week ago}" # default to last week
+   given_date="$(date -d "$given_date")"
+   _print_var_vals given_date
+#   local weekOf="$(date -d "now - $(($(date +%w) + 6)) days" +%F)" #calculate the beginning of last week
+
+   [[ $(date -d "$given_date" +%j | sed -re 's;^0*([0-9]+)$;\1;') -gt $(date -d "now" +%j | sed -re 's;^0*([0-9]+)$;\1;') ]] && {
+      echo "date must be in the past or present!"
+      return 1
+   }
+
+   # calculate the beginning of the week of the given day
+   weekOf="$(date -d "$given_date - $(($(date -d "$given_date" +%${beginning_of_week_designation[$beginning_of_week]}) - $beginning_of_week)) days" +%F)"
+   _print_var_vals given_date weekOf beginning_of_week
 
    date -d "$weekOf" +%w &>/dev/null || return 1
 

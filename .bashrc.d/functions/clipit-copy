@@ -5,7 +5,7 @@
 #then Ctrl-A to select it all, then Ctrl-C to copy it
 clipit-copy() {
 
-   file="$1"
+   local file="$1"
 
    # display a better alternative and cut off leading spaces (kept just for prettier code)
    echo -n "
@@ -21,11 +21,11 @@ clipit-copy() {
    [[ $REPLY =~ [Yy] ]] || return 1
    echo
 
-   total_remaining_bytes="$(wc -c $file | cut -d' ' -f1)"
+   local total_remaining_bytes="$(wc -c $file | cut -d' ' -f1)"
 
-   buffer_size=4000
-   bytes_to_grab="$buffer_size"
-   chunk_ending_byte=0
+   local buffer_size=4000
+   local bytes_to_grab="$buffer_size"
+   local chunk_ending_byte=0
 
    while [[ $total_remaining_bytes -gt 0 ]]; do
       if [[ $total_remaining_bytes -lt $buffer_size ]]; then

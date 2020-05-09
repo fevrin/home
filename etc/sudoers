@@ -28,6 +28,12 @@ root	ALL=(ALL:ALL) ALL
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
 
+# permit users to run certain commands without being prompted for their password
+%sudo	ALL=(ALL:ALL)NOPASSWD: /bin/systemctl status $example_service
+%sudo	ALL=(ALL:ALL)NOPASSWD: /bin/systemctl start $example_service
+%sudo	ALL=(ALL:ALL)NOPASSWD: /bin/systemctl restart $example_service
+%sudo	ALL=(ALL:ALL)NOPASSWD: /bin/systemctl stop $example_service
+
 # See sudoers(5) for more information on "#include" directives:
 
 #includedir /etc/sudoers.d

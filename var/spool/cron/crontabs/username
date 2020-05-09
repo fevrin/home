@@ -23,8 +23,19 @@
 # For more information see the manual pages of crontab(5) and cron(8)
 # 
 # m h  dom mon dow   command
+
+SHELL=/bin/bash
+
 # track laptop battery levels
 */10 * * * * date "+\%F \%H:\%M:\%S \%Z: $(upower -i $(upower --enumerate | grep BAT | head -n1) | awk '/percentage/ {print $2}')" >>$HOME/battery_life.log
 
 # go through some git repos and update their master branch if they can be fast-forwarded
-0 */3 * * * /bin/bash -c 'export SSH_AUTH_SOCK=/run/user/1000/keyring/ssh; for dir in "$HOME"/home "$HOME"/encrypted/{documentation,chef}; do cd $dir; output=$(git status --untracked-files=no --porcelain) && [ -z "$output" ] && /usr/bin/git checkout master && /usr/bin/git pull --ff-only; /usr/bin/git checkout -; date "+\%F \%H:\%M:\%S \%Z" >>$HOME/${dir##*/}-git-pull-timestamps; done'
+#0 */3 * * * /bin/bash -c 'export SSH_AUTH_SOCK=/run/user/1000/keyring/ssh; for dir in "$HOME"/home "$HOME"/encrypted/{documentation,chef}; do cd $dir; output=$(git status --untracked-files=no --porcelain) && [ -z "$output" ] && /usr/bin/git checkout master && /usr/bin/git pull --ff-only; /usr/bin/git checkout -; date "+\%F \%H:\%M:\%S \%Z" >>$HOME/${dir##*/}-git-pull-timestamps; done'
+0 */3 * * * /bin/bash -c '$HOME/.gitconfig.d/git-sync.sh --no-stash "$HOME"/home "$HOME"/repos/{documentation,chef} >>/tmp/1'
+
+# attempt to start a service needed only during certain hours
+*/30 * * * Mon-Fri { pgrep -fla [s]ervice_name 2>&1 | grep -v '[s]ervice_name monitor' 2>&1 | grep -cv [g]rep 2>&1 >>/tmp/1; } || { sudo chmod 750 /full/path/to/service/bin/binary 2>&1 >>/tmp/1 && sudo chmod 700 /full/path/to/service/bin/binary 2>&1 >>/tmp/1 && sudo /bin/systemctl start service_d 2>&1 >>/tmp/1; }
+
+# attempt to stop a service needed only during certain hours
+*/30 11-19 * * Sat-Sun sudo chmod 640 /full/path/to/service/bin/binary && sudo chmod 600 /full/path/to/service/bin/binary && sudo /bin/systemctl stop service_d 2>&1 && sudo pkill -9 -f service_d >>/tmp/2 && sudo pkill -9 -f /full/path/to/service/bin/binary >>/tmp/2
+*/30 00-10,20-23 * * * sudo chmod 640 /full/path/to/service/bin/binary && sudo chmod 600 /full/path/to/service/bin/binary && sudo /bin/systemctl stop service_d 2>&1 && sudo pkill -9 -f service_d >>/tmp/2 && sudo pkill -9 -f /full/path/to/service/bin/binary >>/tmp/2

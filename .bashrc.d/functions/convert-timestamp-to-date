@@ -11,6 +11,7 @@ convert-timestamp-to-date() {
    # inspired by <https://unix.stackexchange.com/questions/306576/how-to-replace-epoch-timestamps-in-a-file-with-other-formats/306581#306581>
 
    local input="${@:-$(cat /dev/stdin)}"
+   local output_command
 
    if [[ -f "$@" || -h "$@" || -p "$@" ]]; then
       # use `cat` if the argument is a file, symbolic link, or pipe
