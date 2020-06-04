@@ -65,19 +65,25 @@ for DIR in ${DIRS[*]}; do
 
    echo "UPDATING MASTER..."
    [[ $GIT_BRANCH =~ ^master$ ]] || $GITBIN checkout master
+   ORIGINAL_MASTER_REF="$(git rev-parse master)"
    $GITBIN pull --ff-only
    echo
 
-   # if the original branch wasn't master, switch back to it
-   # and rebase it from master
+   # if the original branch wasn't master, and updates were made to master,
+   # rebase it from master
    if [[ ! $GIT_BRANCH =~ ^master$ ]]; then
-      echo "ATTEMPTING TO GIT REBASE '$GIT_BRANCH' FROM MASTER"
       $GITBIN checkout -
-      $GITBIN rebase master || {
-         [[ -f .git/rebase-merge/done ]] &&
-            $GITBIN rebase --abort
-      }
-      echo
+
+#      if [[ $ORIGINAL_MASTER_REF = $(git rev-parse master) ]]; then
+#         echo "MASTER UNCHANGED; SKIPPING REBASE OF '$GIT_BRANCH' FROM MASTER"
+#      else
+         echo "ATTEMPTING TO GIT REBASE '$GIT_BRANCH' FROM MASTER"
+         $GITBIN rebase master || {
+            [[ -f .git/rebase-merge/done ]] &&
+               $GITBIN rebase --abort
+         }
+         echo
+#      fi
    fi
 
    if [[ $THERE_WERE_LOCAL_CHANGES && $STASH = 1 ]]; then

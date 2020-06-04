@@ -64,7 +64,8 @@ alias jobs='jobs -l'
 alias mkdir='mkdir -p'
 
 # have qrencode take standard input
-alias qrencode='qrencode -o /tmp/$$.png && eog /tmp/$$.png'
+# OMG this caused me so much headache before I realized I'd aliased this a while ago >_<
+#alias qrencode='qrencode -o /tmp/$$.png && eog /tmp/$$.png'
 #'temp_file=/tmp/temp_ssh_key && { [[ -r $temp_file ]] || touch $temp_file && chmod 600 $temp_file; } && cat /media/$USER-1gb/key >$temp_file && ssh-add $temp_file && rm -f $temp_file'
 
 # for connecting to a remote desktop
@@ -86,10 +87,11 @@ alias grep-config='grep -Ev "^(\s*|#.*|\s*#.*)$"'
 
 # easier editing of ~/.bash_history when it's chattr'ed to prevent anything but appending
 #actually, this may not work if there are changes to the live file when editing the temp copy :(
-# add something like these lines to /etc/sudoers if you want to avoid having to sudo every time (use a username instead of '%sudo' to enable just one user to do this)
+# add something like these lines to a file in /etc/sudoers.d/ if you want to avoid having to sudo every time (use a username instead of '%sudo' to enable just one user to do this, and replace $HOME with the hard-coded version since sudo doesn't support $HOME)
 # %sudo   ALL=(ALL:ALL)NOPASSWD: /usr/bin/chattr -a $HOME/.bash_history
 # %sudo   ALL=(ALL:ALL)NOPASSWD: /usr/bin/chattr +a $HOME/.bash_history
 alias edit-history='sudo chattr -a ~/.bash_history && vim ~/.bash_history && sudo chattr +a ~/.bash_history'
+alias eh='edit-history'
 
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
@@ -107,15 +109,15 @@ alias calculate-free-mem='free | awk '\''FNR == 3 {printf "%0.2f%%\n",$4/($3+$4)
 alias calculate-used-mem='free | awk '\''FNR == 3 {printf "%0.2f%%\n",$3/($3+$4)*100}'\'''
 
 # make the output of 'dirs' more readable
-alias dirs="dirs -v"
+alias dirs='dirs -v'
 
 # number the lines of a file on standard output
-alias num-file="nl -bp -w3"
+alias num-file='nl -bp -w3'
 
-if [[ $TMUX =~ tmate ]]; then
-   alias tsm="tmate show-messages"
+if [[ $TMUX =~ (tmate|tmux) ]]; then
+   alias tsm='tmate show-messages'
 else
-   alias tsm="echo 'this alias works only when run in a tmate session!'"
+   alias tsm='echo "this alias works only when run in a tmate session!"'
 fi
 
 ############# Directory Shortcuts ############

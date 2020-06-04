@@ -22,8 +22,14 @@ set cursorline " cul; highlight the screen line of the cursor
 set nospell " automatically spell-check; okay, I give up: no spell-check by default!!!
 
 " 6 multiple windows
-set laststatus=2 "ls; statusline will always be displayed, showing modification status; Ctrl+G shows status regardless if this is set or not
-set statusline=%f\ %m\ \ ft=%y\ \ char=%b,\ %B,\ #%o,\ #%O%=%l(%L),%c\ \ \ \ \ \ \ %p%% "stl; determines what to show in the status line; the default is: statusline=%-f\ %-m%=%l,%c\ \ \ \ \ \ \ %P; help default is: statusline=%-t\ %-h%-r%=%l,%c%V\ \ \ \ \ \ \ %P
+
+set laststatus=2 "ls; statusline will always be displayed, showing modification status; Ctrl+G shows status regardless if
+"this is set or not
+
+set statusline=%f\ %m\ \ ft=%y\ \ char=%b,\ %B,\ #%o,\ #%O%=%l(%L),%c\ \ \ \ \ \ \ %p%% "stl; determines what to show in the
+"status line; the default is:
+"statusline=%-f\ %-m%=%l,%c\ \ \ \ \ \ \ %P; help default is: statusline=%-t\ %-h%-r%=%l,%c%V\ \ \ \ \ \ \ %P
+
 set splitbelow "sb; new window is put below current one
 set splitright "spr; new v-window is put right of current one
 
@@ -43,10 +49,16 @@ map <a-v> "+gP
 " 12 messages and info
 set showcmd " sc; show commands in the lower-right as they are typed
 set ruler " ru; show cursor position below each window
-set visualbell t_vb= "vb; sets the visual bell to nothing, so no audible or visible bells are rung after an error (like Backspacing when you're at the beginning of a line)
+
+set visualbell t_vb= "vb; sets the visual bell to nothing, so no audible or visible bells are rung after an error (like
+"Backspacing when you're at the beginning of a line)
 
 " 14 editing text
-set omnifunc=syntaxcomplete#Complete "ofu; function for filetype-specific Insert mode completion; from <http://vim.wikia.com/wiki/Omni_completion>, <http://arstechnica.com/open-source/guides/2009/05/vim-made-easy-how-to-get-your-favorite-ide-features-in-vim.ars>
+"
+set omnifunc=syntaxcomplete#Complete "ofu; function for filetype-specific Insert mode completion; from
+"<http://vim.wikia.com/wiki/Omni_completion>,
+"<http://arstechnica.com/open-source/guides/2009/05/vim-made-easy-how-to-get-your-favorite-ide-features-in-vim.ars>
+
 "set digraph "dg; enables entering digraphs with c1 <BS> c2 instead of just Ctrl-K c1c2
 set matchpairs=(:),{:},[:],<:>,':',":" " mps; list of pairs that match for the "%" command
 set joinspaces " js; use two spaces after '.' when joining a line
@@ -59,7 +71,10 @@ set autoindent " ai; autoindent all subsequent lines
 set indentexpr="" " inde; indicates when to indent; comment out in $VIMRUNTIME/indent/html.vim
 " filetype indent off " disables filetype-based indentation settings
 set copyindent " ci; new line indents use same characters (spaces, tabs, etc.) as previous line
-"set textwidth=125 " tw; maximum formatted width before text starts wrapping around to the next line; 125, as that's the maximum monospace width in GHE's editing window before a horizontal scroll bar appears
+
+"set textwidth=125 " tw; maximum formatted width before text starts wrapping around to the next line; 125, as that's the
+"maximum monospace width in GHE's editing window before a horizontal scroll bar appears
+
 set formatoptions=crqlt " fo; ensures any text width that's set will take effect
                          " c.......Auto-wrap comments using textwidth, inserting the current comment
                          "         leader automatically.
@@ -90,15 +105,70 @@ set history=4000 " hi; allow for ample command history
 set term=xterm " needed for the colorscheme to show as more bold and vibrant than 'screen.xterm-256color'
 colorscheme ron
 
-syntax sync minlines=50 " ensure vim doesn't keep changing syntax highlighting; from <http://vim.wikia.com/wiki/Fix_Syntax_Highlighting>
+syntax sync minlines=50 " ensure vim doesn't keep changing syntax highlighting; from
+"<http://vim.wikia.com/wiki/Fix_Syntax_Highlighting>
 
 
 " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 " FILETYPE OPTIONS
 " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-" help from <https://stackoverflow.com/questions/11023194/automatically-wrap-long-git-commit-messages-in-vim/11023282#11023282>
-au FileType gitcommit set spell
+" help from
+" <https://stackoverflow.com/questions/11023194/automatically-wrap-long-git-commit-messages-in-vim/11023282#11023282>
+au FileType gitcommit setlocal spell
+
+" since 'textwidth' is overriden in the global file /usr/share/vim/vim80/ftplugin/gitcommit.vim, we have to put this config
+" in a separate file, ~/.vim/after/ftplugin/gitcommit.vim
+" not even rearranging the 'runtime' value so ~/.vimrc is at the end fixes the issue
+"au FileType gitcommit setlocal tw=125
+
+
+" when programming, set textwidth=125 since that's the maximum monospace width
+" in GH's editing window before a horizontal scroll bar appears
+
+" alternatively, create separate files for each language to contain the settings
+" $HOME/.vim/ftdetect/bash.vim
+" $HOME/.vim/ftdetect/python.vim
+" $HOME/.vim/ftdetect/golang.vim
+autocmd FileType go,python,sh,vim,markdown,gitcommit setlocal tw=125
+" autocmd BufRead,BufNew,BufNewFile *.sh,*.py,*.go set tw=125
+
+
+
+" options set for editing gpg-encrypted files (using symmetric ASCII armored encryption
+" from <https://vim.fandom.com/wiki/Edit_gpg_encrypted_files#Comments>
+" another possibility: <https://github.com/jamessan/vim-gnupg>
+" Don't save backups of *.gpg files
+set backupskip+=*.gpg,*.asc
+
+augroup encrypted
+  au!
+  " Before reading the file:
+  " * disable swap files
+  " * set binary file format
+  " * empty the 'viminfo' option to avoid parts of the file being saved to .viminfo when yanking or deleting
+  autocmd BufReadPre,FileReadPre *.gpg,*.asc
+    \ setlocal noswapfile bin viminfo=
+  " Decrypt the contents after reading the file, reset binary file format
+  " and run any BufReadPost autocmds matching the file name without the .gpg
+  " extension
+  autocmd BufReadPost,FileReadPost *.gpg,*.asc
+    \ execute "'[,']!gpg --decrypt --quiet --default-recipient-self" |
+    \ setlocal nobin |
+    \ execute "doautocmd BufReadPost " . expand("%:r")
+  " Set binary file format and encrypt the contents before writing the file
+  autocmd BufWritePre,FileWritePre *.gpg,*.asc
+    \ setlocal bin |
+    \ '[,']!gpg --armor --symmetric --cipher-algo AES256 --default-recipient-self
+  " After writing the file, do an :undo to revert the encryption in the
+  " buffer, and reset binary file format
+  autocmd BufWritePost,FileWritePost *.gpg,*.asc
+    \ silent u |
+    \ setlocal nobin
+augroup END
+
+
+
 
 
 " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -118,7 +188,10 @@ map "" i"<esc>f i"<esc> " quotes word under cursor (to improve, have it quote ev
 vmap "" c"<esc>pa"<esc> " wraps visual selection in double quotes
 " creates an XHTML image tag; help from <http://linuxgazette.net/148/misc/tag/vimrc>
 imap img<tab> <img src="" alt="" /><esc>10hi
-"map <CR> o<Esc> " inserts a newline below current line from within normal mode; from <http://vim.wikia.com/wiki/Insert_newline_without_entering_insert_mode>
+
+"map <CR> o<Esc> " inserts a newline below current line from within normal mode; from
+"<http://vim.wikia.com/wiki/Insert_newline_without_entering_insert_mode>
+
 "map <S-Enter> O<esc> " inserts a newline above current line from within normal mode
 "nmap @c :w<cr>:!javac %<cr>
 "nmap @r :!java $(echo % | sed 's;\.[^.]*$;;')<cr>
