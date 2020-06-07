@@ -10,6 +10,9 @@ if [[ "$TERM_PROGRAM" = "Apple_Terminal" || "$TERM_PROGRAM" =~ iTerm ]]; then
    alias sed='gsed'
    alias timeout='gtimeout'
    alias grep='ggrep'
+   alias wc='gwc'
+
+   alias mac-ssh-into-vm="ssh -Ap 2222 cweeks@$(ifconfig en0 | sed -nre 's;\s+inet ([^ ]+) .*;\1;p')"
 
    brew_pkgs_to_install=(
       git
