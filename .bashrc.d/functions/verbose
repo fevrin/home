@@ -12,10 +12,10 @@ verbose() {
 
    #        -n    suppress trailling newline
    #        -e    interpret escape characters (like "\n")
-   
+
    # output: if the specified verbosity level in the verbose() call is less than the set VERBOSE variable, the message is printed,
    #         taking into account the specified flags.
-   
+
    # examples:
    # verbose 1 test message <--- printed if VERBOSE is set to 1 or higher
    # verbose 8 test message <--- printed if VERBOSE is set to 8 or higher

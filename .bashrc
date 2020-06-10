@@ -25,7 +25,7 @@ else
       export GIT_PS1_SHOWDIRTYSTATE=true
       export GIT_PS1_SHOWUNTRACKEDFILES=true
       export GIT_PS1_SHOWCOLORHINTS=true
-   
+
       # append history commands to ~/.bash_history as they are executed;
       #from <http://www.ukuug.org/events/linux2003/papers/bash_tips/>.  also, read in latest bash history
       # inspired by <https://unix.stackexchange.com/questions/18212/bash-history-ignoredups-and-erasedups-setting-conflict-with-common-history/18443#18443>
@@ -48,7 +48,7 @@ else
       # something about this causes odd cursor placement when reviewing
       #bash history, so we have to use the old-fashioned color escapes
       #"\n$(colorize bold blue "\!" none "\$") "
-   
+
    #   # alternative version with some slightly different formatting and coloring
    #   # a major thing this has over the above is no graphical weirdness
    #   #when reviewing some commands in bash history

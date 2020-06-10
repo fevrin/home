@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# deal with the maximum buffer size of the clipboard from the command line
-#if possible, it'd be better to just open the file with a GUI editor, like gvim,
-#then Ctrl-A to select it all, then Ctrl-C to copy it
 clipit-copy() {
+   # deal with the maximum buffer size of the clipboard from the command line
+   #if possible, it'd be better to just open the file with a GUI editor, like gvim,
+   #then Ctrl-A to select it all, then Ctrl-C to copy it
 
-   local file="$1"
+   local file="${1:?you must specify a filename!}"
 
    # display a better alternative and cut off leading spaces (kept just for prettier code)
    echo -n "
@@ -14,11 +14,17 @@ clipit-copy() {
    2) Ctrl-A to select it all
    3) Ctrl-C to copy it
 
-   Do you still wish to use $FUNCNAME? [y/N] "  | sed -re 's;^\s+;;g'
+   Do you still wish to use $FUNCNAME? [y/n/G(vim)] " | sed -re 's;^\s+;;g'
 
    read
 
-   [[ $REPLY =~ [Yy] ]] || return 1
+   [[ $REPLY =~ [Nn] ]] && return
+
+   # if the user input anything but "Y" or "y", run gvim and exit
+   [[ $REPLY =~ [Yy] ]] || {
+      gvim "$file"
+      return
+   }
    echo
 
    local total_remaining_bytes="$(wc -c $file | cut -d' ' -f1)"

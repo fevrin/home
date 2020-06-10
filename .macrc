@@ -66,12 +66,12 @@ if [[ "$TERM_PROGRAM" = "Apple_Terminal" || "$TERM_PROGRAM" =~ iTerm ]]; then
    else 
       echo "please install ruby to continue"
    fi
-   
+
    # enable color support of ls and also add handy aliases
    if [[ "$TERM" != "dumb" ]]; then
       alias ls='ls -G'
    fi
-   
+
    # remove any references to :/usr/local/bin in the PATH
    [[ "$PATH" =~ :/usr/local/bin(:|$) ]] && PATH="${PATH//:\/usr\/local\/bin}"
 

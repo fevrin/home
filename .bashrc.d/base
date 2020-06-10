@@ -14,7 +14,7 @@ if ! (grep -q '\[deep\]' /sys/power/mem_sleep); then
 	for convenience, you can also set this in /etc/sudoers to be able to run the above without needing a password:
 
 	   %sudo ALL=NOPASSWD: /usr/bin/sponge /sys/power/mem_sleep
-	
+
 	EOF
 fi
 
@@ -101,6 +101,29 @@ fi
 
 # don't remember basic/common commands, including all bash aliases
 # i really need to make a level 0/level 6 script using perl or something to have greater control over regexes; plus, it can be annoying to have the commands immediately removed; lastly, duplicates aren't always removed like they should be
-export HISTIGNORE="bg:cd *:crontab -?:df -h:echo:edit-history:fg*:$([[ -x $(which git) ]] && { for i in $(git config -l | sed -rne 's;^alias\.([^=]+)=.*;\1;p'); do value+="git $i:"; done; echo "${value%:}"; }):git co master:jobs:kill*:ls:list -tr:ping 8.8.8.8:popd:pushd:pwd:screen -r:screen -t *:vim:vim nodes:w:$(alias | sed -rne 's;^alias ([^=]*)=.*;:\1?;p' | sort | tr -d '\n' | sed -e 's;^:;;')"
+HISTIGNORE="bg:cd *:crontab -?:df -h:echo:edit-history:fg*:git co master:jobs:kill*:ls:list -tr:ping 8.8.8.8:popd:pushd:pwd:screen -r:screen -t *:vim:vim nodes:w"
+
+# add git aliases
+HISTIGNORE+=":$(
+   [[ -x $(which git) ]] && {
+      for i in $(git config -l | sed -rne 's;^alias\.([^=]+)=.*;\1;p'); do
+         # git config --get-regexp alias | sed -rne 's;^alias\.([^ ]+) .*;\1;p'
+         value+="git $i:";
+      done;
+      echo "${value%:}";
+   }
+)"
+# add main aliases
+HISTIGNORE+=":$(
+   trailing_char="?"
+   alias |
+    sed -rne "s;^alias ([^=]*)=.*;:\1$trailing_char;p" |
+    sort |
+    tr -d '\n' |
+    sed -e 's;^:;;'
+)"
+
+export HISTIGNORE
+#export HISTIGNORE="bg:cd *:crontab -?:df -h:echo:edit-history:fg*:$([[ -x $(which git) ]] && { for i in $(git config -l | sed -rne 's;^alias\.([^=]+)=.*;\1;p'); do value+="git $i:"; done; echo "${value%:}"; }):git co master:jobs:kill*:ls:list -tr:ping 8.8.8.8:popd:pushd:pwd:screen -r:screen -t *:vim:vim nodes:w:$(alias | sed -rne 's;^alias ([^=]*)=.*;:\1?;p' | sort | tr -d '\n' | sed -e 's;^:;;')"
 
 set -o vi
