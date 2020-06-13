@@ -1,8 +1,9 @@
 #!/bin/bash
 
 convert-timestamp-to-date() {
-   # input: text that includes timestamps to convert
-   # output: input, but with timestamps converted to dates
+   # input: text that includes timestamps in the format of seconds since the UNIX epoc
+   #
+   # output: the given timestamps converted to dates
 
    # example:
    #
@@ -10,21 +11,17 @@ convert-timestamp-to-date() {
 
    # inspired by <https://unix.stackexchange.com/questions/306576/how-to-replace-epoch-timestamps-in-a-file-with-other-formats/306581#306581>
 
-   local input="${@:-$(cat /dev/stdin)}"
+   _verify_reqs <<-EOF || return 1
+      _get_stdin
+      _print_var_vals
+	EOF
+
+   local input="$(_get_stdin "$@")"
    local output_command
-
-   if [[ -f "$@" || -h "$@" || -p "$@" ]]; then
-      # use `cat` if the argument is a file, symbolic link, or pipe
-
-      output_command="cat"
-   else
-      # otherwise, use `echo`
-      output_command="echo"
-   fi
 
    _print_var_vals 8 output_command
 
-   $output_command "$input" | while IFS= read -r i; do
+   echo "$input" | while IFS= read -r i; do
       if [[ $i =~ (^.*[^0-9])([0-9]{10})([^0-9].*$|$) ]]; then
          printf '%s%(%F %T)T%s\n' "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}" "${BASH_REMATCH[3]}";
       else

@@ -115,9 +115,9 @@ HISTIGNORE+=":$(
 )"
 # add main aliases
 HISTIGNORE+=":$(
-   trailing_char="?"
+   trailing_char="*" # ignore all aliases
    alias |
-    sed -rne "s;^alias ([^=]*)=.*;:\1$trailing_char;p" |
+    sed -rne "s;^alias ([^=]{2,})=.*;:\1$trailing_char;p" |
     sort |
     tr -d '\n' |
     sed -e 's;^:;;'

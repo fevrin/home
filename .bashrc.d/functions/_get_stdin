@@ -1,0 +1,47 @@
+#!/bin/bash
+
+_get_stdin() {
+   # helper to grab input (whether via "-", /dev/stdin, or a file) to present to the caller in a standardized way
+   #
+   # input: the contents of the caller's argument you want to convert
+   #
+   # output: the contents of the argument
+   #
+   #
+   # examples:
+   #
+   # $ echo $contents | test_script.sh -
+   #
+   # $ test_script.sh /path/to/file
+   #
+   # $ echo $contents | test_script.sh
+   #
+   # $ test_script.sh
+   # > output
+   # > these
+   # > values
+   # 
+   #
+   #
+   # those all assume test_script.sh calls this helper function like so:
+   #
+   # _get_stdin $1
+
+   local input="${1}"
+   local output_command
+
+   # ensure the input isn't blank; otherwise, pull from /dev/stdin
+   # account for if the user provides "-" (stdin) as the file
+   [[ -z "$input" || "$input" = "-" ]] && input="$(cat /dev/stdin)"
+
+   if [[ -f "$input" || -h "$input" || -p "$input" ]]; then
+      # use `cat` if the argument is a file, symbolic link, or pipe
+      output_command="cat"
+   else
+      # otherwise, use `echo`
+      output_command="echo"
+   fi
+
+   # output the contents
+   $output_command "$input"
+}

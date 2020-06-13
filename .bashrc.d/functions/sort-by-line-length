@@ -1,0 +1,17 @@
+#!/bin/bash
+
+sort-by-line-length() {
+   # from <https://stackoverflow.com/questions/5917576/sort-a-text-file-by-line-length-including-spaces/5917762#5917762>
+
+   _verify_reqs <<-EOF || return 1
+      _get_stdin
+	EOF
+
+   local input="$(_get_stdin "$1")"
+   local output_command
+
+   echo "$input" | awk '{ print length, $0 }' | sort -n -s | sort | cut -d" " -f2-
+
+   # include length count
+   #echo $HISTIGNORE | tr ':' '\n' | grep '\*' | awk '{ print length, $0 | "sort -n" }'
+}
