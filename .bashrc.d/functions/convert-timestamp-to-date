@@ -28,10 +28,15 @@ convert-timestamp-to-date() {
 
    echo "$input" | while IFS= read -r line; do
       if [[ $QUICK -eq 1 ]]; then
-         if [[ $line =~ (^.*[^0-9])([0-9]{10})([^0-9].*$|$) ]]; then
-            line="$(printf '%s%(%F %T)T%s\n' "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}" "${BASH_REMATCH[3]}")"
+         # convert the timestamp on the line
+         # works with just one timestamp on a line
+         if [[ $line =~ (^|.*[^0-9])([0-9]{10})([^0-9].*|$) ]]; then
+            [[ "${BASH_REMATCH[2]}" -le "$curdate" ]] && {
+               line="$(printf '%s%(%F %T)T%s\n' "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}" "${BASH_REMATCH[3]}")"
+            }
          fi
       else
+         # go through all timestamps on a line and convert them
          for timestamp in $(echo "$line" | egrep -o '\b([0-9]{10})\b'); do
             # weakly validate the timestamp to ensure it wasn't a false positive, like a phone number
             [[ "$timestamp" -le "$curdate" ]] && {
