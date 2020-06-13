@@ -8,6 +8,11 @@ convert-timestamp-to-date() {
    # example:
    #
    # convert-timestamp-to-date <(cat $file)
+   #
+   #
+   # note: if you prepend the command with QUICK=1, like below, you'll opt for the quicker but less accurate strategy
+   #
+   # QUICK=1 convert-timestamp-to-date <(cat $file)
 
    # inspired by <https://unix.stackexchange.com/questions/306576/how-to-replace-epoch-timestamps-in-a-file-with-other-formats/306581#306581>
 
@@ -17,15 +22,24 @@ convert-timestamp-to-date() {
 	EOF
 
    local input="$(_get_stdin "$@")"
-   local output_command
+   local curdate="$(date +%s)"
 
    _print_var_vals 8 output_command
 
-   echo "$input" | while IFS= read -r i; do
-      if [[ $i =~ (^.*[^0-9])([0-9]{10})([^0-9].*$|$) ]]; then
-         printf '%s%(%F %T)T%s\n' "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}" "${BASH_REMATCH[3]}";
+   echo "$input" | while IFS= read -r line; do
+      if [[ $QUICK -eq 1 ]]; then
+         if [[ $line =~ (^.*[^0-9])([0-9]{10})([^0-9].*$|$) ]]; then
+            line="$(printf '%s%(%F %T)T%s\n' "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}" "${BASH_REMATCH[3]}")"
+         fi
       else
-         printf '%s\n' "$i"
+         for timestamp in $(echo "$line" | egrep -o '\b([0-9]{10})\b'); do
+            # weakly validate the timestamp to ensure it wasn't a false positive, like a phone number
+            [[ "$timestamp" -le "$curdate" ]] && {
+               line="${line//$timestamp/$(date -d @$timestamp +'%F %T %Z')}"
+            }
+         done
       fi
+
+      printf '%s\n' "$line"
    done
 }
