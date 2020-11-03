@@ -112,6 +112,11 @@ syntax sync minlines=50 " ensure vim doesn't keep changing syntax highlighting; 
 " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 " FILETYPE OPTIONS
 " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+" this section partially augments /usr/share/vim/vim80/filetype.vim
+
+" OpenSSH configuration
+" ensure all */.ssh/config* files are set to be of "sshconfig" type
+au BufNewFile,BufRead ssh_config,*/.ssh/config*	setf sshconfig
 
 " help from
 " <https://stackoverflow.com/questions/11023194/automatically-wrap-long-git-commit-messages-in-vim/11023282#11023282>

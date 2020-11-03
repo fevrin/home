@@ -3,6 +3,30 @@
 diff-home-files() {
    local i
    local HOME_DIR="$HOME/home"
+   local ACTION="${1:-diff}"
+
+   _help() {
+      cat <<-EOF
+		Commands:
+
+		[cp|copy|-a]      copy files from ~/ to $HOME_DIR non-interactively
+
+		[diff|vimdiff]    use vimdiff to compare each file that differs between ~/ and $HOME_DIR
+		EOF
+   }
+
+   case "$ACTION" in
+      diff|vimdiff)
+         ACTION="vimdiff"
+         ;;
+      copy|cp|-a)
+         ACTION="cp -aiv"
+         ;;
+      *)
+         _help
+         return
+         ;;
+   esac
 
    # list files that should be ignored
    # filenames relative to $HOME_DIR
@@ -15,6 +39,7 @@ diff-home-files() {
    "etc/hosts"
    "etc/logrotate.d/chrome-history"
    "etc/sudoers"
+   "etc/sudoers.d/laptop-sleep"
    "var/spool/cron/crontabs/username"
    )
    for i in $(find $HOME_DIR -type f ! -iregex '.*\/\.git\/.*'); do
@@ -39,7 +64,7 @@ diff-home-files() {
 
       local file2=$i
 #      echo file2="$file2"
-      [[ $(md5sum $file1 2>/dev/null | cut -d" " -f1) != $(md5sum $file2 2>/dev/null | cut -d" " -f1) ]] && vimdiff $file1 $file2
+      [[ $(md5sum $file1 2>/dev/null | cut -d" " -f1) != $(md5sum $file2 2>/dev/null | cut -d" " -f1) ]] && $ACTION $file1 $file2
    done
 
    local missed_files

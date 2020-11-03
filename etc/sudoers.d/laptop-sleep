@@ -1,0 +1,2 @@
+# useful for some laptops that don't hibernate well with the default of "s2idle" sleep
+%sudo ALL=NOPASSWD: /usr/bin/tee /sys/power/mem_sleep

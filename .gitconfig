@@ -4,8 +4,8 @@
 	bare = false
 	logallrefupdates = true
 	editor = vim
-	excludesfile = $HOME/.gitconfig.d/ignore
-	attributesfile = $HOME/.gitconfig.d/attributes
+	excludesfile = $HOME/.gitconfig.d/gitignore
+	attributesfile = $HOME/.gitconfig.d/gitattributes
 [color]
 	ui = true
 [alias]

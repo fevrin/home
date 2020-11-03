@@ -74,19 +74,31 @@ fi
 # don't overwrite ~/.bash_history file upon logging out
 shopt -s histappend
 
-# start screen upon login only if screen is not already opened and there
-#are no detached sessions
+# start a terminal multiplexer upon login only if screen is not already opened and there are no detached sessions
 SHLVL_threshold=1
 # always use just "screen" as the terminal so servers don't go ballistic
-# ugh, `export TERM=screen` causes weird stuff on the local machine, like italicizing text instead of highlighting it when copying using screen's commands
+# ugh, `export TERM=screen` causes weird stuff on the local machine, like italicizing text instead of highlighting it when
+# copying using screen's commands
 #export TERM=screen
-# open a new screen session if we're not already using screen
 if [[ -x $(which tmux) ]]; then
-   TMUX_LIST=$(tmux ls)
-   [[ ! $TERM =~ tmux && $(env | sed -n "s;SHLVL=\([1-9][1-9]*\);\1;p") = $SHLVL_threshold && ! $(echo "$TMUX_LIST" | grep -vi attached) ]] && tmux
+   TMUX_LIST=$(tmux ls 2>/dev/null)
+   if [[
+      ! $TERM =~ screen && # we're not currently in a tmux session
+                           # (tmux sets $TERM to "screen"
+      $(env | sed -n "s;SHLVL=\([0-9][0-9]*\);\1;p") -le $SHLVL_threshold # we're in the main bash instance (not nested)
+   ]]; then
 
-   # list detached tmux instances, if any, to explain why tmux wasn't started
-   [[ $(echo "$TMUX_LIST" | grep -vi attached) ]] && echo "$TMUX_LIST"
+     if [[ -n "$TMUX_LIST" && $(echo "$TMUX_LIST" | grep -cvi attached) -ne 0 ]]; then
+        # list detached tmux instances, if any, to explain why tmux wasn't started
+        cat <<-EOF
+			can't start tmux due to these detached sessions:
+			$(echo "$TMUX_LIST" | grep -vi attached)
+			EOF
+     else
+        # there are no tmux sessions or at least no detached tmux sessions, so start tmux
+        tmux
+     fi
+   fi
 else
    SCREEN_LIST=$(screen -ls)
    [[ ! $TERM =~ screen && $(env | sed -n "s;SHLVL=\([1-9][1-9]*\);\1;p") = $SHLVL_threshold && ! $(echo "$SCREEN_LIST" | grep -i detached) ]] && screen
@@ -115,9 +127,34 @@ HISTIGNORE+=":$(
 )"
 # add main aliases
 HISTIGNORE+=":$(
+   # list aliases to include in HISTIGNORE
+   includes=(
+   eh
+   )
+   includes="$(
+   for i in ${!includes[*]}; do
+      [[ $i -eq 0 ]] && echo -n "(${includes[$i]}" && continue
+      echo -n "|${includes[$i]}"
+   done
+   echo -n ")"
+   )"
    trailing_char="*" # ignore all aliases
    alias |
-    sed -rne "s;^alias ([^=]{2,})=.*;:\1$trailing_char;p" |
+    # list aliases to exclude from HISTIGNORE
+    grep -vf <(cat <<-EOF | xargs -I{} echo ^alias {}
+		aptinstall
+		aptsearch
+		aptshow
+		cp
+		dir
+		list
+		mv
+		nmap
+		EOF
+    ) |
+    egrep -o "^alias (([^=]{3,})|$includes)=.*" |
+    sed -re "s;^alias $includes=.*;:\1;" |
+    sed -re "s;^alias ([^=]{3,})=.*;:\1$trailing_char;" |
     sort |
     tr -d '\n' |
     sed -e 's;^:;;'

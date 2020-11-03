@@ -12,8 +12,8 @@ yessh() {
    # yessh reg1node22
    # yessh reg1node22 'cat /proc/cmdline'
 
-   # any files or symlinks in the ~/.bashrc.d/remote/ directory will be passed
-   # as-is from the local to the remote host.
+   # any files or symlinks in the ~/.bashrc.d/remote/ directory will be dereferenced and passed as contents of the bashrc
+   # file from the local to the remote host.
 
    # they should be directly executable by bash on the remote host
 
@@ -104,7 +104,14 @@ yessh() {
          verbose "$HOME/.bashrc.d doesn't exist!"
 
       # inspired by <https://superuser.com/a/1078431>
-      local bashrc_contents="$(ls -1 ~/.bashrc.d/remote/* 2>/dev/null | grep -v \.md$ | xargs cat | bzip2 | base64 -w0)"
+      local bashrc_contents="$(
+         ls -1 ~/.bashrc.d/remote/* 2>/dev/null |
+            grep -v \.md$ | # do not include markdown files
+            xargs cat |
+            egrep -v '^ +#' | # remove all commented lines
+            bzip2 |
+            base64 -w0
+      )"
 
       if [[ $(echo "$bashrc_contents" | wc -c) -le 20480 ]]; then
          command="

@@ -1,0 +1,48 @@
+127.0.0.1	localhost
+127.0.1.1	cw-XPS-13-9380
+
+# basic measure against some common ads
+0.0.0.0     3lift.com
+0.0.0.0     aax-us-east.amazon-adsystem.com
+0.0.0.0     adnxs.com
+0.0.0.0     amazon-adsystem.com
+0.0.0.0     bounceexchange.com
+0.0.0.0     casalemedia.com
+0.0.0.0     doubleclick.net
+0.0.0.0     doubleverify.com
+0.0.0.0     dummytracker.org
+0.0.0.0     everestads.net
+0.0.0.0     gce-or.bidswitch.net
+0.0.0.0     g.doubleclick.net
+0.0.0.0     googleads.g.doubleclick.net
+0.0.0.0     hotjar.com
+0.0.0.0     imasdk.googleapis.com
+0.0.0.0     jwpsrv.com
+0.0.0.0     krxd.net
+0.0.0.0     media.net
+0.0.0.0     mediavine.com
+0.0.0.0     openx.net
+0.0.0.0     pubmatic.com
+0.0.0.0     rubiconproject.com
+0.0.0.0     s0.2mdn.net
+0.0.0.0     securepubads.g.doubleclick.net
+0.0.0.0     simplereach.com
+0.0.0.0     w55c.net
+0.0.0.0     z.moatads.com
+0.0.0.0     cdn.tegna-media.com
+0.0.0.0     cutwaterspirits.com
+0.0.0.0     interactive.cbs8.com
+0.0.0.0     kfmb-news-app.firebaseio.com
+0.0.0.0     mcohandsanitizer.com
+0.0.0.0     media.cbs8.com
+0.0.0.0     platform.twitter.com
+0.0.0.0     tags.tiqcdn.com
+0.0.0.0     video.tegna-media.com
+0.0.0.0     tpc.googlesyndication.com
+
+# The following lines are desirable for IPv6 capable hosts
+::1     ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
