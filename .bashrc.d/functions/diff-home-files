@@ -6,13 +6,14 @@ diff-home-files() {
    local ACTION="${1:-diff}"
 
    _help() {
-      cat <<-EOF
+      # bash 5 doesn't like <<- heredocs with leading tabs within nested functions
+      echo "
 		Commands:
 
 		[cp|copy|-a]      copy files from ~/ to $HOME_DIR non-interactively
 
 		[diff|vimdiff]    use vimdiff to compare each file that differs between ~/ and $HOME_DIR
-		EOF
+		" | tr -d '\t'
    }
 
    case "$ACTION" in

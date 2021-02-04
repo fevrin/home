@@ -6,16 +6,18 @@
 # <https://www.tldp.org/LDP/abs/html/tabexpansion.html>
 
 for func in $(realpath $(dirname "$BASH_SOURCE"))/functions/*; do
+   [[ -d "$func" ]] && continue
    funcname="$(sed -rne '3 s;^(function\s+)?([^#( ]+)\(\) \{$;\2;p' "$func")"
 
    # export all the functions here so subshells can utilize them, if needed
    # for some reason, exported pushd() causes issues in direnv allowed directories
    # also, we don't want to source and export files with functions that don't match their filenames
-   if [[ ! -d "$func" ]] &&
-      [[ "$funcname" =~ ^${func//*\/}$ ]] &&
-      bash -n "$func" 2>/dev/null; then
-      . "$func"
-      [[ "$func" =~ pushd ]] || export -f "${func//*\/}"
-   fi
+   [[ "$funcname" =~ ^${func//*\/}$ ]] &&
+   [[ -r "$file" ]] &&
+   file -L --mime-type "$file" | grep -q 'text/x-shellscript' &&
+   bash -n "$func" 2>/dev/null &&
+   . "$func" &&
+   [[ ! "$func" =~ pushd ]] &&
+   export -f "${func//*\/}"
 done
 unset func

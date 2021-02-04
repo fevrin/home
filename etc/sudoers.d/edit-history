@@ -1,0 +1,3 @@
+%sudo ALL=NOPASSWD: /usr/bin/vim /home/$USER/.bash_history
+%sudo ALL=NOPASSWD: /usr/bin/chattr -a /home/$USER/.bash_history
+%sudo ALL=NOPASSWD: /usr/bin/chattr +a /home/$USER/.bash_history
