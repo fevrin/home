@@ -21,7 +21,7 @@ seek-broken-links() {
       # if the path isn't set, and the current arg fits the bill, set it
       # and remove it from the options list
       # inspiration from <https://unix.stackexchange.com/questions/258512/how-to-remove-a-positional-parameter-from/258514#258514>
-      [[ -z "$path" && -e "$arg" ]] && path="$arg" && shift && continue
+      [[ -e "$arg" ]] && path+="$arg " && shift && continue
 
       new_args="$new_args $arg"
 	done
@@ -47,14 +47,32 @@ seek-broken-links() {
 
    # ensure these variables are set, one way or another
    path="${path:-.}"
-   timeout="${timeout:-5}"
+   timeout="${timeout:-15}"
 
    local link
-   _print_var_vals dry_run path
-   for link in $(egrep -Ihoir "$HTTP_REGEX" "$path" | sort -u); do
-      echo "checking $link" >&2
-      if [[ $dry_run -ne 1 ]]; then
-         timeout $timeout curl -kIL "$link" &>/dev/null || echo "$link"
+   _print_var_vals timeout dry_run path
+   parallel --will-cite '
+   link="$(echo {})";
+      if [[ '$dry_run' -eq 1 ]]; then
+         echo "checking $link" >&2
+      else
+         exit_code="$(timeout '$timeout' curl -o /dev/null -ksLw "%{http_code}" "$link" 2>&1 | tail -n1)";
+         if [[ "$exit_code" =~ ^[0-9]+$ ]]; then
+            if [[ "$exit_code" -ge 200 && "$exit_code" -lt 300 ]]; then
+               echo -n ".";
+            else
+               echo "$exit_code: \"$link\"";
+            fi;
+         else
+            echo "timed out on \"$link\"";
+         fi;
+         exit_code="";
       fi
-   done
+   ' ::: $(egrep -Ihiro "$HTTP_REGEX" $path | sort -u)
+   #for link in $(egrep -Ihoir "$HTTP_REGEX" $path | sort -u); do
+   #   echo "checking $link" >&2
+   #   if [[ $dry_run -ne 1 ]]; then
+   #      timeout $timeout curl -kIL "$link" &>/dev/null || echo "$link"
+   #   fi
+   #done
 }

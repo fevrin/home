@@ -80,6 +80,7 @@ for DIR in ${DIRS[*]}; do
          echo "ATTEMPTING TO GIT REBASE '$GIT_BRANCH' FROM MASTER"
          $GITBIN rebase master || {
             [[ -f .git/rebase-merge/done ]] &&
+               echo "ABORTING GIT REBASE '$GIT_BRANCH' FROM MASTER" &&
                $GITBIN rebase --abort
          }
          echo

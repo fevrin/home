@@ -45,9 +45,9 @@
         '"
   br = branch
   changelog = "!git log --format='### %cd%x02%n%B' master..$(git rev-parse --abbrev-ref HEAD) | tr '\n' '\\1' | sed -re 's;(\\o1\\o1|\\o2\\o1)([^-+*#\\o1]+);\\1#### \\2;g' | tr '\\1' '\n' | tr -d '\\2'"
-  df = diff --word-diff=color --word-diff-regex=.
-  dfs = diff --word-diff=color --staged --word-diff-regex=.
-  diffs = diff --staged
+  df = "!bash -c 'git diff --word-diff-regex=\"[ ]+|[^ ]+\" && echo && git diff --check'"
+  dfs = "!bash -c 'git diff --staged --word-diff-regex=\"[ ]+|[^ ]+\" && echo && git diff --check'"
+  diffs = "!bash -c 'git diff --staged && echo && git diff --check'"
   dump = cat-file -p
   fet = "fetch --all -p"
   hist = log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short
@@ -76,8 +76,10 @@
          git remote | xargs --max-procs=1 -L1 -I{} git push -v --tags {} $(git rev-parse --abbrev-ref HEAD) '$@"
 
   # from <http://stackoverflow.com/questions/1057564/pretty-git-branch-graphs#answer-9074343>
-  lg1 = log --graph -15 --abbrev-commit --decorate --date=relative --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' --all
-  lg2 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n''          %C(white)%s%C(reset) %C(dim white)- %an%C(reset)' --all
+  lg1 = log --graph -30 --abbrev-commit --decorate --date=relative --format=format:'%C(bold blue)%h%C(reset) - %C(bold yellow)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(auto)%d%C(reset)' --all
+  lg2 = log --graph -30 --abbrev-commit --decorate --simplify-by-decoration --date=relative --format=format:'%C(bold blue)%h%C(reset) - %C(bold yellow)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(auto)%d%C(reset)' --all
+  lg3 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold yellow)(%ar)%C(reset)%C(auto)%d%C(reset)%n''          %C(white)%s%C(reset) %C(dim white)- %an%C(reset)' --all
+  lg4 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset) %C(bold cyan)(committed: %cD)%C(reset) %C(auto)%d%C(reset)%n''          %C(white)%s%C(reset)%n''          %C(dim white)- %an <%ae> %C(reset) %C(dim white)(committer: %cn <%ce>)%C(reset)'
 [merge]
 	conflictstyle = diff3
 	tool = vimdiff
@@ -89,6 +91,8 @@
    enabled = true # from <http://psung.blogspot.com/2011/02/reducing-merge-headaches-git-meets.html>
 [remote]
 	pushdefault = origin
+[status]
+   showUntrackedFiles = all
 [branch "master"]
 	pushremote = no_push
 #[user]
