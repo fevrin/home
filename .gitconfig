@@ -12,28 +12,29 @@
   # inspired by <https://www.atlassian.com/blog/git/advanced-git-aliases>
 #  bclean = "!git branch --merged HEAD | sed -re 's;^\\*?\\s+;;' | egrep -v \"^($(git rev-parse --abbrev-ref HEAD)|master)$\" -Z | xargs -0 -I{} echo -e 'these branches would be cleared:\n{}'"
   bclean = "!bash -c 'affected_branches=$(git branch --merged HEAD | \
-               sed -re \"s;^\\*?\\s+;;\" | \
-               egrep -v \"^($(git rev-parse --abbrev-ref HEAD)|master)$\" -Z);\
+               sed -re \"s;^\\*?\\s+;;\" -e \"s;^;- ;\" | \
+               egrep -v \"^- ($(git rev-parse --abbrev-ref HEAD)|master)$\" -Z);\
                if [[ $affected_branches ]]; then\
                   echo -e \"these branches would be cleared:\\n$affected_branches\";\
                   \
                   echo -n \"would you like to clear them? [y/N] \";\
                   read;\
                   echo;\
-                  [[ $REPLY =~ [Yy] ]] && {\
+                  if [[ $REPLY =~ [Yy] ]]; then \
                      for branch in $affected_branches; do\
                         git branch -d $branch;\
                      done; \
-                  };\
+                  else \
+                     echo \"cancelling branch clearing\"; \
+                  fi;\
                else\
                   echo \"no branches to clean!\";\
                fi;\
             '"
-
+  br = branch
   co = checkout
   ci = "!bash -c '\
-           [[ \"'$@'\" =~ -a( |$) ]] && git add -u;\
-           git sync;\
+           git sync \"'$@'\";\
            \
            if git diff --staged --quiet --exit-code && [[ ! \"'$@'\" =~ (^-a | -a | -a$|^-a$) ]]; then\
               echo -e \"\nnothing in index to commit!\";\
@@ -43,10 +44,9 @@
               git commit -v '$@';\
            fi;\
         '"
-  br = branch
   changelog = "!git log --format='### %cd%x02%n%B' master..$(git rev-parse --abbrev-ref HEAD) | tr '\n' '\\1' | sed -re 's;(\\o1\\o1|\\o2\\o1)([^-+*#\\o1]+);\\1#### \\2;g' | tr '\\1' '\n' | tr -d '\\2'"
   com = commit -v
-   df = "!bash -c 'git diff --word-diff-regex=\".\" $(echo \"$GIT_PREFIX\")'$1' && echo && git diff --check'"
+  df = "!bash -c 'git diff --word-diff-regex=\".\" $(echo \"$GIT_PREFIX\")'$1' && echo && git diff --check'"
   dff = "!bash -c 'git diff --word-diff-regex=\"[ ]+|[^ ]+\" $(echo \"$GIT_PREFIX\")'$1' && echo && git diff --check'"
   dfs = "!bash -c 'git diff --staged --word-diff-regex=\".\" $(echo \"$GIT_PREFIX\")'$1' && echo && git diff --check'"
   dffs = "!bash -c 'git diff --staged --word-diff-regex=\"[ ]+|[^ ]+\" $(echo \"$GIT_PREFIX\")'$1' && echo && git diff --check'"
@@ -55,23 +55,10 @@
   dump = cat-file -p
   fet = "fetch --all -p"
   hist = log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short
+  make = "!make " # run make in the repo root directory with any arguments passed to it
+  root = rev-parse --show-toplevel
   st = status
   sync = "!$HOME/.gitconfig.d/git-sync.sh $@"
-   syncs = "!bash -c '\
-      if [[ $(git branch --show-current) =~ master ]]; then \
-         git pull; \
-      else \
-         git fetch origin master:master && \
-         { \
-            if [[ $(git diff --staged --quiet; echo $?) -ne 0 ]]; then \
-               files=$(git diff --staged --name-only); \
-               echo \"the index has changes that will be stashed and re-added:\"; \
-               echo \"$files\"; \
-            fi; \
-            git rebase --autostash master; \
-            [[ -n \"$files\" ]] && git add --ignore-errors $files; \
-         } \
-      fi'"
   type = cat-file -t
   ver = "!bash -c 'version=$0; git tag -am \"version $version\" v$version'"
   who = shortlog -n -s --no-merges # from <https://thoughtbot.com/blog/streamline-your-git-workflow-with-aliases>
@@ -79,20 +66,20 @@
   # push current branch to all remotes
   # from <https://stackoverflow.com/questions/5785549/able-to-push-to-all-git-remotes-with-the-one-command/18674313#18674313>
   # and <https://stackoverflow.com/questions/6245570/how-to-get-the-current-branch-name-in-git/6245587#6245587>
-   pushall = "!bash -c '\
-      branch=$(git symbolic-ref --short HEAD);\
-      [[ \"$branch\" =~ master ]] &&\
-         echo -n \"are you sure you wish to push \"$branch\" to all remotes? [y/N] \" &&\
-         read;\
-      [[ $REPLY =~ [Yy] || ! \"$branch\" =~ master ]] &&\
-         parallel --will-cite git push -v --tags {} $(git rev-parse --abbrev-ref HEAD) ::: $(git remote)'"
-   pushallf = "!bash -c '\
-      branch=$(git symbolic-ref --short HEAD);\
-      [[ \"$branch\" =~ master ]] &&\
-         echo -n \"are you sure you wish to push \"$branch\" to all remotes? [y/N] \" &&\
-         read;\
-      [[ $REPLY =~ [Yy] || ! \"$branch\" =~ master ]] &&\
-         git remote | xargs --max-procs=1 -L1 -I{} git push -v --tags {} $(git rev-parse --abbrev-ref HEAD) '$@"
+  pushall = "!bash -c '\
+     branch=$(git symbolic-ref --short HEAD);\
+     [[ \"$branch\" =~ master ]] &&\
+        echo -n \"are you sure you wish to push \"$branch\" to all remotes? [y/N] \" &&\
+        read;\
+     [[ $REPLY =~ [Yy] || ! \"$branch\" =~ master ]] &&\
+        parallel --will-cite git push -v --tags {} $(git rev-parse --abbrev-ref HEAD) ::: $(git remote)'"
+  pushallf = "!bash -c '\
+     branch=$(git symbolic-ref --short HEAD);\
+     [[ \"$branch\" =~ master ]] &&\
+        echo -n \"are you sure you wish to push \"$branch\" to all remotes? [y/N] \" &&\
+        read;\
+     [[ $REPLY =~ [Yy] || ! \"$branch\" =~ master ]] &&\
+        git remote | xargs --max-procs=1 -L1 -I{} git push -v --tags {} $(git rev-parse --abbrev-ref HEAD) '$@"
 
   # from <http://stackoverflow.com/questions/1057564/pretty-git-branch-graphs#answer-9074343>
   lg1 = log --graph -30 --abbrev-commit --decorate --date=relative --format=format:'%C(bold blue)%h%C(reset) - %C(bold yellow)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(auto)%d%C(reset)' --all
