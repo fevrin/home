@@ -40,7 +40,7 @@ for DIR in ${DIRS[*]}; do
    echo
 
    THERE_WERE_LOCAL_CHANGES="$($GITBIN status --untracked-files=no --porcelain)"
-   GIT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+   GIT_BRANCH="$(git branch --show-current)"
 
    echo "UPDATING MASTER..."
    ORIGINAL_MASTER_REF="$(git rev-parse master)"

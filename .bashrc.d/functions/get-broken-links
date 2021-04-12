@@ -1,6 +1,6 @@
 #!/bin/bash
 
-seek-broken-links() {
+get-broken-links() {
    # inspired by <https://sookocheff.com/post/bash/parsing-bash-script-arguments-with-shopts/>
 
    # reset OPTIND since it's normally rest only at the beginning of a script execution, not function execution
@@ -51,19 +51,28 @@ seek-broken-links() {
 
    local link
    _print_var_vals timeout dry_run path
-   parallel --will-cite '
+   parallel --will-cite --max-procs=0 '
    link="$(echo {})";
       if [[ '$dry_run' -eq 1 ]]; then
          echo "checking $link" >&2
       else
-         exit_code="$(timeout '$timeout' curl -o /dev/null -ksLw "%{http_code}" "$link" 2>&1 | tail -n1)";
+         output="$(curl --max-time '$timeout' -o /dev/null -ksSLw "%{http_code}" "$link" 2>&1)";
+         [[ $(echo "$output" | wc -l) -gt 1 ]] && error_msg="$(echo "$output" | head -n1)"
+         exit_code="$(echo "$output" | tail -n1)"
          if [[ "$exit_code" =~ ^[0-9]+$ ]]; then
             if [[ "$exit_code" -ge 200 && "$exit_code" -lt 300 ]]; then
                echo -n ".";
             else
-               echo "$exit_code: \"$link\"";
+               echo
+               echo -n "$exit_code: ";
+               if [[ -n "$error_msg" ]]; then
+                  echo "\"$error_msg\" (\"$link)\"";
+               else
+                  echo "\"$link\"";
+               fi
             fi;
          else
+            echo
             echo "timed out on \"$link\"";
          fi;
          exit_code="";
