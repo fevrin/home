@@ -11,17 +11,28 @@
 [alias]
   # inspired by <https://www.atlassian.com/blog/git/advanced-git-aliases>
 #  bclean = "!git branch --merged HEAD | sed -re 's;^\\*?\\s+;;' | egrep -v \"^($(git rev-parse --abbrev-ref HEAD)|master)$\" -Z | xargs -0 -I{} echo -e 'these branches would be cleared:\n{}'"
-  bclean = "!bash -c 'affected_branches=$(git branch --merged HEAD | \
-               sed -re \"s;^\\*?\\s+;;\" -e \"s;^;- ;\" | \
-               egrep -v \"^- ($(git rev-parse --abbrev-ref HEAD)|master)$\" -Z);\
+   bclean = "!bash -c '\
+               current_branch=$(git symbolic-ref --short HEAD) \
+               \
+               main_branch=$(git get-main-branch);\
+               affected_branches=$(git branch --merged $(git get-main-remote)/$(git get-main-branch) | \
+               sed -re \"s;^\\*?\\s+;;\" | \
+               egrep -v \"^$main_branch$\" -Z);\
+               \
                if [[ $affected_branches ]]; then\
-                  echo -e \"these branches would be cleared:\\n$affected_branches\";\
-                  \
+                  echo -e \"these branches would be cleared:\\n$(echo \"${affected_branches}\" | sed -e \"s;^;- ;\")\"; \
+                  echo; \
                   echo -n \"would you like to clear them? [y/N] \";\
                   read;\
                   echo;\
                   if [[ $REPLY =~ [Yy] ]]; then \
-                     for branch in $affected_branches; do\
+                     for branch in $affected_branches; do \
+                        if [[ $branch = $current_branch ]]; then \
+                           echo -n \"delete current branch '\\''\"$current_branch\"'\\''? [Y/N] \" && \
+                           read && \
+                           echo && \
+                           [[ $REPLY =~ Y ]] || continue; \
+                        fi; \
                         git branch -d $branch;\
                      done; \
                   else \
@@ -44,16 +55,20 @@
               git commit -v '$@';\
            fi;\
         '"
-  changelog = "!git log --format='### %cd%x02%n%B' master..$(git rev-parse --abbrev-ref HEAD) | tr '\n' '\\1' | sed -re 's;(\\o1\\o1|\\o2\\o1)([^-+*#\\o1]+);\\1#### \\2;g' | tr '\\1' '\n' | tr -d '\\2'"
+  changelog = "!git log --format='### %cd%x02%n%B' $(git get-main-branch)..$(git rev-parse --abbrev-ref HEAD) | tr '\n' '\\1' | sed -re 's;(\\o1\\o1|\\o2\\o1)([^-+*#\\o1]+);\\1#### \\2;g' | tr '\\1' '\n' | tr -d '\\2'"
   com = commit -v
-  df = "!bash -c 'git diff --word-diff-regex=\".\" $(echo \"$GIT_PREFIX\")'$1' && echo && git diff --check'"
+  current-branch = symbolic-ref --short HEAD
+  df = "!bash -c 'git diff --word-diff-regex=\".\" $(if [[ -e \"$GIT_PREFIX/'$1'\" && ! \"$GIT_PREFIX/'$1'\" =~ ^/$ ]]; then echo \"$GIT_PREFIX/'$1'\"; else echo \"'$1'\"; fi) && echo && git diff --check'"
   dff = "!bash -c 'git diff --word-diff-regex=\"[ ]+|[^ ]+\" $(echo \"$GIT_PREFIX\")'$1' && echo && git diff --check'"
   dfs = "!bash -c 'git diff --staged --word-diff-regex=\".\" $(echo \"$GIT_PREFIX\")'$1' && echo && git diff --check'"
   dffs = "!bash -c 'git diff --staged --word-diff-regex=\"[ ]+|[^ ]+\" $(echo \"$GIT_PREFIX\")'$1' && echo && git diff --check'"
   diffs = "!bash -c 'git diff --staged $(echo \"$GIT_PREFIX\")'$1' && echo && git diff --check'"
-  diff-with-master = diff master...
+  diff-with-main = "!bash -c 'git diff $(git get-main-branch)...'"
   dump = cat-file -p
   fet = "fetch --all -p"
+#  get-main-branch = "!bash -c 'git remote -v show $(git get-main-remote) | sed -rne \"s;.*HEAD branch: (.*)$;\\1;p\"'" # this is slower than the below version, though it's potentially more up-to-date
+  get-main-branch = "!bash -c 'sed -rne \"s;.*$(git get-main-remote)/(.*);\\1;p\" .git/refs/remotes/$(git get-main-remote)/HEAD'"
+  get-main-remote = config --get remote.pushdefault
   hist = log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short
   make = "!make " # run make in the repo root directory with any arguments passed to it
   root = rev-parse --show-toplevel
@@ -67,18 +82,19 @@
   # from <https://stackoverflow.com/questions/5785549/able-to-push-to-all-git-remotes-with-the-one-command/18674313#18674313>
   # and <https://stackoverflow.com/questions/6245570/how-to-get-the-current-branch-name-in-git/6245587#6245587>
   pushall = "!bash -c '\
+     main_branch=$(git get-main-branch);\
      branch=$(git symbolic-ref --short HEAD);\
-     [[ \"$branch\" =~ master ]] &&\
+     [[ \"$branch\" =~ \"$main_branch\" ]] &&\
         echo -n \"are you sure you wish to push \"$branch\" to all remotes? [y/N] \" &&\
         read;\
-     [[ $REPLY =~ [Yy] || ! \"$branch\" =~ master ]] &&\
+     [[ $REPLY =~ [Yy] || ! \"$branch\" =~ \"$main_branch\" ]] &&\
         parallel --will-cite git push -v --tags {} $(git rev-parse --abbrev-ref HEAD) ::: $(git remote)'"
   pushallf = "!bash -c '\
      branch=$(git symbolic-ref --short HEAD);\
-     [[ \"$branch\" =~ master ]] &&\
+     [[ \"$branch\" =~ \"$main_branch\" ]] &&\
         echo -n \"are you sure you wish to push \"$branch\" to all remotes? [y/N] \" &&\
         read;\
-     [[ $REPLY =~ [Yy] || ! \"$branch\" =~ master ]] &&\
+     [[ $REPLY =~ [Yy] || ! \"$branch\" =~ \"$main_branch\" ]] &&\
         git remote | xargs --max-procs=1 -L1 -I{} git push -v --tags {} $(git rev-parse --abbrev-ref HEAD) '$@"
 
   # from <http://stackoverflow.com/questions/1057564/pretty-git-branch-graphs#answer-9074343>

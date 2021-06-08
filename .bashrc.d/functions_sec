@@ -126,3 +126,21 @@ generate_luks_keyfile() {
       echo "you must specify an output file!"
    fi
 }
+
+ssh_key_is_encrypted() {
+   local file="$1"
+
+   [[ -r "$file" ]] || {
+      echo "error: file unreadable or doesn't exist: '$file'"
+      return 2
+   }
+
+   grep -iq encrypted "$file" || {
+      if head -n1 "$file" | grep -iq openssh; then
+         { tail -n+2 "$file" | head -n-1 | base64 -d | strings | grep -iq bcrypt; } &&
+            return 0
+      else
+         return 1
+      fi
+   }
+}

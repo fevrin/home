@@ -9,11 +9,11 @@ if ! (grep -q '\[deep\]' /sys/power/mem_sleep); then
 
 	you can run this command to set it until the next boot:
 
-	   echo deep | sudo sponge /sys/power/mem_sleep
+	   echo deep | sudo tee /sys/power/mem_sleep
 
 	for convenience, you can also set this in /etc/sudoers to be able to run the above without needing a password:
 
-	   %sudo ALL=NOPASSWD: /usr/bin/sponge /sys/power/mem_sleep
+	   %sudo ALL=NOPASSWD: /usr/bin/tee /sys/power/mem_sleep
 
 	EOF
 fi
@@ -97,6 +97,11 @@ if [[ -x $(which tmux) ]]; then
      else
         # there are no tmux sessions or at least no detached tmux sessions, so start tmux
         tmux
+
+#        # this command would otherwise result in the following error if in ~/.tmux.conf since tmux seems to read and execute the conf file in full before creating a session:
+#        # .tmux.conf:117: no current target
+#        # more info at <https://superuser.com/questions/1413870/tmux-conf-doesnt-work-when-starting-but-does-with-source-file/1414127#1414127>
+#        tmux new-window top
      fi
    fi
 else
@@ -148,6 +153,7 @@ HISTIGNORE+=":$(
 		cp
 		dir
 		list
+		mtr
 		mv
 		nmap
 		EOF
