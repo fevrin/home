@@ -11,8 +11,8 @@
 [alias]
   # inspired by <https://www.atlassian.com/blog/git/advanced-git-aliases>
 #  bclean = "!git branch --merged HEAD | sed -re 's;^\\*?\\s+;;' | egrep -v \"^($(git rev-parse --abbrev-ref HEAD)|master)$\" -Z | xargs -0 -I{} echo -e 'these branches would be cleared:\n{}'"
-   bclean = "!bash -c '\
-               current_branch=$(git symbolic-ref --short HEAD) \
+   bclean = "!git fet; bash -c '\
+               current_branch=$(git current-branch) \
                \
                main_branch=$(git get-main-branch);\
                affected_branches=$(git branch --merged $(git get-main-remote)/$(git get-main-branch) | \
@@ -66,8 +66,10 @@
   diff-with-main = "!bash -c 'git diff $(git get-main-branch)...'"
   dump = cat-file -p
   fet = "fetch --all -p"
-#  get-main-branch = "!bash -c 'git remote -v show $(git get-main-remote) | sed -rne \"s;.*HEAD branch: (.*)$;\\1;p\"'" # this is slower than the below version, though it's potentially more up-to-date
-  get-main-branch = "!bash -c 'sed -rne \"s;.*$(git get-main-remote)/(.*);\\1;p\" .git/refs/remotes/$(git get-main-remote)/HEAD'"
+  get-main-branch = "!bash -c '\
+     sed -rne \"s;.*$(git get-main-remote)/(.*);\\1;p\" .git/refs/remotes/$(git get-main-remote)/HEAD 2>/dev/null || {\
+        git remote -v show $(git get-main-remote) | sed -rne \"s;.*HEAD branch: (.*)$;\\1;p\";\
+     }'" # try a quick method first, but if that fails, try a slower though potentially more up-to-date method
   get-main-remote = config --get remote.pushdefault
   hist = log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short
   make = "!make " # run make in the repo root directory with any arguments passed to it
@@ -83,14 +85,14 @@
   # and <https://stackoverflow.com/questions/6245570/how-to-get-the-current-branch-name-in-git/6245587#6245587>
   pushall = "!bash -c '\
      main_branch=$(git get-main-branch);\
-     branch=$(git symbolic-ref --short HEAD);\
+     branch=$(git current-branch);\
      [[ \"$branch\" =~ \"$main_branch\" ]] &&\
         echo -n \"are you sure you wish to push \"$branch\" to all remotes? [y/N] \" &&\
         read;\
      [[ $REPLY =~ [Yy] || ! \"$branch\" =~ \"$main_branch\" ]] &&\
         parallel --will-cite git push -v --tags {} $(git rev-parse --abbrev-ref HEAD) ::: $(git remote)'"
   pushallf = "!bash -c '\
-     branch=$(git symbolic-ref --short HEAD);\
+     branch=$(git current-branch);\
      [[ \"$branch\" =~ \"$main_branch\" ]] &&\
         echo -n \"are you sure you wish to push \"$branch\" to all remotes? [y/N] \" &&\
         read;\
