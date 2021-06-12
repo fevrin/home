@@ -99,9 +99,9 @@ for DIR in ${DIRS[*]}; do
       echo
    }
 
-   date "+%F %H:%M:%S %Z: success" | tee -a $HOME/$(basename "$DIR")-git-pull-timestamps
-
    echo
+
+   date "+%F %H:%M:%S %Z: success" | tee -a $HOME/$(basename "$DIR")-git-pull-timestamps
 
 #   cd - &>/dev/null
 done

@@ -59,7 +59,7 @@
   com = commit -v
   current-branch = symbolic-ref --short HEAD
   df = "!bash -c 'git diff --word-diff-regex=\".\" $(if [[ -e \"$GIT_PREFIX/'$1'\" && ! \"$GIT_PREFIX/'$1'\" =~ ^/$ ]]; then echo \"$GIT_PREFIX/'$1'\"; else echo \"'$1'\"; fi) && echo && git diff --check'"
-  dff = "!bash -c 'git diff --word-diff-regex=\"[ ]+|[^ ]+\" $(echo \"$GIT_PREFIX\")'$1' && echo && git diff --check'"
+  dff = "!bash -c 'git diff --word-diff-regex=\"(\\[[^]]+\\]|\\([^)]+\\)|\\w)+\" $(echo \"$GIT_PREFIX\")'$1' && echo && git diff --check'"
   dfs = "!bash -c 'git diff --staged --word-diff-regex=\".\" $(echo \"$GIT_PREFIX\")'$1' && echo && git diff --check'"
   dffs = "!bash -c 'git diff --staged --word-diff-regex=\"[ ]+|[^ ]+\" $(echo \"$GIT_PREFIX\")'$1' && echo && git diff --check'"
   diffs = "!bash -c 'git diff --staged $(echo \"$GIT_PREFIX\")'$1' && echo && git diff --check'"
