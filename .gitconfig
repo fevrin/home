@@ -70,10 +70,13 @@
      sed -rne \"s;.*$(git get-main-remote)/(.*);\\1;p\" .git/refs/remotes/$(git get-main-remote)/HEAD 2>/dev/null || {\
         git remote -v show $(git get-main-remote) | sed -rne \"s;.*HEAD branch: (.*)$;\\1;p\";\
      }'" # try a quick method first, but if that fails, try a slower though potentially more up-to-date method
+  trunk = "!git co $(git get-main-branch)"
+  root-branch = trunk
+  rbr = root-branch
   get-main-remote = config --get remote.pushdefault
   hist = log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short
   make = "!make " # run make in the repo root directory with any arguments passed to it
-  root = rev-parse --show-toplevel
+  root-dir = rev-parse --show-toplevel
   st = status
   sync = "!$HOME/.gitconfig.d/git-sync.sh $@"
   type = cat-file -t

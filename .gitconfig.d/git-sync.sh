@@ -29,6 +29,7 @@ done
 GITBIN="/usr/bin/git"
 
 for DIR in ${DIRS[*]}; do
+   cd "$DIR"
    cd $(git rev-parse --show-toplevel)
 
    # check if the directory is a git repo
