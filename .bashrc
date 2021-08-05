@@ -91,10 +91,12 @@ declare -a files_to_source
 declare -a dirs_for_path
 declare -a dirs_for_gopath
 
+# to add more files, just either add them here or in any sourced directories
+# note that they are sourced in alphanumeric order, which you can use to source in a particular order, based on dependencies
 files_to_source=(
 ~/.bashrc.d/*
 ~/bin/lib/lib_all
-/etc/bash_completion # needed for git completion, ironically
+/etc/bash_completion # needed for git completion
 /usr/lib/git-core/git-sh-prompt
 /usr/local/git/contrib/completion/git-prompt.sh
 /usr/local/git/contrib/completion/git-completion.bash
@@ -115,7 +117,15 @@ for file in ${files_to_source[*]}; do
     continue
 
    [[ -d "$file" ]] && continue
-   [[ -r "$file" ]] && . "$file"
+
+   [[ -r "$file" ]] &&
+   [[ ! "$file" =~ python ]] &&
+   file -L --mime-type "$file" | egrep -q '(text/x-shellscript|git-sh-prompt|bash_completion)' && # git-sh-prompt shows as 'text/plain'
+   bash -n "$file" 2>/dev/null &&
+#   echo "sourcing '$file'..." >&2 &&
+#   TIMEFORMAT='%R' &&
+#   time . "$file"
+   . "$file"
 done
 unset files_to_source file
 
@@ -126,14 +136,14 @@ unset files_to_source file
 #############################
 
 dirs_for_path+=(
-~/bin
+   $HOME/bin
 )
 
 # add a GOPATH value if go's installed
 # and add it to the general PATH, as well
 if which go &>/dev/null; then
    dirs_for_gopath+=(
-   "$HOME/go"
+      "$HOME/go"
    )
 
    for dir in ${dirs_for_gopath[*]}; do

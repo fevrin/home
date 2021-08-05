@@ -1,0 +1,6 @@
+#!/bin/bash
+
+get-volume-percentage() {
+   # from <https://askubuntu.com/questions/1063341/get-percent-volume/1063484#1063484>
+   amixer -M -D pulse get Master | grep -m 1 -o -E [[:digit:]]+% | tr -d "%"
+}

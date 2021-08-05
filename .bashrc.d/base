@@ -1,6 +1,10 @@
 #!/bin/bash
 
 if ! (grep -q '\[deep\]' /sys/power/mem_sleep); then
+   echo deep | sudo tee /sys/power/mem_sleep
+fi
+
+if ! (grep -q '\[deep\]' /sys/power/mem_sleep); then
    cat <<-EOF
 	deep sleep not currently configured!
 

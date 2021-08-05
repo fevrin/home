@@ -43,37 +43,67 @@ else
    addtl_cmds="
     keycode $alt_r = Control_R NoSymbol Control_R
     keycode $ctrl_r = Alt_R Meta_R"
+
+   { egrep -q "replace key <RALT>.*Control_R, Control_R" /usr/share/X11/xkb/symbols/ctrl &&
+      egrep -q "replace key <RCTL>.*Alt_R, Meta_R" /usr/share/X11/xkb/symbols/ctrl; } || {
+
+      # restart sudo timeout timer
+      sudo -v
+
+      echo "adding config to '/usr/share/X11/xkb/symbols/ctrl'..."
+      cat <<-EOF | sudo tee -a /usr/share/X11/xkb/symbols/ctrl &>/dev/null
+
+			// Swap right Ctrl and and right Alt keys
+			// from <https://askubuntu.com/questions/885045/how-to-swap-ctrl-and-alt-keys-in-ubuntu-16-04/885047#885047>
+			xkb_symbols "nocaps" {
+			    replace key <RALT> { [ Control_R, Control_R ] };
+			    replace key <RCTL> { [ Alt_R, Meta_R ] };
+			};
+		EOF
+   }
+
+   egrep -q "ctrl:swap_ralt_rctl	=	\+ctrl\(swap_ralt_rctl)" /usr/share/X11/xkb/rules/evdev || {
+      echo "adding config to '/usr/share/X11/xkb/rules/evdev'..."
+      sudo sed -i.bak -re 's;! option	=	symbols$;&\n  ctrl:swap_ralt_rctl	=	+ctrl(swap_ralt_rctl);' /usr/share/X11/xkb/rules/evdev
+   }
+
+   egrep -q "ctrl:swap_ralt_rctl  Swap right Alt and right Ctrl" /usr/share/X11/xkb/rules/evdev.lst || {
+      echo "adding config to '/usr/share/X11/xkb/rules/evdev.lst'..."
+      sudo sed -i.bak -re 's;! option$;&\n  ctrl:swap_ralt_rctl  Swap right Alt and right Ctrl;' /usr/share/X11/xkb/rules/evdev.lst
+   }
+
+#   dconf write "/org/gnome/desktop/input-sources/xkb-options" "['ctrl:swap_lalt_lctl','ctrl:swap_ralt_rctl']"
 fi
 
-xmodmap - <<-EOF
-! from <http://www.chrisamiller.com/blog/posts/remapping-your-macbooks-keyboard-in-ubuntu-1204>
-! help from <http://askubuntu.com/questions/131900/how-do-i-switch-the-command-key-and-control-key-on-a-macbook-pro>
-!
-! clean most of the modifiers
-clear control
-clear mod4
-clear mod1
-
-! -----------------
-! left side
-! ----------------
-! ensure Alt-L behaves like Alt-L
-!keycode 64 = Alt_L Meta_L
-! ensure Cmd-L behaves like Ctrl-L
-!keycode 133 = Control_L NoSymbol Control_L
-
-! ------------------
-! right side
-! -------------------
-$addtl_cmds
-
-!add mod4 = Super_L
-add mod1 = Alt_L Meta_L
-add control = Control_L
-add control = Control_R
-!add mod1 = Alt_R Meta_R
-!add control = Control_L
-!add control = Control_R
-EOF
-
-unset addtl_cmds
+#xmodmap - <<-EOF
+#! from <http://www.chrisamiller.com/blog/posts/remapping-your-macbooks-keyboard-in-ubuntu-1204>
+#! help from <http://askubuntu.com/questions/131900/how-do-i-switch-the-command-key-and-control-key-on-a-macbook-pro>
+#!
+#! clean most of the modifiers
+#clear control
+#clear mod4
+#clear mod1
+#
+#! -----------------
+#! left side
+#! ----------------
+#! ensure Alt-L behaves like Alt-L
+#!keycode 64 = Alt_L Meta_L
+#! ensure Cmd-L behaves like Ctrl-L
+#!keycode 133 = Control_L NoSymbol Control_L
+#
+#! ------------------
+#! right side
+#! -------------------
+#$addtl_cmds
+#
+#!add mod4 = Super_L
+#add mod1 = Alt_L Meta_L
+#add control = Control_L
+#add control = Control_R
+#!add mod1 = Alt_R Meta_R
+#!add control = Control_L
+#!add control = Control_R
+#EOF
+#
+#unset addtl_cmds

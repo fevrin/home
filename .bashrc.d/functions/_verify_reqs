@@ -52,6 +52,7 @@ _verify_reqs() {
    for req in ${requirements[*]}; do
       local actual_version
       local needed_version="${req#*:}"
+      local failure_output
       req="${req%:*}"
 
       actual_version="$(${req%:*} --version 2>&1 | sed -rne '1s;.* ([0-9.a-z+]+\.[0-9.a-z+]+)([^0-9.a-z+].*|$);\1;p')"
@@ -62,7 +63,28 @@ _verify_reqs() {
       [[ "$needed_version" == "$req" ]] && needed_version="$actual_version"
 
       # make sure both the required command, as well as the version, if specified, are what we actually have
-      { type -t "$req" &>/dev/null && [[ "$needed_version" == "$actual_version" ]]; } || failures+=("$req")
+      { type -t "$req" &>/dev/null && [[ "$needed_version" == "$actual_version" ]]; } || {
+
+         if [[ -x /usr/lib/command-not-found ]]; then
+            failure_output="$(/usr/lib/command-not-found "$req" 2>&1 | tr '\n' '\1' | tr ' ' '\2')"
+#            failure_output="$(/usr/lib/command-not-found "$req" 2>&1 | sed -rne 's;^ *sudo apt install (.*)$;\1;p')"
+             separator="=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+             [[ -n "$failure_output" ]] && failure_output="$separator$failure_output$separator"
+         fi
+
+         if [[ -z "$failure_output" ]]; then
+            failure_output="* $req"
+         fi
+         failures+=("$failure_output")
+      }
+
+#      echo "req = '$req'"
+#      echo "test1"
+#      echo "test3"
+#      echo "type = '$(type -t "$req"; echo $?)'"
+#      echo "actual_version = '$actual_version'"
+#      echo "needed_version = '$needed_version'"
+#      echo "failures = '$failures'"
    done
 
    if [[ -n ${failures[*]} ]]; then
@@ -71,7 +93,7 @@ _verify_reqs() {
 
       local failure
       for failure in ${failures[*]}; do
-         echo "* $failure"
+         echo "$failure" 2>&1 | tr '\1' '\n' | tr '\2' ' '
       done
 
       echo

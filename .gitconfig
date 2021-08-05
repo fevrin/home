@@ -56,14 +56,42 @@
            fi;\
         '"
   changelog = "!git log --format='### %cd%x02%n%B' $(git get-main-branch)..$(git rev-parse --abbrev-ref HEAD) | tr '\n' '\\1' | sed -re 's;(\\o1\\o1|\\o2\\o1)([^-+*#\\o1]+);\\1#### \\2;g' | tr '\\1' '\n' | tr -d '\\2'"
+  check-check = "!bash -c '\
+                   git diff --check &>/dev/null; \
+                   [[ $? -eq 0 ]] || { \
+                      echo && \
+                      echo && \
+                      echo && \
+                      echo && \
+                      echo \"changes introduce conflict markers or whitespace errors:\" && \
+                      echo && \
+                      git diff --check; \
+                   } \
+                '"
   com = commit -v
   current-branch = symbolic-ref --short HEAD
-  df = "!bash -c 'git diff --word-diff-regex=\".\" $(if [[ -e \"$GIT_PREFIX/'$1'\" && ! \"$GIT_PREFIX/'$1'\" =~ ^/$ ]]; then echo \"$GIT_PREFIX/'$1'\"; else echo \"'$1'\"; fi) && echo && git diff --check'"
-  dff = "!bash -c 'git diff --word-diff-regex=\"(\\[[^]]+\\]|\\([^)]+\\)|\\w)+\" $(echo \"$GIT_PREFIX\")'$1' && echo && git diff --check'"
-  dfs = "!bash -c 'git diff --staged --word-diff-regex=\".\" $(echo \"$GIT_PREFIX\")'$1' && echo && git diff --check'"
-  dffs = "!bash -c 'git diff --staged --word-diff-regex=\"[ ]+|[^ ]+\" $(echo \"$GIT_PREFIX\")'$1' && echo && git diff --check'"
-  diffs = "!bash -c 'git diff --staged $(echo \"$GIT_PREFIX\")'$1' && echo && git diff --check'"
-  diff-with-main = "!bash -c 'git diff $(git get-main-branch)...'"
+  df = "!bash -c '\
+          git diff --word-diff-regex=\".\" $(if [[ -e \"$GIT_PREFIX/'$1'\" && ! \"$GIT_PREFIX/'$1'\" =~ ^/$ ]]; then echo \"$GIT_PREFIX/'$1'\"; else echo \"'$1'\"; fi) && \
+          git check-check \
+       '"
+  dff = "!bash -c '\
+           git diff --word-diff-regex=\"(\\[[^]]+\\]|\\([^)]+\\)|\\w)+\" $(echo \"$GIT_PREFIX\")'$1' && \
+           git check-check \
+        '"
+        # formerly used this, but it may not show changes in other directories: `git diff --staged --word-diff-regex=\".\" $(echo \"$GIT_PREFIX\")'$1' && \`
+  dfs = "!bash -c '\
+           git diff --staged --word-diff-regex=\".\" && \
+           git check-check \
+        '"
+  dffs = "!bash -c '\
+            git diff --staged --word-diff-regex=\"[ ]+|[^ ]+\" $(echo \"$GIT_PREFIX\")'$1' && \
+            git check-check \
+         '"
+  diffs = "!bash -c '\
+             git diff --staged $(echo \"$GIT_PREFIX\")'$1' && \
+             git check-check \
+          '"
+  diff-with-main = "!bash -c 'git diff $(git get-main-branch)... '$@''"
   dump = cat-file -p
   fet = "fetch --all -p"
   get-main-branch = "!bash -c '\
@@ -103,7 +131,7 @@
         git remote | xargs --max-procs=1 -L1 -I{} git push -v --tags {} $(git rev-parse --abbrev-ref HEAD) '$@"
 
   # from <http://stackoverflow.com/questions/1057564/pretty-git-branch-graphs#answer-9074343>
-  lg1 = log --graph -30 --abbrev-commit --decorate --date=relative --format=format:'%C(bold blue)%h%C(reset) - %C(bold yellow)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(auto)%d%C(reset)' --all
+  lg1 = log --graph -30 --abbrev-commit --decorate --date=relative --color --format=format:'%C(bold blue)%h%C(reset) - %C(bold yellow)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(auto)%d%C(reset)' --all
   lg2 = log --graph -30 --abbrev-commit --decorate --simplify-by-decoration --date=relative --format=format:'%C(bold blue)%h%C(reset) - %C(bold yellow)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(auto)%d%C(reset)' --all
   lg3 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold yellow)(%ar)%C(reset)%C(auto)%d%C(reset)%n''          %C(white)%s%C(reset) %C(dim white)- %an%C(reset)' --all
   lg4 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset) %C(bold cyan)(committed: %cD)%C(reset) %C(auto)%d%C(reset)%n''          %C(white)%s%C(reset)%n''          %C(dim white)- %an <%ae> %C(reset) %C(dim white)(committer: %cn <%ce>)%C(reset)'

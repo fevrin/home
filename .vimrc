@@ -228,8 +228,10 @@ imap img<tab> <img src="" alt="" /><esc>10hi
 " from <https://github.com/tpope/vim-pathogen>
 " this allows you to install plugins without having to restart vim
 
-
-execute pathogen#infect()
+" but, to avoid needless errors, first ensure the file exists before attempting to source it
+if filereadable("~/.vim/autoload/pathogen.vim")
+   execute pathogen#infect()
+endif
 
 
 " for vim-go to automatically grab imports, as needed

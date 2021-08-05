@@ -2,6 +2,361 @@
 
 # CHANGELOG
 
+## v2.3.0
+
+### Wed Aug 4 21:46:28 2021 -0400
+#### .apple_keyboard_mod.rc
+* updated to utlize xkb rules instead of xmodmap
+
+#### .bashrc
+* added file type validation prior to sourcing
+
+#### .bashrc.d/base
+* updated to automatically set deep sleep
+
+#### .bashrc.d/functions/_verify_reqs
+* updated to output failure messages for dependencies
+
+#### .bashrc.d/functions/diff-home-files
+* updated to permit diffing a specified file
+
+#### .bashrc.d/functions/get-volume-percentage
+* added
+
+#### .gitconfig
+* updated aliases for readability
+* reduced duplication of code
+
+#### .vimrc
+* added conditional block to source pathogen only when the associated file exists
+
+### Sat Jul 10 00:02:28 2021 -0400
+#### .gitconfig
+* added some new aliases
+
+#### .gitconfig.d/git-sync.sh
+* fixed a bug when changing directory
+
+#### Makefile
+* added
+
+### Fri Jun 11 23:08:23 2021 -0400
+#### .gitconfig
+* updated the `dff` alias's regex
+
+#### .gitconfig.d/git-sync.sh
+* rearranged a couple of lines
+
+### Fri Jun 11 15:33:02 2021 -0400
+#### .gitconfig
+* replaced duplicated code to reference new git aliases
+
+### Tue Jun 8 00:56:14 2021 -0400
+#### .bashrc.d/base
+* switched back to `tee` from `sponge`
+* added `mtr` to HISTIGNORE
+
+#### .bashrc.d/functions_sec
+* added `ssh_key_is_encrypted()`
+
+#### .bashrc.d/remote/remote_base
+* fixed source command to ensure it isn't going to recursively source
+
+#### .gitconfig
+* updated various aliases to support `main` branch
+* added aliases to detect the main branch and main remote names
+
+#### .gitconfig.d/git-sync.sh
+* added support for `main` branch name
+* added some checks and verbosity
+
+#### etc/hosts
+* added more domains to blacklist
+
+### Mon Apr 12 15:21:28 2021 -0400
+#### .gitconfig
+* updated aliases to be more concise
+
+#### .gitconfig.d/git-sync.sh
+* stash any staged files and re-add them after rebasing
+
+### Mon Apr 12 14:23:34 2021 -0400
+#### .bashrc.d/functions/seek-broken-links -> .bashrc.d/functions/get-broken-links
+* renamed and updated to include any errors messages
+
+#### .gitconfig
+* updated some aliases
+
+#### .gitconfig.d/git-sync.sh
+* updated a git command for getting the current branch
+
+### Tue Apr 6 02:39:18 2021 -0400
+#### .gitconfig
+* added `dffs` and `diff-with-master` aliases
+
+#### .gitconfig.d/git-sync.sh
+* removed old code in favor of more concise version
+
+### Tue Mar 23 12:28:06 2021 -0400
+#### .gitconfig
+* added `dff` alias to take over the previous `df` behavior
+* `df` now diffs by character
+
+#### .tmux.conf
+* added a missing escape of a backslash
+
+### Tue Mar 9 16:31:53 2021 -0500
+#### .bashrc.d/00_vars
+* updated regex vars
+
+#### .bashrc.d/functions/seek-broken-links
+* updated to support parallel for faster processing
+
+#### .gitconfig
+* improved diff and log aliases
+
+#### .gitconfig.d/git-sync.sh
+* added output when aborting a git rebase
+
+### Thu Feb 4 17:19:28 2021 -0500
+#### .bashrc.d/functions/diff-home-files
+* removed heredoc that's incompatible with Bash 5
+
+#### .bashrc.d/functions_general
+* improved sanity function checks before sourcing and exporting
+
+#### .gitconfig
+* fixed path specification to use `~` instead of `$HOME`
+* updated `df` and `dfs` to diff by character
+
+#### .gitconfig.d/gitattributes
+* commented out config, which led to weird behavior for some repos
+
+#### .gitconfig.d/gitignore
+* added `.idea` to dismiss PyCharm config directories and files
+
+#### etc/sudoers.d/edit-history
+* added
+
+### Mon Nov 2 22:33:46 2020 -0500
+#### .bashrc.d/01_vars
+* added export commands
+
+#### .bashrc.d/base
+* updated some comments
+* updated logic for determining when to start a new tmux session
+* added ability to specifically include or exclude aliases added to  HISTIGNORE
+
+#### .bashrc.d/functions/_print_var_vals
+* updated FUNCNEST value
+
+#### .bashrc.d/functions/diff-home-files
+* added _help()
+* added arguments to alter execution behavior
+
+#### .bashrc.d/functions/yessh
+* updated a comment
+* updated formatting of a command for readability
+
+#### .gitconfig
+* updated some variable values
+
+#### .tmux.conf
+* updated key bindings
+
+#### .vimrc
+* added a config for ssh config files
+
+#### etc/hosts:
+* added
+
+#### etc/sudoers.d/laptop-sleep:
+* added
+
+### Sat Jun 13 02:31:56 2020 -0400
+#### .bashrc.d/functions/convert-timestamp-to-date
+* added timestamp validation for the quick method
+
+### Sat Jun 13 02:06:32 2020 -0400
+#### .bashrc.d/functions/convert-timestamp-to-date
+* added a more thorough and accurate timestamp conversion strategy, which is the new default
+
+### Sat Jun 13 02:04:47 2020 -0400
+#### .bashrc.d/base
+* updated the trailing character appended to aliases when generating HISTIGNORE
+* added a minimum alias name length requirement for adding to HISTIGNORE
+
+#### .bashrc.d/functions/_get_stdin
+* added
+
+#### .bashrc.d/functions/convert-timestamp-to-date
+* updated to support the new _get_stdin() helper function
+
+#### .bashrc.d/functions/list-to-quoted-csv
+* updated to support the new _get_stdin() helper function
+
+#### .bashrc.d/functions/sort-by-line-length
+* added
+
+### Tue Jun 9 20:02:13 2020 -0400
+#### .bashrc.d/base
+* updated HISTIGNORE generation for greater readability
+
+#### .bashrc.d/functions/clipit-copy
+* added the option to open the file with gvim and made that the default
+* rearranged some comments to ensure the function is sourced
+
+#### .bashrc.d/functions/copy-skey
+* rearranged some comments to ensure the function is sourced
+
+#### .bashrc.d/functions/get-vb-ip
+* rearranged some comments to ensure the function is sourced
+
+#### .bashrc.d/functions/img2pdf
+* rearranged some comments to ensure the function is sourced
+
+#### .bashrc.d/functions/showpkg
+* rearranged some comments to ensure the function is sourced
+
+#### .gitignore_global -> .gitconfig.d/gitignore
+* renamed
+
+#### .gitconfig.d/gitattributes
+* added
+
+### Thu Jun 4 15:31:15 2020 -0400
+#### .bashrc.d/aliases_general
+* commented out an old alias for now to avoid issues with it overriding the same-named command
+* changed double quotes to single quotes to standardize on that
+* corrected a regex in `tsm` to properly detect when tmux is in use
+* added `eh` as an alias of `edit-history`
+
+#### .bashrc.d/base
+* updated command for setting deep sleep of the OS and added comment for executing that without needing a password
+
+#### .bashrc.d/functions/compact_history
+* added a comment for executing this function without needing a password
+
+#### .gitconfig
+* added "excludesfile" and "attributesfile" values
+* added code to run `git add -u` to stage tracked files that have changed prior to running `git-sync.sh`
+* updated `pushall` to push to multiple repos in parallel
+
+#### .gitconfig.d/git-sync.sh
+* added logic to attempt rebasing the branch only if master has been updated
+
+#### .vim/after/ftplugin/gitcommit.vim
+* added
+
+#### .vimrc
+* wrapped lines longer than 125 characters to respect the textwidth limit
+* added a comment about vim needing the textwidth value for gitcommit files to be in a separate file to work
+* added file-specific options
+* added config for editing gpg-encrypted files
+
+### Sat May 9 02:55:57 2020 -0400
+#### .bashrc.d/aliases_general
+* added example sudoers lines
+
+#### .bashrc.d/functions/_find_unscoped_vars
+* added more robust code for finding and presenting improperly scoped variables across multiple files
+
+#### .bashrc.d/functions/archive-emails
+* added more robust code for accurately calculating time frames for which to show emails
+
+#### .bashrc.d/functions/clipit-copy
+* updated to properly scope variables
+
+#### .bashrc.d/functions/convert-timestamp-to-date
+* updated to properly scope variables
+
+#### .bashrc.d/functions/copy-skey
+* updated to properly scope variables
+
+#### .gitconfig
+* updated the `ci` alias to correctly handle arguments
+
+#### .gitconfig.d/git-sync.sh
+* updated to provide more control around stashing to be more compatible with being run via cronjob vs. manually
+
+#### .tmux.conf
+* added a comment noting the unfortunate behavior in which tmux reads and executes its config file in full before creating a session leading to errors
+
+#### etc/logrotate.d/chrome-history
+* updated rotation count to be 520 weeks (~10 years) to ensure the history doesn't destroy old files too often
+
+#### etc/sudoers
+* added a comment with example lines for enabling commands to be run without prompting for the password
+
+#### var/spool/cron/crontabs/username
+* updated to include examples of cronjobs for starting and stopping a service
+
+### Sat May 9 02:51:43 2020 -0400
+#### .gitconfig.d/git-sync.sh
+* added
+
+#### etc/logrotate.d/chrome-history
+* added
+
+#### .bashrc.d/functions/diff-home-files
+* added `etc/logrotate.d/chrome-history` to list of files to skip
+
+#### .gitconfig
+* added `bclean`
+
+#### .vimrc
+* updated format of headings for various config settings
+
+### Wed Apr 15 02:57:24 2020 -0400
+#### .bashrc.d/functions/diff-home-files
+* enabled skipping files
+
+#### .bashrc.d/functions/time-between-now-and
+* updated logic to properly calculate days, hours, minutes, and seconds
+
+#### .bashrc.d/functions/yessh
+* fixed an issue when ssh'ing into hosts that don't have `bzip2` installed by default, like CentOS
+
+#### .bashrc.d/remote/remote_base
+* improved logic in run-check() for running check commands
+
+#### .gitconfig
+* updated `pushall` and `pushallf` aliases to ask before pushing to `master`
+* fixed an issue with `changelog` alias regarding formatting of lines following date lines
+
+#### .tmux.conf
+* added commented out code that may fix the issue with tmux tabs not automatically getting renamed
+
+#### .vimrc
+* set formatting options explicitly so they're not as easily overriden
+
+### Wed Apr 8 21:27:49 2020 -0400
+#### .bashrc.d/remote/remote_base
+* added code to enable bash completion since that's not always enabled
+
+#### .gitconfig
+* updated commands for `git ci` alias to better handle some cases
+
+### Wed Apr 8 14:51:48 2020 -0400
+#### .bashrc.d/00_vars
+* added DOMAIN_REGEX
+* updated HTTP_REGEX and EMAIL_REGEX
+
+#### .bashrc.d/functions_sec
+* get_ssl_cert(): added domain validation and further host name
+processing
+
+#### .bashrc.d/remote/remote_base
+* run-check(): added for running Nagios checks locally on a host
+* added logic to not run run-parts if it doesn't exist
+
+#### .gitconfig
+* updated 'git ci' alias to attempt to rebase on master before
+committing
+* added 'who' alias for displaying the repo's contributors
+* updated pull.ff to 'only' so pulls fail if they can't fast-forward
+
+
 ## v2.2.5
 
 ### Wed Feb 26 13:58:26 2020 -0500

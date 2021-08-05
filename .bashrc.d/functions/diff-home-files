@@ -3,7 +3,8 @@
 diff-home-files() {
    local i
    local HOME_DIR="$HOME/home"
-   local ACTION="${1:-diff}"
+   local ACTION="${1:-vimdiff}"
+   local FILE_LIST
 
    _help() {
       # bash 5 doesn't like <<- heredocs with leading tabs within nested functions
@@ -12,28 +13,18 @@ diff-home-files() {
 
 		[cp|copy|-a]      copy files from ~/ to $HOME_DIR non-interactively
 
-		[diff|vimdiff]    use vimdiff to compare each file that differs between ~/ and $HOME_DIR
+      [diff|vimdiff]    use vimdiff to compare each file that differs between ~/ and $HOME_DIR (this is the default)
+
+      [file]            operate only on the specified file
 		" | tr -d '\t'
    }
-
-   case "$ACTION" in
-      diff|vimdiff)
-         ACTION="vimdiff"
-         ;;
-      copy|cp|-a)
-         ACTION="cp -aiv"
-         ;;
-      *)
-         _help
-         return
-         ;;
-   esac
 
    # list files that should be ignored
    # filenames relative to $HOME_DIR
    declare -a skip_files=(
    ".bashrc"
    ".bashrc.d/functions/_verify_reqs"
+   "etc/sudoers.d/edit-history"
    ".bashrc.d/functions/yessh"
    ".htoprc"
    ".zshrc"
@@ -42,8 +33,38 @@ diff-home-files() {
    "etc/sudoers"
    "etc/sudoers.d/laptop-sleep"
    "var/spool/cron/crontabs/username"
+   ".local/share/applications/chrome-slack-converter.sh"
+   "Makefile"
    )
-   for i in $(find $HOME_DIR -type f ! -iregex '.*\/\.git\/.*'); do
+
+   _print_var_vals ACTION
+   case "$ACTION" in
+      diff|vimdiff)
+         ACTION="vimdiff"
+         ;;
+      copy|cp|-a)
+         ACTION="cp -aiv"
+         ;;
+      file)
+         shift
+         unset ACTION
+         FILE_LIST="${1##$HOME/}"
+         [[ $FILE_LIST =~ ^$HOME ]] || FILE_LIST="$HOME_DIR/$FILE_LIST"
+         for i in ${!skip_files[*]}; do
+            { echo "$FILE_LIST" | grep -q "${skip_files[$i]}"; } && unset skip_files[$i]
+         done
+         ;;
+      *)
+         _help
+         return
+         ;;
+   esac
+
+   [[ $ACTION || $ACTION = "file" ]] || ACTION="vimdiff"
+   [[ $FILE_LIST ]] || FILE_LIST=$(find $HOME_DIR -type f ! -iregex '.*\/\.git\/.*')
+   _print_var_vals ACTION FILE_LIST
+
+   for i in $FILE_LIST; do
       # check if the file should be skipped
       echo "$i" | grep -qxf <(for i in  ${skip_files[*]}; do echo "$HOME_DIR/$i"; done) && {
          echo "skipping ignored file '$i'..."
@@ -65,7 +86,17 @@ diff-home-files() {
 
       local file2=$i
 #      echo file2="$file2"
-      [[ $(md5sum $file1 2>/dev/null | cut -d" " -f1) != $(md5sum $file2 2>/dev/null | cut -d" " -f1) ]] && $ACTION $file1 $file2
+      if [[ $(md5sum $file1 2>/dev/null | cut -d" " -f1) != $(md5sum $file2 2>/dev/null | cut -d" " -f1) ]]; then
+         $ACTION $file1 $file2
+      else
+         [[ "$FILE_LIST" = "$i" ]] && {
+            cat <<-EOF
+					no differences between these files:
+					$file1
+					$file2
+				EOF
+         }
+      fi
    done
 
    local missed_files
