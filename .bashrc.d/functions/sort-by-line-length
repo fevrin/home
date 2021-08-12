@@ -10,7 +10,7 @@ sort-by-line-length() {
    local input="$(_get_stdin "$1")"
    local output_command
 
-   echo "$input" | awk '{ print length, $0 }' | sort -n -s | sort | cut -d" " -f2-
+   echo "$input" | awk '{ print length, $0 }' | sort -n -s | egrep -v '^0 *$' | cut -d" " -f2- | sed -re 's;^[[:space:]]+;;'
 
    # include length count
    #echo $HISTIGNORE | tr ':' '\n' | grep '\*' | awk '{ print length, $0 | "sort -n" }'

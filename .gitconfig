@@ -55,7 +55,11 @@
               git commit -v '$@';\
            fi;\
         '"
-  changelog = "!git log --format='### %cd%x02%n%B' $(git get-main-branch)..$(git rev-parse --abbrev-ref HEAD) | tr '\n' '\\1' | sed -re 's;(\\o1\\o1|\\o2\\o1)([^-+*#\\o1]+);\\1#### \\2;g' | tr '\\1' '\n' | tr -d '\\2'"
+   changelog = "!git log --format='### %cd%x02%n%B' $(git get-main-branch)..$(git rev-parse --abbrev-ref HEAD) | \
+                  tr '\n' '\\1' | \
+                  sed -re 's;(\\o1\\o1|\\o2\\o1)([^-+*#\\o1]+);\\1#### \\2;g' | \
+                  tr '\\1' '\n' | \
+                  tr -d '\\2'"
   check-check = "!bash -c '\
                    git diff --check &>/dev/null; \
                    [[ $? -eq 0 ]] || { \
@@ -96,8 +100,12 @@
   fet = "fetch --all -p"
   get-main-branch = "!bash -c '\
      sed -rne \"s;.*$(git get-main-remote)/(.*);\\1;p\" .git/refs/remotes/$(git get-main-remote)/HEAD 2>/dev/null || {\
-        git remote -v show $(git get-main-remote) | sed -rne \"s;.*HEAD branch: (.*)$;\\1;p\";\
+        echo \"using slower, more accurate method to determine the main branch\" >&2; \
+        echo \"setting head so this will be quicker next time\" >&2; \
+        git remote -v set-head origin -a >&2; \
+        sed -rne \"s;.*$(git get-main-remote)/(.*);\\1;p\" .git/refs/remotes/$(git get-main-remote)/HEAD 2>/dev/null; \
      }'" # try a quick method first, but if that fails, try a slower though potentially more up-to-date method
+     # old, slower method: git remote -v show $(git get-main-remote) | sed -rne \"s;.*HEAD branch: (.*)$;\\1;p\";\
   trunk = "!git co $(git get-main-branch)"
   root-branch = trunk
   rbr = root-branch
