@@ -10,14 +10,21 @@ for func in $(realpath $(dirname "$BASH_SOURCE"))/functions/*; do
    funcname="$(sed -rne '3 s;^(function\s+)?([^#( ]+)\(\) \{$;\2;p' "$func")"
 
    # export all the functions here so subshells can utilize them, if needed
-   # for some reason, exported pushd() causes issues in direnv allowed directories
+   # for some reason, exported pushd() causes issues in direnv-allowed directories
+   # though simply sourced (and not exported) pushd() is fine
    # also, we don't want to source and export files with functions that don't match their filenames
-   [[ "$funcname" =~ ^${func//*\/}$ ]] &&
-   [[ -r "$file" ]] &&
-   file -L --mime-type "$file" | grep -q 'text/x-shellscript' &&
-   bash -n "$func" 2>/dev/null &&
-   . "$func" &&
-   [[ ! "$func" =~ pushd ]] &&
-   export -f "${func//*\/}"
+   {
+      # test conditions
+      [[ "$funcname" =~ ^${func//*\/}$ ]] &&
+      [[ -r "$file" ]] &&
+      file -L --mime-type "$file" | grep -q 'text/x-shellscript' &&
+      bash -n "$func" 2>/dev/null
+   } && {
+      # export the function
+      type -t funcname && unset -f funcname
+      . "$func" &&
+      [[ ! "$func" =~ pushd ]] &&
+      export -f "$funcname"
+   }
 done
 unset func

@@ -111,3 +111,5 @@ diff-home-files() {
       echo "$missed_files" | tr '\1' '\n'
    fi
 }
+
+complete -W "copy vimdiff file" $(basename $BASH_SOURCE)

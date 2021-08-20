@@ -28,10 +28,14 @@
                   if [[ $REPLY =~ [Yy] ]]; then \
                      for branch in $affected_branches; do \
                         if [[ $branch = $current_branch ]]; then \
-                           echo -n \"delete current branch '\\''\"$current_branch\"'\\''? [Y/N] \" && \
+                           echo -n \"delete current branch '\\''\"$current_branch\"'\\''? [y/N] \" && \
                            read && \
                            echo && \
-                           [[ $REPLY =~ Y ]] || continue; \
+                           [[ $REPLY =~ [Yy] ]] || { \
+                              echo \"skipping '\\''\"$current_branch\"'\\''\"; \
+                              continue; \
+                           }; \
+                           git trunk; \
                         fi; \
                         git branch -d $branch;\
                      done; \

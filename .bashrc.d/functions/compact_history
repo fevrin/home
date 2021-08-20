@@ -110,3 +110,5 @@ compact_history() {
       return 1
    fi
 }
+
+complete -W "--dry-run --regex" $(basename $BASH_SOURCE)

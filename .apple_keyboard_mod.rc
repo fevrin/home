@@ -72,38 +72,47 @@ else
       sudo sed -i.bak -re 's;! option$;&\n  ctrl:swap_ralt_rctl  Swap right Alt and right Ctrl;' /usr/share/X11/xkb/rules/evdev.lst
    }
 
-#   dconf write "/org/gnome/desktop/input-sources/xkb-options" "['ctrl:swap_lalt_lctl','ctrl:swap_ralt_rctl']"
+   dconf write "/org/gnome/desktop/input-sources/xkb-options" "['ctrl:swap_lalt_lctl','ctrl:swap_ralt_rctl']"
 fi
 
-#xmodmap - <<-EOF
-#! from <http://www.chrisamiller.com/blog/posts/remapping-your-macbooks-keyboard-in-ubuntu-1204>
-#! help from <http://askubuntu.com/questions/131900/how-do-i-switch-the-command-key-and-control-key-on-a-macbook-pro>
-#!
-#! clean most of the modifiers
-#clear control
-#clear mod4
-#clear mod1
-#
-#! -----------------
-#! left side
-#! ----------------
-#! ensure Alt-L behaves like Alt-L
-#!keycode 64 = Alt_L Meta_L
-#! ensure Cmd-L behaves like Ctrl-L
-#!keycode 133 = Control_L NoSymbol Control_L
-#
-#! ------------------
-#! right side
-#! -------------------
-#$addtl_cmds
-#
-#!add mod4 = Super_L
-#add mod1 = Alt_L Meta_L
-#add control = Control_L
-#add control = Control_R
-#!add mod1 = Alt_R Meta_R
-#!add control = Control_L
-#!add control = Control_R
-#EOF
-#
-#unset addtl_cmds
+if ! w | awk '/'$USER'/ { print $2 }' | grep -q 'pts/2'; then
+   # we're not in a new login session
+
+   echo -n "are the keybindings working as expected? [Y/n] "; read
+
+   if [[ $REPLY =~ ^n$ ]]; then
+      echo "ok, running alternative commands"
+      xmodmap - <<-EOF
+   	! from <http://www.chrisamiller.com/blog/posts/remapping-your-macbooks-keyboard-in-ubuntu-1204>
+   	! help from <http://askubuntu.com/questions/131900/how-do-i-switch-the-command-key-and-control-key-on-a-macbook-pro>
+   	!
+   	! clean most of the modifiers
+   	clear control
+   	clear mod4
+   	clear mod1
+
+   	! -----------------
+   	! left side
+   	! ----------------
+   	! ensure Alt-L behaves like Alt-L
+   	!keycode 64 = Alt_L Meta_L
+   	! ensure Cmd-L behaves like Ctrl-L
+   	!keycode 133 = Control_L NoSymbol Control_L
+
+   	! ------------------
+   	! right side
+   	! -------------------
+   	$addtl_cmds
+
+		!add mod4 = Super_L
+		add mod1 = Alt_L Meta_L
+		add control = Control_L
+		add control = Control_R
+		!add mod1 = Alt_R Meta_R
+		!add control = Control_L
+		!add control = Control_R
+		EOF
+
+      unset addtl_cmds
+   fi
+fi
