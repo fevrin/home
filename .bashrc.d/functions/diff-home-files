@@ -48,10 +48,14 @@ diff-home-files() {
       file)
          shift
          unset ACTION
-         FILE_LIST="${1##$HOME/}"
-         [[ $FILE_LIST =~ ^$HOME ]] || FILE_LIST="$HOME_DIR/$FILE_LIST"
-         for i in ${!skip_files[*]}; do
-            { echo "$FILE_LIST" | grep -q "${skip_files[$i]}"; } && unset skip_files[$i]
+         for file in $@; do
+            file="${1##$HOME/}"
+            [[ $file =~ ^$HOME ]] || file="$HOME_DIR/$file"
+            for i in ${!skip_files[*]}; do
+               { echo "$file" | grep -q "${skip_files[$i]}"; } && unset skip_files[$i]
+            done
+            FILE_LIST+="$file "
+            shift
          done
          ;;
       *)
@@ -79,7 +83,6 @@ diff-home-files() {
       ! $(file $i) =~ "Vim swap file" &&
       ! "$i" =~ \.md &&
       ! "$i" =~ \.vim\/ ]] || continue
-#      echo "i = $i"
 
       local file1="$(echo "$i" | sed -re "s;$HOME_DIR/(.*);$HOME/\1;")"
 #      echo file1="$file1"
@@ -112,4 +115,23 @@ diff-home-files() {
    fi
 }
 
-complete -W "copy vimdiff file" $(basename $BASH_SOURCE)
+_diff_home_files_completions() {
+   HOME_DIR="$HOME/home"
+   VALUES=""
+#   echo "COMP_WORDS = '${COMP_WORDS[@]}'"
+   # if we're going by files, list available files
+   if [[ "${#COMP_WORDS[@]}" -gt 2 ]]; then
+      if [[ "${COMP_WORDS[1]}" =~ ^file$ ]]; then
+         VALUES="$(cd "$HOME_DIR" && git ls-tree -r $(git current-branch) --name-only | column -c$(tput cols))"
+      fi
+   elif [[ "${#COMP_WORDS[@]}" -eq 2 ]]; then
+      # ${#COMP_WORDS} starts off at 2, so we're at the initial [Tab]
+      VALUES="copy vimdiff file"
+   fi
+#   echo "VALUES = '$VALUES'"
+#   echo "COMP_WORDS = '${COMP_WORDS[-1]}'"
+   # generate completions based on the last word on the commandline
+   COMPREPLY=($(compgen -W "$VALUES" "${COMP_WORDS[-1]}"))
+}
+
+complete -F _diff_home_files_completions $(basename $BASH_SOURCE)
