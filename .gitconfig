@@ -11,41 +11,59 @@
 [alias]
   # inspired by <https://www.atlassian.com/blog/git/advanced-git-aliases>
 #  bclean = "!git branch --merged HEAD | sed -re 's;^\\*?\\s+;;' | egrep -v \"^($(git rev-parse --abbrev-ref HEAD)|master)$\" -Z | xargs -0 -I{} echo -e 'these branches would be cleared:\n{}'"
-   bclean = "!git fet; bash -c '\
-               current_branch=$(git current-branch) \
-               \
-               main_branch=$(git get-main-branch);\
-               affected_branches=$(git branch --merged $(git get-main-remote)/$(git get-main-branch) | \
-               sed -re \"s;^\\*?\\s+;;\" | \
-               egrep -v \"^$main_branch$\" -Z);\
-               \
-               if [[ $affected_branches ]]; then\
-                  echo -e \"these branches would be cleared:\\n$(echo \"${affected_branches}\" | sed -e \"s;^;- ;\")\"; \
-                  echo; \
-                  echo -n \"would you like to clear them? [y/N] \";\
-                  read;\
-                  echo;\
-                  if [[ $REPLY =~ [Yy] ]]; then \
-                     for branch in $affected_branches; do \
-                        if [[ $branch = $current_branch ]]; then \
-                           echo -n \"delete current branch '\\''\"$current_branch\"'\\''? [y/N] \" && \
-                           read && \
-                           echo && \
-                           [[ $REPLY =~ [Yy] ]] || { \
-                              echo \"skipping '\\''\"$current_branch\"'\\''\"; \
-                              continue; \
-                           }; \
-                           git trunk; \
-                        fi; \
-                        git branch -d $branch;\
-                     done; \
-                  else \
-                     echo \"cancelling branch clearing\"; \
-                  fi;\
-               else\
-                  echo \"no branches to clean!\";\
-               fi;\
-            '"
+   bclean = "!\
+             bash -c '\
+                main_remote=\"$(git get-main-remote)\"; \
+                main_branch=\"$(git get-main-branch)\"; \
+                current_branch=$(git current-branch) \
+                git fetch $main_remote $main_branch:$main_branch; \
+                \
+                affected_branches=$(git branch --merged $main_remote/$main_branch | \
+                sed -re \"s;^\\*?\\s+;;\" | \
+                egrep -v \"^$main_branch$\" -Z);\
+                \
+                if [[ $affected_branches ]]; then\
+                   echo -e \"these branches would be cleared:\\n$(echo \"${affected_branches}\" | sed -e \"s;^;- ;\")\"; \
+                   echo; \
+                   echo -n \"would you like to clear them? [y/N] \";\
+                   read;\
+                   echo;\
+                   if [[ $REPLY =~ [Yy] ]]; then \
+                      for branch in $affected_branches; do \
+                         if [[ $branch = $current_branch ]]; then \
+                            echo -n \"delete current branch '\\''\"$current_branch\"'\\''? [y/N] \" && \
+                            read && \
+                            echo && \
+                            [[ $REPLY =~ [Yy] ]] || { \
+                               echo \"skipping '\\''\"$current_branch\"'\\''\"; \
+                               continue; \
+                            }; \
+                            git trunk; \
+                         fi; \
+                         git branch -d $branch;\
+                      done; \
+                   else \
+                      echo \"cancelling branch clearing\"; \
+                   fi;\
+                else\
+                   echo \"no branches to clean!\";\
+                fi;\
+                echo; \
+                echo \"running '\\''git clean'...\\''\"; \
+                git_clean=\"$(git clean -ndf)\"; \
+                echo \"$git_clean\" | sed -re \"s;^Would remove ;;\"; \
+                if [[ \"$git_clean\" ]]; then \
+                   echo && \
+                   echo -n \"remove the above files? [y/N] \" && \
+                   read; \
+                   [[ \"$REPLY\" =~ [Yy] ]] && git clean -df && unset REPLY; \
+                else \
+                   echo \"no files to clean\"; \
+                fi; \
+                echo; \
+                echo -n \"run '\\''git gc'\\''? [y/N] \"; read; \
+                [[ \"$REPLY\" =~ [Yy] ]] && git gc || exit 0 \
+             '"
   br = branch
   co = checkout
   ci = "!bash -c '\
@@ -79,11 +97,11 @@
   com = commit -v
   current-branch = symbolic-ref --short HEAD
   df = "!bash -c '\
-          git diff --word-diff-regex=\".\" $(if [[ -e \"$GIT_PREFIX/'$1'\" && ! \"$GIT_PREFIX/'$1'\" =~ ^/$ ]]; then echo \"$GIT_PREFIX/'$1'\"; else echo \"'$1'\"; fi) && \
+          git diff --word-diff-regex=\".\" $(if [[ '\\'$1\\'' && -e \"$GIT_PREFIX/'$1'\" && ! \"$GIT_PREFIX/'$1'\" =~ ^/$ ]]; then echo \"$GIT_PREFIX/'$1'\"; else echo \"'$1'\"; fi) && \
           git check-check \
        '"
   dff = "!bash -c '\
-           git diff --word-diff-regex=\"(\\[[^]]+\\]|\\([^)]+\\)|\\w)+\" $(echo \"$GIT_PREFIX\")'$1' && \
+           git diff --word-diff-regex=\"(\\[[^]]+\\]|\\([^)]+\\)|\\w)+\" $([[ '\\'$1\\'' ]] && echo \"$GIT_PREFIX/'$1'\") && \
            git check-check \
         '"
         # formerly used this, but it may not show changes in other directories: `git diff --staged --word-diff-regex=\".\" $(echo \"$GIT_PREFIX\")'$1' && \`
@@ -110,10 +128,11 @@
         sed -rne \"s;.*$(git get-main-remote)/(.*);\\1;p\" .git/refs/remotes/$(git get-main-remote)/HEAD 2>/dev/null; \
      }'" # try a quick method first, but if that fails, try a slower though potentially more up-to-date method
      # old, slower method: git remote -v show $(git get-main-remote) | sed -rne \"s;.*HEAD branch: (.*)$;\\1;p\";\
+  get-main-remote = config --get remote.pushdefault
+  list-tracked-files="!git ls-tree -r $(git current-branch) --name-only"
   trunk = "!git co $(git get-main-branch)"
   root-branch = trunk
   rbr = root-branch
-  get-main-remote = config --get remote.pushdefault
   hist = log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short
   make = "!make " # run make in the repo root directory with any arguments passed to it
   root-dir = rev-parse --show-toplevel

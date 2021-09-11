@@ -21,7 +21,7 @@ for func in $(realpath $(dirname "$BASH_SOURCE"))/functions/*; do
       bash -n "$func" 2>/dev/null
    } && {
       # export the function
-      type -t funcname && unset -f funcname
+      [[ $(type -t funcname) =~ ^function$ ]] && unset -f funcname
       . "$func" &&
       [[ ! "$func" =~ pushd ]] &&
       export -f "$funcname"

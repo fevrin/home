@@ -6,7 +6,7 @@
 # see the `yessh` file for more info
 
 # ensure we're not resourcing this file in an endless loop
-[[ -r ~/.bashrc && $(realpath ~/.bashrc) != $(realpath $BASH_SOURCE) ]] && . ~/.bashrc
+[[ -r ~/.bashrc && $(readlink -e ~/.bashrc) != $(readlink -e $BASH_SOURCE) ]] && . ~/.bashrc
 
 infocmp -x 2>/dev/null | grep -q $TERM || export TERM=screen
 set -o vi

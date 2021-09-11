@@ -24,17 +24,17 @@ diff-home-files() {
    declare -a skip_files=(
    ".bashrc"
    ".bashrc.d/functions/_verify_reqs"
-   "etc/sudoers.d/edit-history"
    ".bashrc.d/functions/yessh"
+   ".githooks/pre-commit"
    ".htoprc"
    ".zshrc"
+   "Makefile"
    "etc/hosts"
    "etc/logrotate.d/chrome-history"
    "etc/sudoers"
+   "etc/sudoers.d/edit-history"
    "etc/sudoers.d/laptop-sleep"
    "var/spool/cron/crontabs/username"
-   ".local/share/applications/chrome-slack-converter.sh"
-   "Makefile"
    )
 
    _print_var_vals ACTION
@@ -116,12 +116,13 @@ diff-home-files() {
 }
 
 _diff_home_files_completions() {
-   HOME_DIR="$HOME/home"
-   VALUES=""
+   local HOME_DIR="$HOME/home"
+   local VALUES=""
 #   echo "COMP_WORDS = '${COMP_WORDS[@]}'"
    # if we're going by files, list available files
    if [[ "${#COMP_WORDS[@]}" -gt 2 ]]; then
       if [[ "${COMP_WORDS[1]}" =~ ^file$ ]]; then
+         # output into columns all files tracked in the $HOME_DIR repo
          VALUES="$(cd "$HOME_DIR" && git ls-tree -r $(git current-branch) --name-only | column -c$(tput cols))"
       fi
    elif [[ "${#COMP_WORDS[@]}" -eq 2 ]]; then
@@ -129,7 +130,8 @@ _diff_home_files_completions() {
       VALUES="copy vimdiff file"
    fi
 #   echo "VALUES = '$VALUES'"
-#   echo "COMP_WORDS = '${COMP_WORDS[-1]}'"
+#   echo "COMP_WORDS = '${COMP_WORDS[@]}'"
+#   echo "COMP_CWORD = '${COMP_CWORD[*]}'"
    # generate completions based on the last word on the commandline
    COMPREPLY=($(compgen -W "$VALUES" "${COMP_WORDS[-1]}"))
 }

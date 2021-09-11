@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# `git pull`s the main branch of the provided repos and rebases the current branch on that
+
 export SSH_AUTH_SOCK=/run/user/$(id -u)/keyring/ssh
 
 declare -a DIRS
@@ -52,32 +54,74 @@ for DIR in ${DIRS[*]}; do
    STAGED_FILES="$(git diff --staged --name-only)"
    GIT_BRANCH="$(git branch --show-current)"
 
-   echo
-   echo
-   echo "UPDATING MAIN BRANCH..."
-   MAIN_BRANCH_NAME="master"
-   git rev-parse --verify --quiet $MAIN_BRANCH_NAME || MAIN_BRANCH_NAME="main"
-   ORIGINAL_MAIN_REF="$(git rev-parse $MAIN_BRANCH_NAME)"
-   if [[ "$GIT_BRANCH" =~ $MAIN_BRANCH_NAME ]]; then
-      echo "$GITBIN pull"
-      $GITBIN pull
-   else
-      echo "$GITBIN fetch origin $MAIN_BRANCH_NAME:$MAIN_BRANCH_NAME"
-      $GITBIN fetch origin $MAIN_BRANCH_NAME:$MAIN_BRANCH_NAME
-   fi
-
-   if [[ $? -ne 0 ]]; then
-      echo "GIT PULL FAILED! ABORTING FURTHER CHANGES"
-      continue
-   fi
-   echo
-
    if [[ -n "$STAGED_FILES" ]]; then
       echo
       echo "THESE STAGED FILES WILL BE STASHED AND RE-STAGED:"
       echo "$STAGED_FILES"
    fi
 
+   echo
+   echo
+   echo "UPDATING MAIN BRANCH..."
+   MAIN_BRANCH_NAME="$(git get-main-branch)"
+   MAIN_REMOTE_NAME="$(git get-main-remote)"
+#   git rev-parse --verify --quiet $MAIN_BRANCH_NAME || MAIN_BRANCH_NAME="main"
+   ORIGINAL_MAIN_BRANCH_REF="$(git rev-parse $MAIN_BRANCH_NAME)"
+
+   # sync any upstream first
+   UPSTREAM="upstream"
+#   [[ -n $(git branch --list $UPSTREAM) ]] && git ls-remote --heads $UPSTREAM &>/dev/null {
+   MERGE_STATUS=0
+   MERGE_TYPE=
+   if git ls-remote --heads $UPSTREAM &>/dev/null; then
+      git fetch --all
+
+      if [[ "$GIT_BRANCH" =~ $MAIN_BRANCH_NAME ]]; then
+         echo "$GITBIN merge $UPSTREAM/$MAIN_BRANCH_NAME"
+         $GITBIN merge $UPSTREAM/$MAIN_BRANCH_NAME
+      else
+#         echo "$GITBIN checkout $MAIN_BRANCH_NAME"
+#         $GITBIN checkout $MAIN_BRANCH_NAME
+
+#         echo "$GITBIN merge $UPSTREAM/$MAIN_BRANCH_NAME"
+#         if $GITBIN merge $UPSTREAM/$MAIN_BRANCH_NAME; then
+         echo "$GITBIN fetch $UPSTREAM +$MAIN_BRANCH_NAME:$MAIN_BRANCH_NAME"
+         if $GITBIN fetch $UPSTREAM +$MAIN_BRANCH_NAME:$MAIN_BRANCH_NAME; then
+            echo "$GITBIN push $MAIN_REMOTE_NAME $MAIN_BRANCH_NAME:$MAIN_BRANCH_NAME"
+            $GITBIN push $MAIN_REMOTE_NAME $MAIN_BRANCH_NAME:$MAIN_BRANCH_NAME
+
+         else
+            MERGE_TYPE=fetch
+            MERGE_STATUS=1
+         fi
+
+#         echo "$GITBIN checkout -"
+#         $GITBIN checkout -
+      fi
+   else
+      if [[ "$GIT_BRANCH" =~ $MAIN_BRANCH_NAME ]]; then
+         echo "$GITBIN pull"
+         $GITBIN pull || {
+            MERGE_TYPE=pull
+            MERGE_STATUS=1
+         }
+
+      else
+         echo "$GITBIN fetch $MAIN_REMOTE_NAME $MAIN_BRANCH_NAME:$MAIN_BRANCH_NAME"
+         $GITBIN fetch $MAIN_REMOTE_NAME $MAIN_BRANCH_NAME:$MAIN_BRANCH_NAME || {
+            MERGE_TYPE=fetch
+            MERGE_STATUS=1
+         }
+
+      fi
+   fi
+
+   if [[ -n "$MERGE_TYPE" ]]; then
+      echo "GIT ${MERGE_TYPE} FAILED! ABORTING FURTHER CHANGES"
+      continue
+   fi
+
+   echo
 
    if [[ ! "$GIT_BRANCH" =~ $MAIN_BRANCH_NAME ]]; then
       echo
