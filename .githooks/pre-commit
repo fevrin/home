@@ -1,0 +1,27 @@
+#!/bin/bash
+
+exec < /dev/tty
+echo -n 'run `check-scripts`? [Y/n] '; read
+
+[[ "$REPLY" =~ [Nn] ]] || {
+   # run the `check-scripts` function, which should already be sourced
+   check-scripts
+
+   [[ $? -eq 0 ]] || {
+      echo
+      echo -n "continue committing, despite the above errors? [y/N] "; read
+      [[ "$REPLY" =~ [Yy] ]] || exit 1
+   }
+}
+
+#echo -n 'run `spell-check`? [Y/n] '; read
+#[[ "$REPLY" =~ [Nn] ]] || {
+#   # run the `check-scripts` function, which should already be sourced
+#   #aspell
+#
+#   [[ $? -eq 0 ]] || {
+#      echo
+#      echo -n "continue committing, despite the above errors? [y/N] "; read
+#      [[ "$REPLY" =~ [Yy] ]] || exit 1
+#   }
+#}

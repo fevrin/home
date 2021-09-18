@@ -1,3 +1,6 @@
+MAKEFILE := $(lastword $(MAKEFILE_LIST))
+MAKE_COMMAND := $(MAKE) -C $(abspath $(dir $(MAKEFILE))) -f $(abspath $(MAKEFILE))
+
 .PHONY: ssh git
 # from <https://stackoverflow.com/questions/2131213/can-you-make-valid-makefiles-without-tab-characters/60363121#60363121>
 .RECIPEPREFIX := $(.RECIPEPREFIX) # switch to using spaces instead of tabs for recipe separators
@@ -62,6 +65,40 @@ else
    @# Makefile path determination from <https://stackoverflow.com/questions/18136918/how-to-get-current-relative-directory-of-your-makefile/18137056#18137056>
    @$(MAKE) -sC .gitconfig.d -f $(abspath $(lastword $(MAKEFILE_LIST))) git
 endif
+
+.PHONY: dev
+dev:
+   @$(MAKE_COMMAND) git-hooks
+
+git-hooks:
+   @$(MAKE_COMMAND) $(subst .githooks, .git/hooks, $(wildcard .githooks/*))
+.git/hooks/%: .githooks/%
+   @[ -h $@ ] || ln -siv ../../$< $@
+
+.PHONY: check-defs
+check-defs: $(shell find -name '*.md')
+   @/bin/bash -c '\
+      for file in $^; do \
+         for def in $$(\
+               cat $$file | \
+               sed -rne '\''s;^(\[[^]]+\]):.*;\1;p'\'' | \
+               sed -re '\''s;[][*];\\&;g'\'' | \
+               sed -re "s;^;[^^];" | \
+               sed -re "s; ;\o1;g" \
+            ); do \
+            def=$$(echo "$$def" | tr "\1" " "); \
+#            echo "def = '\''$$def'\''"; \
+            egrep -iq --color=always "$$def" $$file || \
+               defs="$$defs\n'\''$$(echo $$def | sed -re "s;^\[\^\^\];;" -e "s;[*^\];;g")'\'' is unused"; \
+         done; \
+         if [[ -n "$$defs" ]]; then \
+            echo -n "$$file:" && \
+            echo -e "$$defs" && \
+            echo && unset defs; \
+         fi; \
+      done; \
+   '
+
 
 
 #test:
