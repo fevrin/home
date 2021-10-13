@@ -96,14 +96,19 @@ check-defs: $(shell find -name '*.md')
             echo && unset footnotes; \
          fi; \
          for def in $$(\
-	            sed -rne '\''s;.*(\[[^]]+\]\[([^]]+)\]|\[([^]]+)\]\[\]).*;\2;gp'\'' | \
+               cat $$file | \
+               sed -rne '\''s;.*\[[^]]+\]\[([^]]+)\].*;\1;gp'\'' | \
+               sed -re '\''s;[][*];\\&;g'\'' | \
+               sed -re "s; ;\o1;g"; \
+               cat $$file | \
+               sed -rne '\''s;.*\[([^]]+)\]\[\].*;\1;gp'\'' | \
                sed -re '\''s;[][*];\\&;g'\'' | \
                sed -re "s; ;\o1;g"; \
             ); do \
             def=$$(echo "$$def" | tr "\1" " "); \
 #            echo "def = '\''$$def'\''"; \
             egrep -iq --color=always "^\[$$def\]:" $$file || \
-               defs="$$defs\n'\''$$def'\'' is unused"; \
+               defs="$$defs\n'\''$$def'\'' is undefined"; \
          done; \
          if [[ -n "$$defs" ]]; then \
             echo -n "$$file:" && \
