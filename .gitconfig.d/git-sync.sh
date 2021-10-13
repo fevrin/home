@@ -73,12 +73,17 @@ for DIR in ${DIRS[*]}; do
 #   [[ -n $(git branch --list $UPSTREAM) ]] && git ls-remote --heads $UPSTREAM &>/dev/null {
    MERGE_STATUS=0
    MERGE_TYPE=
+   git fetch --all
    if git ls-remote --heads $UPSTREAM &>/dev/null; then
-      git fetch --all
 
+      # if we're on the main branch, just merge the changes; otherwise fetch them
+      # (which also merges with the '+' marker)
       if [[ "$GIT_BRANCH" =~ $MAIN_BRANCH_NAME ]]; then
-         echo "$GITBIN merge $UPSTREAM/$MAIN_BRANCH_NAME"
-         $GITBIN merge $UPSTREAM/$MAIN_BRANCH_NAME
+         echo "$GITBIN merge $UPSTREAM $MAIN_BRANCH_NAME"
+         $GITBIN merge $UPSTREAM $MAIN_BRANCH_NAME || {
+            MERGE_TYPE="pull upstream"
+            MERGE_STATUS=1
+         }
       else
 #         echo "$GITBIN checkout $MAIN_BRANCH_NAME"
 #         $GITBIN checkout $MAIN_BRANCH_NAME
@@ -86,14 +91,10 @@ for DIR in ${DIRS[*]}; do
 #         echo "$GITBIN merge $UPSTREAM/$MAIN_BRANCH_NAME"
 #         if $GITBIN merge $UPSTREAM/$MAIN_BRANCH_NAME; then
          echo "$GITBIN fetch $UPSTREAM +$MAIN_BRANCH_NAME:$MAIN_BRANCH_NAME"
-         if $GITBIN fetch $UPSTREAM +$MAIN_BRANCH_NAME:$MAIN_BRANCH_NAME; then
-            echo "$GITBIN push $MAIN_REMOTE_NAME $MAIN_BRANCH_NAME:$MAIN_BRANCH_NAME"
-            $GITBIN push $MAIN_REMOTE_NAME $MAIN_BRANCH_NAME:$MAIN_BRANCH_NAME
-
-         else
-            MERGE_TYPE=fetch
+         $GITBIN fetch $UPSTREAM +$MAIN_BRANCH_NAME:$MAIN_BRANCH_NAME || {
+            MERGE_TYPE="fetch upstream"
             MERGE_STATUS=1
-         fi
+         }
 
 #         echo "$GITBIN checkout -"
 #         $GITBIN checkout -
@@ -107,8 +108,8 @@ for DIR in ${DIRS[*]}; do
    else
       if [[ "$GIT_BRANCH" =~ $MAIN_BRANCH_NAME ]]; then
          echo "$GITBIN pull"
-         $GITBIN pull || {
-            MERGE_TYPE=pull
+         $GITBIN merge || {
+            MERGE_TYPE=merge
             MERGE_STATUS=1
          }
 
