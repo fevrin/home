@@ -79,17 +79,31 @@ git-hooks:
 check-defs: $(shell find -name '*.md')
    @/bin/bash -c '\
       for file in $^; do \
-         for def in $$(\
+         for footnote in $$(\
                cat $$file | \
                sed -rne '\''s;^(\[[^]]+\]):.*;\1;p'\'' | \
                sed -re '\''s;[][*];\\&;g'\'' | \
                sed -re "s;^;[^^];" | \
                sed -re "s; ;\o1;g" \
             ); do \
+            footnote=$$(echo "$$footnote" | tr "\1" " "); \
+            egrep -iq --color=always "$$footnote" $$file || \
+               footnotes="$$footnotes\n'\''$$(echo $$footnote | sed -re "s;^\[\^\^\];;" -e "s;[*^\];;g")'\'' is unused"; \
+         done; \
+         if [[ -n "$$footnotes" ]]; then \
+            echo -n "$$file:" && \
+            echo -e "$$footnotes" && \
+            echo && unset footnotes; \
+         fi; \
+         for def in $$(\
+	            sed -rne '\''s;.*(\[[^]]+\]\[([^]]+)\]|\[([^]]+)\]\[\]).*;\2;gp'\'' | \
+               sed -re '\''s;[][*];\\&;g'\'' | \
+               sed -re "s; ;\o1;g"; \
+            ); do \
             def=$$(echo "$$def" | tr "\1" " "); \
 #            echo "def = '\''$$def'\''"; \
-            egrep -iq --color=always "$$def" $$file || \
-               defs="$$defs\n'\''$$(echo $$def | sed -re "s;^\[\^\^\];;" -e "s;[*^\];;g")'\'' is unused"; \
+            egrep -iq --color=always "^\[$$def\]:" $$file || \
+               defs="$$defs\n'\''$$def'\'' is unused"; \
          done; \
          if [[ -n "$$defs" ]]; then \
             echo -n "$$file:" && \

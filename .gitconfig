@@ -120,6 +120,7 @@
   diff-with-main = "!bash -c 'git diff $(git get-main-branch)... '$@''"
   dump = cat-file -p
   fet = "fetch --all -p"
+  fork = "clone -o upstream "
   get-main-branch = "!bash -c '\
      sed -rne \"s;.*$(git get-main-remote)/(.*);\\1;p\" .git/refs/remotes/$(git get-main-remote)/HEAD 2>/dev/null || {\
         echo \"using slower, more accurate method to determine the main branch\" >&2; \
@@ -139,7 +140,7 @@
   st = status
   sync = "!$HOME/.gitconfig.d/git-sync.sh $@"
   type = cat-file -t
-  ver = "!bash -c 'version=$0; git tag -am \"version $version\" v$version'"
+  ver = "!bash -c 'version='$1'; [[ -n \"$version\" ]] && git tag -am \"version $version\" v$version'"
   who = shortlog -n -s --no-merges # from <https://thoughtbot.com/blog/streamline-your-git-workflow-with-aliases>
 
   # push current branch to all remotes

@@ -98,6 +98,12 @@ for DIR in ${DIRS[*]}; do
 #         echo "$GITBIN checkout -"
 #         $GITBIN checkout -
       fi
+
+      if [[ -z "$MERGE_TYPE" ]]; then
+         # if the fetch/merge was successful, push the changes to the fork
+         echo "$GITBIN push $MAIN_REMOTE_NAME $MAIN_BRANCH_NAME:$MAIN_BRANCH_NAME"
+         $GITBIN push $MAIN_REMOTE_NAME $MAIN_BRANCH_NAME:$MAIN_BRANCH_NAME
+      fi
    else
       if [[ "$GIT_BRANCH" =~ $MAIN_BRANCH_NAME ]]; then
          echo "$GITBIN pull"
@@ -120,8 +126,6 @@ for DIR in ${DIRS[*]}; do
       echo "GIT ${MERGE_TYPE} FAILED! ABORTING FURTHER CHANGES"
       continue
    fi
-
-   echo
 
    if [[ ! "$GIT_BRANCH" =~ $MAIN_BRANCH_NAME ]]; then
       echo

@@ -3,7 +3,11 @@
 tabular-to-csv() {
    #takes a file of standard MySQL tabular output and converts it to CSV
 
-   local tabular_file="$1"
+   _verify_reqs <<-EOF || return 1
+      _get_stdin
+	EOF
 
-   sed -rne 's; *\| *;,;gp' "$tabular_file" | sed -re 's;(^,|,$);;g'
+   local tabular_contents="$(_get_stdin "$1")"
+
+   echo "$tabular_contents" | sed -rne 's; *\| *;,;gp' | sed -re 's;(^,|,$);;g'
 }
