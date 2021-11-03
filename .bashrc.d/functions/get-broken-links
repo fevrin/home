@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# consider <https://github.com/lycheeverse/lychee> instead
+
 get-broken-links() {
    # inspired by <https://sookocheff.com/post/bash/parsing-bash-script-arguments-with-shopts/>
 
