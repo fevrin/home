@@ -17,8 +17,28 @@ get-public-ip() {
 }
 
 get-ip-location() {
-   ip="$(get-public-ip)"
-   curl -s http://api.db-ip.com/v2/free/$ip
+   local ip="$(get-public-ip)"
+   local data="$(curl -sw "%{response_code}" http://api.db-ip.com/v2/free/$ip)"
+   local location="$(echo "$data" | sed -re 's;(.*[^0-9])[0-9]+$;\1;')"
+   local resp_code="$(echo "$data" | sed -re 's;.*[^0-9]([0-9]+)$;\1;')"
+
+   [[ ! "$resp_code" =~ 200 ]] && {
+      location="$(curl -s -H "User-Agent: keycdn-tools:https://www.example.com" "https://tools.keycdn.com/geo.json?host=${ip}")"
+   }
+
+   echo "$location"
+}
+
+get-ip-city() {
+   local data="$(curl -sw "%{response_code}" https://ipinfo.io/city 2> /dev/null | tr ' ' '+')"
+   local city="$(echo "$data" | sed -re 's;(.*[^0-9])[0-9]+$;\1;')"
+   local resp_code="$(echo "$data" | sed -re 's;.*[^0-9]([0-9]+)$;\1;')"
+
+   [[ ! "$resp_code" =~ 200 ]] && {
+      city="$(get-ip-location | jq -r '.city')"
+   }
+
+   echo "$city"
 }
 
 count-ips-from-tcpdump() {

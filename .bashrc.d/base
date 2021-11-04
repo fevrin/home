@@ -100,7 +100,7 @@ if [[ -x $(which tmux) ]]; then
 			EOF
      else
         # there are no tmux sessions or at least no detached tmux sessions, so start tmux
-        tmux
+        tmux new-session 'tmux new-window top && tmux new-window'
 
 #        # this command would otherwise result in the following error if in ~/.tmux.conf since tmux seems to read and execute the conf file in full before creating a session:
 #        # .tmux.conf:117: no current target
