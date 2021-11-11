@@ -2,6 +2,120 @@
 
 # CHANGELOG
 
+## v2.3.5
+
+### 2021-11-11 (Thu, Nov 11 2021)
+#### .bashrc.d/aliases_laptop
+* updated `cn` alias to use the new "speaker" target
+
+#### .bashrc.d/functions/blueconnect
+* added for easier management of a small number of bluetooth devices
+
+#### .bashrc.d/functions/yessh
+* fixed issues with running commands without getting to a shell prompt
+
+### 2021-11-04 (Thu, Nov 04 2021)
+#### .bashrc.d/base
+* updated tmux initialization to begin with a `top` and blank window in an initial new session
+
+#### .bashrc.d/functions_net
+* updated `get-ip-location()` for better failure handling
+* added `get-ip-city()`
+
+#### .tmux.conf
+* updated the status line to move the weather info to the left of the date/time
+
+### 2021-11-03 (Wed, Nov 03 2021)
+#### .bashrc.d/aliases_laptop
+* added `cb` and `cn` for easier connecting to certain bluetooth devices
+
+#### .bashrc.d/functions/get-broken-links
+* added a comment noting a more mature tool for detecting bad links
+
+#### .gitconfig
+* updated `changelog` to be smarter with regards to which commits' notes it should retrieve
+* added `df-alt`
+
+#### .tmux.conf
+* added some support for `dracula`'s weather scripts
+
+### 2021-10-13 (Wed, Oct 13 2021)
+#### .gitconfig
+* updated `git bclean` for readability
+* renamed `check-check` to `check-whitespace` for clarity
+* added `git fork`
+* updated `git ver` to require a version number
+
+#### .gitconfig.d/git-sync.sh
+* updated for clarity when recovering from a failure
+* added code to push changes to the fork if a merge was done from the origin
+
+#### Makefile
+* fixed to better detect definitions within the content
+* updated `check-defs` to additionally check for terms used but undefined
+
+#### .bashrc.d/functions/tabular-to-csv
+* updated to support `_get_stdin`
+
+### 2021-09-17 (Fri, Sep 17 2021)
+#### .githooks/pre-commit
+* added
+
+#### Makefile
+* added `make dev`, `make git-hooks`, and `make check-defs`
+
+### 2021-09-11 (Sat, Sep 11 2021)
+#### .bashrc.d/functions/diff-home-files
+* added file exceptions
+* fixed variable scoping in completions function
+
+#### .bashrc.d/functions_general
+* improved function interpretation confirmation code
+
+#### .bashrc.d/remote/remote_base
+* improved portability of conditional `~/.bashrc` sourcing
+
+#### .gitconfig
+* improved robustness of `bclean`, `df`, and `dff`
+* added `list-tracked-files`
+
+#### .gitconfig.d/git-sync.sh
+* added support for pulling upstream changes and merging those into a fork
+
+### 2021-08-21 (Sat, Aug 21 2021)
+#### .bashrc.d/functions/diff-home-files
+* updated bash completion to show filenames with the `file` subcommand
+* updated `file` subcommand to support multiple files
+
+### 2021-08-20 (Fri, Aug 20 2021)
+#### .apple_keyboard_mod.rc
+* added conditional to run old keybinding commands if the new method doesn't work
+
+#### .bashrc.d/functions/compact_history
+* added basic bash completion
+
+#### .bashrc.d/functions/diff-home-files
+* added basic bash completion
+
+#### .bashrc.d/functions/show-disk-space-usage
+* added
+
+#### .bashrc.d/functions_general
+* updated code for readability
+* added code to unset a function first (to ensure there isn't weirdness around the version that's available)
+
+#### .gitconfig
+* added verbosity when deleting the current branch
+
+### 2021-08-12 (Thu, Aug 12 2021)
+#### .gitconfig
+* rearranged `changelog` for readability
+* added caching behavior for `get-main-branch`
+
+#### .bashrc.d/functions/sort-by-line-length
+* corrected sorting behavior
+
+
 ## v2.3.0
 
 ### Wed Aug 4 21:46:28 2021 -0400

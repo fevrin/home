@@ -1,0 +1,71 @@
+#!/bin/bash
+
+blueconnect() {
+
+   _verify_reqs <<-EOF || return 1
+   bluetoothctl
+   _print_var_vals
+   verbose
+	EOF
+
+   local device="$1"
+   local already_connected=0
+
+   case "$device" in
+      buds)
+         device="buds";;
+      speaker)
+         device="speaker";;
+   esac
+
+   bluetooth_version="$(btmgmt info | sed -rne 's;.* version ([0-9]+) .*;\1;p')"
+
+   declare -A bluetooth_versions=(
+      [6]="4.0"
+      [7]="4.1"
+      [8]="4.2"
+      [9]="5.0"
+      [10]="5.1"
+      [11]="5.2"
+   )
+
+   _print_var_vals bluetooth_versions[\$bluetooth_version] device
+
+   OIFS="$IFS"
+   IFS=$'\n'
+   local connected_devs="$(bluetoothctl info 2>&1 | sed -rne "s;.*Name: (.+)$;\1;p")"
+      _print_var_vals connected_devs device
+   for dev in $connected_devs; do
+      _print_var_vals dev device
+      [[ "${dev,,}" =~ "$device" ]] && already_connected=1 && echo "$device is already connected" && break
+   done
+   IFS="$OIFS"
+
+   [[ "$already_connected" -eq 1 ]] || {
+      [[ "${bluetooth_versions[$bluetooth_version]%%.*}" -lt 5 && "$connected_devs" ]] && bluetoothctl disconnect;
+      bluetoothctl connect $(bluetoothctl paired-devices | awk "tolower(\$0) ~ /$device/ { print \$2 }");
+   }
+}
+
+_blueconnect_completions() {
+   local HOME_DIR="$HOME/home"
+   local VALUES=""
+#   echo "COMP_WORDS = '${COMP_WORDS[@]}'"
+   # if we're going by files, list available files
+   if [[ "${#COMP_WORDS[@]}" -gt 2 ]]; then
+      if [[ "${COMP_WORDS[1]}" =~ ^file$ ]]; then
+         # output into columns all files tracked in the $HOME_DIR repo
+         VALUES="$(bluetoothctl paired-devices | cut -d' ' -f3-)"
+      fi
+   elif [[ "${#COMP_WORDS[@]}" -eq 2 ]]; then
+      # ${#COMP_WORDS} starts off at 2, so we're at the initial [Tab]
+      VALUES="buds nest"
+   fi
+#   echo "VALUES = '$VALUES'"
+#   echo "COMP_WORDS = '${COMP_WORDS[@]}'"
+#   echo "COMP_CWORD = '${COMP_CWORD[*]}'"
+   # generate completions based on the last word on the commandline
+   COMPREPLY=($(compgen -W "$VALUES" "${COMP_WORDS[-1]}"))
+}
+
+complete -F _blueconnect_completions $(basename $BASH_SOURCE)

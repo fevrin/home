@@ -43,14 +43,17 @@ yessh() {
       while [[ $# -ge 1 ]]; do
          local arg="$1"
          verbose 8 "arg = $arg"
+         verbose 8 "\$@ = '$@'"
          case $arg in
             -p|--port)
                shift
                port="$1"
                ;;
             *@*)
-               username="$(echo "$arg" | cut -d@ -f1)"
-               hostname="$(echo "$arg" | cut -d@ -f2)"
+               if [[ "$arg" =~ $DOMAIN_REGEX$ ]]; then
+                  username="$(echo "$arg" | cut -d@ -f1)"
+                  hostname="$(echo "$arg" | cut -d@ -f2)"
+               fi
                ;;
             -*)
                if [[ "$arg" =~ -[46AaCfGgKkMNnqsTtVvXxYy]+ ]]; then
@@ -63,7 +66,7 @@ yessh() {
                ;;
             *)
                if [[ -z "$hostname" ]]; then
-                  hostname="$arg"
+                  [[ "$arg" =~ $DOMAIN_REGEX$ ]] && hostname="$arg"
                else
                   # the last argument(s) should be the command, like with the ssh client
                   orig_command="$@"
@@ -114,16 +117,16 @@ yessh() {
       )"
 
       if [[ $(echo "$bashrc_contents" | wc -c) -le 20480 ]]; then
-         command="
+         read -r -d '' command <<-EOF
             bash --rcfile <(
                which bunzip2 &>/dev/null || {
                   which yum &>/dev/null &&
-                   echo \"echo \\\"installing bzip2...\\\"\" &&
-                    yum install -qy bzip2 &>/dev/null;
+                     echo "echo \"installing bzip2...\"" &&
+                     yum install -qy bzip2 &>/dev/null;
                };
-               echo \"$bashrc_contents\" | base64 --decode | bunzip2
+               echo "$bashrc_contents" | base64 --decode | bunzip2
             )
-         "
+			EOF
 
          # inspired by <https://superuser.com/questions/671372/running-command-in-new-bash-shell-with-rcfile-and-c/671488#671488>
          # necessary mess to mark just the output of the command (not any rcfile output)
@@ -132,7 +135,7 @@ yessh() {
          # \03 = start of output
          # those numbers are arbitrary but not likely to occur in typical output
          [[ -n "$orig_command" ]] &&
-         command="$command -ci \"$orig_command |
+         command="$command -ci \"${orig_command//"\""/"\\\""} |
          tr '\n' '\2' |                         # convert all newlines to octal #2 so the output is a single line
          sed -re 's;^;\o3;'\" |                 # insert an octal #3 at the beginning of the command output's one line
          sed -rne 's;.*\o3;;' -e 's;\o2;\n;gp'" # now with the command's output alongside any other output from the rcfile, delete everything before the command output marker (octal #3) and convert back all octal #2s to newlines
