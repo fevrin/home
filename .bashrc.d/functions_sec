@@ -144,3 +144,92 @@ ssh_key_is_encrypted() {
       fi
    }
 }
+
+format_external_luks_lvm() {
+   # this expects one argument: the drive designation (e.g., sda)
+   # nvme designations aren't yet supported
+
+   local REPLY
+   local drive="$1"
+   drive="${drive##/dev/}"
+   declare -A drive_info=(
+   [device]="/dev/$(echo "$drive" | sed 's;[0-9]+$;;')"
+   [path]="/dev/$(if [[ "$drive" =~ [A-Za-z][0-9]$ ]]; then echo "$drive"; else echo "${drive}1";fi)"
+   [vendor]="$(if [[ -s /sys/block/${drive}/device/vendor ]]; then cat /sys/block/${drive}/device/vendor | sed -re 's; +$;;'; else echo 'unknown_vendor'; fi)"
+   [model]="$(cat /sys/block/${drive}/device/model | sed -re 's; +$;;' -e 's; ;_;g')"
+   [size_actual]="$(lsblk --nodeps --noheadings --output SIZE "${drive_info[device]}" | tr -d ' ' | sed -re 's;$;B;')"
+   [size]="$(echo "${drive_info[size_actual]}" | egrep -o '[0-9.]+' | awk '{ print int($1 + 0.5) }')$(echo "${drive_info[size_actual]}" | egrep -o '[A-Za-z]+$')"
+   )
+   local keyfile_name
+   local fs_label
+   for i in vendor model size; do
+      keyfile_name+="${drive_info[$i],,}_"
+   done
+   keyfile_name="${keyfile_name%%_}"
+   fs_label="${keyfile_name}"
+   [[ ${#fs_label} -gt 16 ]] && fs_label="${drive_info[vendor],,}_${drive_info[size],,}"
+   echo "$keyfile_name"
+   echo
+   echo -n "is '${drive_info[path]}' the correct drive and partition? [y/N] "; read
+   [[ $REPLY =~ [Yy] ]] || {
+      echo "please re-run with the correct drive"
+      return
+   }
+   echo -n "is the label '${keyfile_name}' ok to use? [y/N] "; read
+   [[ $REPLY =~ [Yy] ]] || {
+      echo -n "which name would you like to use instead? "; read
+      keyfile_name="$REPLY"
+   }
+   _print_var_vals drive_info[device] drive_info[vendor] drive_info[model] drive_info[size] keyfile_name
+
+   # ensure sudo privileges are active
+   sudo -v
+
+   # unmount the drive if it's mounted
+   grep -qs "${drive_info[path]}" /proc/mounts && sudo umount "${drive_info[path]}"
+
+   # close the mount if it's already encrypted
+   sudo cryptsetup isLuks "${drive_info[path]}" &>/dev/null && sudo cryptsetup status "${keyfile_name}" &>/dev/null && sudo cryptsetup close "${keyfile_name}"
+
+   # print the current partition table
+   sudo sgdisk --print "${drive_info[device]}"
+   echo
+   echo -n "would you like to reformat the drive? [y/N] "; read
+   [[ $REPLY =~ [Yy] ]] && {
+      sudo sgdisk --zap-all "${drive_info[device]}"
+      sudo sgdisk --new=1:0:0 "${drive_info[device]}"
+      sudo sgdisk --typecode=1:8301 "${drive_info[device]}"
+      sudo sgdisk --change-name=1:"${keyfile_name}" "${drive_info[device]}"
+      sudo sgdisk --print "${drive_info[device]}"
+      echo
+      echo -n "does the new partition table look correct? [y/N] "; read
+      [[ $REPLY =~ [Yy] ]] || {
+         echo "please manually correct the partition table with \`sgdisk\`"
+         echo "exiting..."
+         return 1
+      }
+   }
+#   generate_luks_keyfile /etc/"${keyfile_name}"
+   echo -n "ready to encrypt the drive? [y/N] "; read
+   [[ $REPLY =~ [Yy] ]] && {
+      echo sudo cryptsetup luksFormat --verbose --verify-passphrase --type=luks2 "${drive_info[path]}"
+      sudo cryptsetup luksFormat --verbose --verify-passphrase --type=luks2 "${drive_info[path]}"
+      echo sudo cryptsetup open --verbose --type=luks2 "${drive_info[path]}" "${keyfile_name}"
+      sudo cryptsetup open --verbose --type=luks2 "${drive_info[path]}" "${keyfile_name}"
+      echo sudo cryptsetup luksDump "${drive_info[path]}"
+      sudo cryptsetup luksDump "${drive_info[path]}"
+      #   sudo cryptsetup luksAddKey "${drive_info[path]}" /etc/crypt."${keyfile_name}" 
+      #   sudo chown "${USER}" /etc/crypt."${keyfile_name}"  
+      #   sudo cryptsetup luksHeaderBackup "${drive_info[path]}" --header-backup-file=/etc/crypt."${keyfile_name}" .header
+      #   echo "${keyfile_name} UUID=$(blkid -o value -s PARTUUID ${drive_info[path]}) /etc/crypt.${keyfile_name} luks,discard,noearly" #   >>/etc/crypttab
+      #   echo pvcreate /dev/mapper/"${keyfile_name}"
+      #   echo vgcreate "${keyfile_name}-vg" /dev/mapper/"${keyfile_name}"
+      #   echo lvcreate -L 100%FREE -n "${keyfile_name}-lv" "${keyfile_name}-vg"
+      echo sudo mkfs.ext4 -vL "${fs_label}" /dev/mapper/"${keyfile_name}"
+      sudo mkfs.ext4 -vL "${fs_label}" /dev/mapper/"${keyfile_name}"
+      echo sudo mount "${drive_info[path]}" /media/$USER/"${keyfile_name}"
+      sudo mount "${drive_info[path]}" /media/$USER/"${keyfile_name}"
+#      sudo cryptsetup close --verbose "${keyfile_name}"
+#      sudo cryptsetup unlock -b "${drive_info[path]}"
+   }
+}
