@@ -63,37 +63,35 @@ for DIR in ${DIRS[*]}; do
    echo
    echo
    echo "UPDATING MAIN BRANCH..."
-   MAIN_BRANCH_NAME="$(git get-main-branch)"
-   MAIN_REMOTE_NAME="$(git get-main-remote)"
-#   git rev-parse --verify --quiet $MAIN_BRANCH_NAME || MAIN_BRANCH_NAME="main"
-   ORIGINAL_MAIN_BRANCH_REF="$(git rev-parse $MAIN_BRANCH_NAME)"
+   MAIN_BRANCH="$(git get-main-branch)"
+   MAIN_REMOTE="$(git get-main-remote)"
+#   git rev-parse --verify --quiet $MAIN_BRANCH || MAIN_BRANCH="main"
+   ORIGINAL_MAIN_BRANCH_REF="$(git rev-parse $MAIN_BRANCH)"
 
    # sync any upstream first
    UPSTREAM="upstream"
 #   [[ -n $(git branch --list $UPSTREAM) ]] && git ls-remote --heads $UPSTREAM &>/dev/null {
-   MERGE_STATUS=0
    MERGE_TYPE=
-   git fetch --all
+   git fetch --all --prune
    if git ls-remote --heads $UPSTREAM &>/dev/null; then
+      # we're in a forked repo (assuming the upstream repo is aliased to $UPSTREAM)
 
       # if we're on the main branch, just merge the changes; otherwise fetch them
       # (which also merges with the '+' marker)
-      if [[ "$GIT_BRANCH" =~ $MAIN_BRANCH_NAME ]]; then
-         echo "$GITBIN merge $UPSTREAM $MAIN_BRANCH_NAME"
-         $GITBIN merge $UPSTREAM $MAIN_BRANCH_NAME || {
-            MERGE_TYPE="pull upstream"
-            MERGE_STATUS=1
+      if [[ "$GIT_BRANCH" =~ $MAIN_BRANCH ]]; then
+         echo "$GITBIN merge $UPSTREAM $MAIN_BRANCH"
+         $GITBIN merge $UPSTREAM $MAIN_BRANCH || {
+            MERGE_TYPE="merge upstream"
          }
       else
-#         echo "$GITBIN checkout $MAIN_BRANCH_NAME"
-#         $GITBIN checkout $MAIN_BRANCH_NAME
+#         echo "$GITBIN checkout $MAIN_BRANCH"
+#         $GITBIN checkout $MAIN_BRANCH
 
-#         echo "$GITBIN merge $UPSTREAM/$MAIN_BRANCH_NAME"
-#         if $GITBIN merge $UPSTREAM/$MAIN_BRANCH_NAME; then
-         echo "$GITBIN fetch $UPSTREAM +$MAIN_BRANCH_NAME:$MAIN_BRANCH_NAME"
-         $GITBIN fetch $UPSTREAM +$MAIN_BRANCH_NAME:$MAIN_BRANCH_NAME || {
+#         echo "$GITBIN merge $UPSTREAM/$MAIN_BRANCH"
+#         if $GITBIN merge $UPSTREAM/$MAIN_BRANCH; then
+         echo "$GITBIN fetch $UPSTREAM +$MAIN_BRANCH:$MAIN_BRANCH"
+         $GITBIN fetch $UPSTREAM +$MAIN_BRANCH:$MAIN_BRANCH || {
             MERGE_TYPE="fetch upstream"
-            MERGE_STATUS=1
          }
 
 #         echo "$GITBIN checkout -"
@@ -102,22 +100,20 @@ for DIR in ${DIRS[*]}; do
 
       if [[ -z "$MERGE_TYPE" ]]; then
          # if the fetch/merge was successful, push the changes to the fork
-         echo "$GITBIN push $MAIN_REMOTE_NAME $MAIN_BRANCH_NAME:$MAIN_BRANCH_NAME"
-         $GITBIN push $MAIN_REMOTE_NAME $MAIN_BRANCH_NAME:$MAIN_BRANCH_NAME
+         echo "$GITBIN push $MAIN_REMOTE $MAIN_BRANCH:$MAIN_BRANCH"
+         $GITBIN push $MAIN_REMOTE $MAIN_BRANCH:$MAIN_BRANCH
       fi
    else
-      if [[ "$GIT_BRANCH" =~ $MAIN_BRANCH_NAME ]]; then
-         echo "$GITBIN pull"
+      if [[ "$GIT_BRANCH" =~ $MAIN_BRANCH ]]; then
+         echo "$GITBIN merge"
          $GITBIN merge || {
             MERGE_TYPE=merge
-            MERGE_STATUS=1
          }
 
       else
-         echo "$GITBIN fetch $MAIN_REMOTE_NAME $MAIN_BRANCH_NAME:$MAIN_BRANCH_NAME"
-         $GITBIN fetch $MAIN_REMOTE_NAME $MAIN_BRANCH_NAME:$MAIN_BRANCH_NAME || {
+         echo "$GITBIN fetch $MAIN_REMOTE $MAIN_BRANCH:$MAIN_BRANCH"
+         $GITBIN fetch $MAIN_REMOTE $MAIN_BRANCH:$MAIN_BRANCH || {
             MERGE_TYPE=fetch
-            MERGE_STATUS=1
          }
 
       fi
@@ -128,15 +124,15 @@ for DIR in ${DIRS[*]}; do
       continue
    fi
 
-   if [[ ! "$GIT_BRANCH" =~ $MAIN_BRANCH_NAME ]]; then
+   if [[ ! "$GIT_BRANCH" =~ $MAIN_BRANCH ]]; then
       echo
       echo
-      echo "ATTEMPTING TO GIT REBASE '$GIT_BRANCH' ONTO '$MAIN_BRANCH_NAME'"
-      $GITBIN rebase --autostash $MAIN_BRANCH_NAME || {
+      echo "ATTEMPTING TO GIT REBASE '$GIT_BRANCH' ONTO '$MAIN_BRANCH'"
+      $GITBIN rebase --autostash $MAIN_BRANCH || {
          [[ -f .git/rebase-merge/done ]] &&
             echo &&
             echo &&
-            echo "ABORTING GIT REBASE '$GIT_BRANCH' ONTO '$MAIN_BRANCH_NAME'" &&
+            echo "ABORTING GIT REBASE '$GIT_BRANCH' ONTO '$MAIN_BRANCH'" &&
             $GITBIN rebase --abort
             date "+%F %H:%M:%S %Z: failure" | tee -a $HOME/$(basename "$DIR")-git-pull-timestamps
       }

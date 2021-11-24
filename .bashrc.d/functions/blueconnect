@@ -42,8 +42,20 @@ blueconnect() {
    IFS="$OIFS"
 
    [[ "$already_connected" -eq 1 ]] || {
-      [[ "${bluetooth_versions[$bluetooth_version]%%.*}" -lt 5 && "$connected_devs" ]] && bluetoothctl disconnect;
+      [[ "${bluetooth_versions[$bluetooth_version]%%.*}" -lt 5 && "$connected_devs" ]] && {
+            echo "turning volume off before disconnecting..."
+            #amixer -D pulse sset Master mute
+            bluetoothctl disconnect;
+      }
       bluetoothctl connect $(bluetoothctl paired-devices | awk "tolower(\$0) ~ /$device/ { print \$2 }");
+      [[ "${bluetooth_versions[$bluetooth_version]%%.*}" -lt 5 ]] && {
+            echo "turning volume back up..."
+            #sleep 3
+            #amixer -D pulse sset Master unmute
+
+            # workaround for buds not using a sane volume without manually adjusting the volume
+            #amixer -D pulse sset Master 25%
+      }
    }
 }
 

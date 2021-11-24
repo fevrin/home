@@ -249,8 +249,8 @@ endif
 " git clone https://github.com/fatih/vim-go.git ~/.vim/bundle/vim-go
 " git clone https://github.com/fatih/vim-go.git ~/.vim/plugged/vim-go
 call plug#begin('~/.vim/plugged')
-Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries' }
-Plug 'https://github.com/ElmCast/elm-vim'
+   Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries' }
+   Plug 'https://github.com/ElmCast/elm-vim'
 call plug#end()
 let g:go_fmt_command = "goimports"
 let g:elm_format_autosave = 0

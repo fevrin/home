@@ -1,0 +1,3 @@
+#!/bin/bash
+
+sudo grep -n allow_groups /etc/sssd/sssd.conf 2>&1 | egrep --color=always "($(id -Gn | tr ' ' '|'))"
