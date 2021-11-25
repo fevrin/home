@@ -1,0 +1,16 @@
+#!/bin/bash
+
+clear-swap() {
+   # clears up on-drive swap for quicker performance
+   # based on the one from <https://help.ubuntu.com/community/SwapFaq#Empty_Swap>
+   mem=$(LC_ALL=C free  | awk '/Mem:/ {print $4}')
+   swap=$(LC_ALL=C free | awk '/Swap:/ {print $3}')
+   
+   if [[ $mem -lt $swap ]]; then
+       echo "ERROR: not enough RAM to write swap back (mem = '$mem', swap = '$swap'), nothing done" >&2
+       return 1
+   fi
+   
+   sudo swapoff -a &&
+   sudo swapon -a
+}

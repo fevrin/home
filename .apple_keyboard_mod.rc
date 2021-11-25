@@ -13,6 +13,7 @@ reset_keyboard() {
    setxkbmap -layout us
 }
 
+[[ $1 =~ (-f|--force) ]] && FORCE=1
 # alternate behavior depending on if an Apple keyboard is plugged in
 if [[ $(grep -qi 'apple keyboard' /proc/bus/input/devices; echo $?) -eq 0 ]]; then
    # make Cmd-R behave like Ctrl-R
@@ -50,6 +51,39 @@ else
       # restart sudo timeout timer
       sudo -v
 
+      # other methods of swapping that were already in /usr/share/X11/xkb/symbols/ctrl:
+      # // Right Ctrl functions as another right Alt.
+      # partial modifier_keys
+      # xkb_symbols "rctrl_ralt" {
+      #     key <RCTL> { symbols[Group1]= [ Alt_R ] };
+      #     modifier_map Mod1{ <RCTL> };
+      # };
+      #
+      # // Menu key functions as another right Ctrl.
+      # partial modifier_keys
+      # xkb_symbols "menu_rctrl" {
+      #     replace key <MENU> { [ Control_R, Control_R ] };
+      #     modifier_map Control { Control_L, <MENU> };
+      # };
+      #
+      # // Right Alt key functions as another right Ctrl.
+      # partial modifier_keys
+      # xkb_symbols "ralt_rctrl" {
+      #     replace key <RALT> { type[Group1] = "TWO_LEVEL",
+      #                          symbols[Group1] = [ Control_R, Control_R ] };
+      #     modifier_map Control { <RALT> };
+      # };
+      #
+      # // Swap the functions of the left Alt key and the left Ctrl key.
+      # partial modifier_keys
+      # xkb_symbols "swap_lalt_lctl" {
+      #     replace key <LALT> { [ Control_L, Control_L ] };
+      #     replace key <LCTL> { [ Alt_L, Meta_L ] };
+      #     modifier_map Mod1    { <LCTL> };
+      #     modifier_map Control { <LALT> };
+      # };
+
+
       echo "adding config to '/usr/share/X11/xkb/symbols/ctrl'..."
       cat <<-EOF | sudo tee -a /usr/share/X11/xkb/symbols/ctrl &>/dev/null
 
@@ -75,7 +109,7 @@ else
    dconf write "/org/gnome/desktop/input-sources/xkb-options" "['ctrl:swap_lalt_lctl','ctrl:swap_ralt_rctl']"
 fi
 
-if ! w | awk '/'$USER'/ { print $2 }' | grep -q 'pts/2'; then
+if ! w | awk '/'$USER'/ { print $2 }' | grep -q 'pts/2' || [[ $FORCE -eq 1 ]]; then
    # we're not in a new login session
 
    echo -n "are the keybindings working as expected? [Y/n] "; read

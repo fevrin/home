@@ -174,3 +174,11 @@ export HISTIGNORE
 #export HISTIGNORE="bg:cd *:crontab -?:df -h:echo:edit-history:fg*:$([[ -x $(which git) ]] && { for i in $(git config -l | sed -rne 's;^alias\.([^=]+)=.*;\1;p'); do value+="git $i:"; done; echo "${value%:}"; }):git co master:jobs:kill*:ls:list -tr:ping 8.8.8.8:popd:pushd:pwd:screen -r:screen -t *:vim:vim nodes:w:$(alias | sed -rne 's;^alias ([^=]*)=.*;:\1?;p' | sort | tr -d '\n' | sed -e 's;^:;;')"
 
 set -o vi
+
+grep -q 10 /proc/sys/vm/swappiness || {
+   sudo sysctl vm.swappiness=10
+   cat <<-EOF | sudo tee /etc/sysctl.d/local-swappiness.conf &>/dev/null
+		# set via $([[ -L "$BASH_SOURCE" ]] && readlink "$BASH_SOURCE" || echo "$BASH_SOURCE")
+		vm.swappiness = 10
+	EOF
+}
