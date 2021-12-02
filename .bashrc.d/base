@@ -101,10 +101,8 @@ if [[ -x $(which tmux) ]]; then
      else
         # there are no tmux sessions or at least no detached tmux sessions, so start tmux
         #tmux new-session 'tmux new-window top && tmux new-window'
-        tmux new-session -d -s default &&
-        tmux new-window -t default top &&
-        tmux swap-window -t default -s 1 -t 0 &&
-        tmux rename-window -t 1 work &&
+        tmux new-session -d -s default 'top' &&
+        tmux new-window -t default -n work &&
         tmux attach -t default
 
 #        # this command would otherwise result in the following error if in ~/.tmux.conf since tmux seems to read and execute the conf file in full before creating a session:
