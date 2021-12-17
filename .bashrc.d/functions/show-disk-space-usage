@@ -26,9 +26,9 @@ show-disk-space-usage() {
       unset dirs_array
       declare -a dirs_array
       readarray possible_dirs < <(
-         echo "$output" | 
+         echo "$output" |
          egrep '^[0-9.]+[GM]' |
-         cut -d$'\t' -f2 | 
+         cut -d$'\t' -f2 |
          grep ^/
       )
 #      echo "possible_dirs = '${possible_dirs[*]}'"

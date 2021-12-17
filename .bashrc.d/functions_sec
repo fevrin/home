@@ -218,8 +218,8 @@ format_external_luks_lvm() {
       sudo cryptsetup open --verbose --type=luks2 "${drive_info[path]}" "${keyfile_name}"
       echo sudo cryptsetup luksDump "${drive_info[path]}"
       sudo cryptsetup luksDump "${drive_info[path]}"
-      #   sudo cryptsetup luksAddKey "${drive_info[path]}" /etc/crypt."${keyfile_name}" 
-      #   sudo chown "${USER}" /etc/crypt."${keyfile_name}"  
+      #   sudo cryptsetup luksAddKey "${drive_info[path]}" /etc/crypt."${keyfile_name}"
+      #   sudo chown "${USER}" /etc/crypt."${keyfile_name}"
       #   sudo cryptsetup luksHeaderBackup "${drive_info[path]}" --header-backup-file=/etc/crypt."${keyfile_name}".header
       #   echo "${keyfile_name} UUID=$(blkid -o value -s PARTUUID ${drive_info[path]}) /etc/crypt.${keyfile_name} luks,discard,noearly" #   >>/etc/crypttab
       #   echo pvcreate /dev/mapper/"${keyfile_name}"

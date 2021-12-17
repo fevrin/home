@@ -8,7 +8,7 @@ set nocompatible " cp; do *not* behave very Vi compatible
 set incsearch " is; enable incremental searching
 
 " 4 displaying text
-set linebreak " lbr; break/wrap lines at a space (not in the middle of a word) 
+set linebreak " lbr; break/wrap lines at a space (not in the middle of a word)
 "set list " ; show non-printable characters
 set listchars=eol:$,tab:^_,trail:_ " lcs; strings to use in 'list' mode
 set number " nu; enable line numbering
@@ -193,10 +193,10 @@ augroup END
 " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 " MAPS
 " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-"imap '' <esc> " allows for an easier way to escape 
-"map "" i"<esc>ea"<esc> " quotes word under cursor (to improve, have it quote everything from start to next white space 
-"map "" i"<esc>/ <cr>i"<esc> " quotes word under cursor (to improve, have it quote everything from start to next white space 
-map "" i"<esc>f i"<esc> " quotes word under cursor (to improve, have it quote everything from start to next white space 
+"imap '' <esc> " allows for an easier way to escape
+"map "" i"<esc>ea"<esc> " quotes word under cursor (to improve, have it quote everything from start to next white space
+"map "" i"<esc>/ <cr>i"<esc> " quotes word under cursor (to improve, have it quote everything from start to next white space
+map "" i"<esc>f i"<esc> " quotes word under cursor (to improve, have it quote everything from start to next white space
 vmap "" c"<esc>pa"<esc> " wraps visual selection in double quotes
 " creates an XHTML image tag; help from <http://linuxgazette.net/148/misc/tag/vimrc>
 imap img<tab> <img src="" alt="" /><esc>10hi

@@ -109,7 +109,7 @@ else
    dconf write "/org/gnome/desktop/input-sources/xkb-options" "['ctrl:swap_lalt_lctl','ctrl:swap_ralt_rctl']"
 fi
 
-if ! w | awk '/'$USER'/ { print $2 }' | grep -q 'pts/2' || [[ $FORCE -eq 1 ]]; then
+if ! w | awk "/${USER}/ { print \$2 }" | grep -q 'pts/2' || [[ $FORCE -eq 1 ]]; then
    # we're not in a new login session
 
    echo -n "are the keybindings working as expected? [Y/n] "; read

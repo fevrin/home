@@ -63,7 +63,7 @@ if [[ "$TERM_PROGRAM" = "Apple_Terminal" || "$TERM_PROGRAM" =~ iTerm ]]; then
    if [[ $(which ruby) ]]; then
       [[ $(gem list | grep terminal-notifier) ]] ||
       sudo gem install terminal-notifier
-   else 
+   else
       echo "please install ruby to continue"
    fi
 

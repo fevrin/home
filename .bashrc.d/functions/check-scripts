@@ -1,0 +1,25 @@
+#!/bin/bash
+
+check-scripts() {
+   local path="${1:-$HOME/.bashrc.d/functions/}"
+   local maxdepth="-maxdepth 2"
+   local exclude_paths=".git"
+   git rev-parse --is-inside-work-tree &>/dev/null && maxdepth=""
+   
+   echo "running \`shellcheck\` in ${path} ..."
+   shellcheck --color -o all -x $(find ${path} ${maxdepth} \( -name '.git' -o -name '*\.md' \) -prune -o -name '*' -print0 | xargs -0 mimetype | awk -F: '/shellscript/ { print $1 }')
+   echo -n "continue to next check? [Y/n] "; read
+   [[ $REPLY =~ [Nn] ]] && {
+      return
+   }
+
+   echo "running \`_find_unscoped_vars\` in ${path} ..."
+   _find_unscoped_vars $(find ${path} \( -name '*\.md' -o -name '.git' \) -prune -o -type f -print)
+   echo -n "continue to next check? [Y/n] "; read
+   [[ $REPLY =~ [Nn] ]] && {
+      return
+   }
+
+   echo "checking for blank lines and whitespace at the end of lines in ${path} ..."
+   find ${path} \( -name '*\.md' -o -name '.git' \) -prune -o -type f -print0 | xargs -0 -I{} egrep -IHnr --color=always '(^\s+$|\s+$)' '{}'
+}
