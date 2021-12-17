@@ -134,11 +134,11 @@
            git check-whitespace \
         '"
   dffs = "!bash -c '\
-            git diff --staged --word-diff-regex=\"[ ]+|[^ ]+\" $(echo \"$GIT_PREFIX\")'$1' && \
+            git diff --staged --word-diff-regex=\"[ ]+|[^ ]+\" $(if [[ '\\'$1\\'' && -e \"$GIT_PREFIX/'$1'\" && ! \"$GIT_PREFIX/'$1'\" =~ ^/$ ]]; then echo \"$GIT_PREFIX/'$1'\"; else echo \"'$1'\"; fi) && \
             git check-whitespace \
          '"
   diffs = "!bash -c '\
-             git diff --staged $(echo \"$GIT_PREFIX\")'$1' && \
+             git diff --staged $(if [[ '\\'$1\\'' && -e \"$GIT_PREFIX/'$1'\" && ! \"$GIT_PREFIX/'$1'\" =~ ^/$ ]]; then echo \"$GIT_PREFIX/'$1'\"; else echo \"'$1'\"; fi) && \
              git check-whitespace \
           '"
   diff-with-main = "!bash -c 'git diff $(git get-main-branch)... '$@''"

@@ -18,6 +18,7 @@ blueconnect() {
          device="speaker";;
    esac
 
+   local bluetooth_version
    bluetooth_version="$(btmgmt info | sed -rne 's;.* version ([0-9]+) .*;\1;p')"
 
    declare -A bluetooth_versions=(
@@ -47,15 +48,20 @@ blueconnect() {
             #amixer -D pulse sset Master mute
             bluetoothctl disconnect;
       }
-      bluetoothctl connect $(bluetoothctl paired-devices | awk "tolower(\$0) ~ /$device/ { print \$2 }");
-      [[ "${bluetooth_versions[$bluetooth_version]%%.*}" -lt 5 ]] && {
-            echo "turning volume back up..."
-            #sleep 3
-            #amixer -D pulse sset Master unmute
+      if bluetoothctl connect $(bluetoothctl paired-devices | awk "tolower(\$0) ~ /$device/ { print \$2 }"); then
+         [[ "${bluetooth_versions[$bluetooth_version]%%.*}" -lt 5 ]] && {
+               echo "turning volume back up..."
+               #sleep 3
+               #amixer -D pulse sset Master unmute
 
-            # workaround for buds not using a sane volume without manually adjusting the volume
-            #amixer -D pulse sset Master 25%
-      }
+               # workaround for buds not using a sane volume without manually adjusting the volume
+               #amixer -D pulse sset Master 25%
+         }
+      else
+         echo "error connecting to $device"
+         echo "try powering $device off and on"
+         return 1
+      fi
    }
 }
 
@@ -71,7 +77,7 @@ _blueconnect_completions() {
       fi
    elif [[ "${#COMP_WORDS[@]}" -eq 2 ]]; then
       # ${#COMP_WORDS} starts off at 2, so we're at the initial [Tab]
-      VALUES="buds nest"
+      VALUES="buds speaker"
    fi
 #   echo "VALUES = '$VALUES'"
 #   echo "COMP_WORDS = '${COMP_WORDS[@]}'"

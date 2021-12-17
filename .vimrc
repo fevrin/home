@@ -136,6 +136,13 @@ au FileType gitcommit setlocal spell
 " $HOME/.vim/ftdetect/python.vim
 " $HOME/.vim/ftdetect/golang.vim
 autocmd FileType go,python,sh,vim,markdown,gitcommit setlocal tw=125
+
+
+autocmd BufReadPost,FileReadPost *.log AnsiEsc
+
+"au BufNewFile,BufRead *.tsx setf typescript
+autocmd FileType typescriptreact setlocal ft=typescript
+"autocmd FileType python setlocal ts=4
 " autocmd BufRead,BufNew,BufNewFile *.sh,*.py,*.go set tw=125
 
 
@@ -251,6 +258,7 @@ endif
 call plug#begin('~/.vim/plugged')
    Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries' }
    Plug 'https://github.com/ElmCast/elm-vim'
+   Plug 'https://github.com/fevrin/AnsiEsc.vim', { 'branch': 'main' }
 call plug#end()
 let g:go_fmt_command = "goimports"
 let g:elm_format_autosave = 0

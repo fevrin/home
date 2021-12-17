@@ -1,3 +1,9 @@
 #!/bin/bash
 
-sudo grep -n allow_groups /etc/sssd/sssd.conf 2>&1 | egrep --color=always "($(id -Gn | tr ' ' '|'))"
+#sudo grep -n allow_groups /etc/sssd/sssd.conf 2>&1 | egrep --color=always "($(id -Gn | tr ' ' '|'))"
+SSSD_FILE="/etc/sssd/sssd.conf"
+if [[ -s "$SSSD_FILE" ]]; then
+   sudo grep -n allow_groups "$SSSD_FILE" | egrep --color=always "($(id -Gn | tr ' ' '|'))"
+else
+   echo "$SSSD_FILE is empty or doesn't exist!"
+fi
