@@ -38,6 +38,8 @@ yessh() {
    local ssh_args
    local orig_command
    local command
+   local COPY_CONFIG
+   local KEEP_CONFIG
 
    if [[ $# -gt 1 ]]; then
       while [[ $# -ge 1 ]]; do
@@ -54,6 +56,12 @@ yessh() {
                   username="$(echo "$arg" | cut -d@ -f1)"
                   hostname="$(echo "$arg" | cut -d@ -f2)"
                fi
+               ;;
+            --copy-config)
+                  COPY_CONFIG=1
+               ;;
+            --keep-config)
+                  KEEP_CONFIG=1
                ;;
             -*)
                if [[ "$arg" =~ -[46AaCfGgKkMNnqsTtVvXxYy]+ ]]; then
@@ -101,6 +109,7 @@ yessh() {
    verbose 8 "final username = $username"
    verbose 8 "final ssh_args = $ssh_args"
    verbose 8 "final orig_command = $orig_command"
+   verbose 8 "final COPY_CONFIG = '$COPY_CONFIG'"
 
    if [[ "$hostname" ]]; then
       [[ -d "$HOME/.bashrc.d" ]] ||
@@ -116,7 +125,7 @@ yessh() {
             base64 -w0
       )"
 
-      if [[ $(echo "$bashrc_contents" | wc -c) -le 20480 ]]; then
+      if [[ $(echo "$bashrc_contents" | wc -c) -le 20480 && "${COPY_CONFIG}" -ne 1 ]]; then
          read -r -d '' command <<-EOF
             bash --rcfile <(
                which bunzip2 &>/dev/null || {
@@ -151,7 +160,8 @@ yessh() {
          echo "$bashrc_contents" >"$tempbashrc"
 
          # copy the temporary bashrc file to the remote host, then delete it locally
-         rsync -avzPi -e "ssh -p $port" "$tempbashrc" ${username}@${hostname}:"$tempbashrc" && rm -f "$tempbashrc"
+         rsync -avzPi -e "ssh -p $port" "$tempbashrc" ${username}@${hostname}:"$tempbashrc"
+         [[ "${KEEP_CONFIG}" -eq 1 ]] || rm -fv "$tempbashrc"
          #scp -P $port "$tempbashrc" ${username}@${hostname}:"$tempbashrc"
 
          command="bash --rcfile <(cat '$tempbashrc' | base64 --decode | bunzip2)"

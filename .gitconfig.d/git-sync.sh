@@ -53,12 +53,14 @@ for DIR in ${DIRS[*]}; do
    THERE_WERE_LOCAL_CHANGES="$($GITBIN status --untracked-files=no --porcelain)"
    STAGED_FILES="$(git diff --staged --name-only)"
    GIT_BRANCH="$(git branch --show-current)"
+   STASH_NAME="git-sync.$$"
 
    if [[ -n "$STAGED_FILES" ]]; then
       echo
       echo "THESE STAGED FILES WILL BE STASHED AND RE-STAGED:"
       echo "$STAGED_FILES"
    fi
+   $GITBIN stash push --message "$STASH_NAME"
 
    echo
    echo
@@ -120,6 +122,8 @@ for DIR in ${DIRS[*]}; do
    fi
 
    if [[ -n "$MERGE_TYPE" ]]; then
+      echo
+      echo
       echo "GIT ${MERGE_TYPE} FAILED! ABORTING FURTHER CHANGES"
       continue
    fi
@@ -128,22 +132,21 @@ for DIR in ${DIRS[*]}; do
       echo
       echo
       echo "ATTEMPTING TO GIT REBASE '$GIT_BRANCH' ONTO '$MAIN_BRANCH'"
-      $GITBIN rebase --autostash $MAIN_BRANCH || {
+      if $GITBIN rebase $MAIN_BRANCH; then
+         echo
+         echo
+         echo "POPPING STASHED FILES"
+         $GITBIN stash pop --index stash@{/"$STASH_NAME"}
+      else
          [[ -f .git/rebase-merge/done ]] &&
             echo &&
             echo &&
             echo "ABORTING GIT REBASE '$GIT_BRANCH' ONTO '$MAIN_BRANCH'" &&
             $GITBIN rebase --abort
             date "+%F %H:%M:%S %Z: failure" | tee -a $HOME/$(basename "$DIR")-git-pull-timestamps
-      }
+            echo "stash saved as 'stash@{/"$STASH_NAME"}'"
+      fi
    fi
-
-   [[ -n "$STAGED_FILES" ]] && {
-      echo
-      echo
-      echo "RE-ADDING STAGED FILES" && git add --ignore-errors $STAGED_FILES
-      echo
-   }
 
    echo
 

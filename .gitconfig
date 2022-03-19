@@ -15,8 +15,11 @@
              bash -c '\
                 main_remote=\"$(git get-main-remote)\"; \
                 main_branch=\"$(git get-main-branch)\"; \
-                current_branch=$(git current-branch) \
-                git sync; \
+                current_branch=$(git current-branch); \
+                if [[ $(echo \"($(date +%s) - $(stat -c %Y $(git root-dir)/.git/FETCH_HEAD))\" | bc) -ge 300 ]]; then \
+                   echo \"it'\\''s been more than 5 minutes since last sync; syncing...\"; \
+                   git sync; \
+                fi; \
                 affected_branches=$(\
                    git branch --merged $main_remote/$main_branch | \
                    sed -re \"s;^\\*?\\s+;;\" | \
@@ -42,6 +45,17 @@
                             git trunk; \
                          fi; \
                          git branch -d $branch;\
+                         if [[ $? -ne 0 ]]; then \
+                            echo && \
+                            echo -n \"try force deleting '\\''\"$branch\"'\\''? [y/N] \" && \
+                            read && \
+                            echo && \
+                            [[ $REPLY =~ [Yy] ]] || { \
+                               echo \"skipping '\\''\"$branch\"'\\''\"; \
+                               continue; \
+                            }; \
+                            git branch -D $branch;\
+                         fi; \
                       done; \
                    else \
                       echo \"cancelling branch clearing\"; \
@@ -68,14 +82,22 @@
   br = branch
   co = checkout
   ci = "!bash -c '\
-           git sync \"'$@'\";\
-           \
-           if git diff --staged --quiet --exit-code && [[ ! \"'$@'\" =~ (^-a | -a | -a$|^-a$) ]]; then\
-              echo -e \"\nnothing in index to commit!\";\
+           if ! git diff --staged --quiet --exit-code || { ! git diff --quiet --exit-code && [[ \"'$@'\" =~ (^-a | -a | -a$|^-a$) ]]; } then\
+              git sync \"'$@'\";\
+              \
+              if ! git diff --staged --quiet --exit-code || { ! git diff --quiet --exit-code && [[ \"'$@'\" =~ (^-a | -a | -a$|^-a$) ]]; } then\
+                 echo -e \"\npress ENTER to continue with commit\";\
+                 read;\
+                 git commit -v '$@';\
+              else\
+                 echo -e \"\nnothing in index to commit!\";\
+              fi;\
            else\
-              echo -e \"\npress ENTER to continue with commit\";\
-              read;\
-              git commit -v '$@';\
+              if git diff --quiet --exit-code; then\
+                 echo -e \"\nnothing in index to commit!\";\
+              elif [[ ! \"'$@'\" =~ (^-a | -a | -a$|^-a$) ]]; then\
+                 echo -e \"\nre-run with '\\''-a'\\'' to stage files to commit\";\
+              fi;\
            fi;\
         '"
    changelog = "!bash -c '\
