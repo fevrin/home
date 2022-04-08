@@ -4,6 +4,12 @@
 
 export SSH_AUTH_SOCK=/run/user/$(id -u)/keyring/ssh
 
+. $HOME/.bashrc.d/functions/verbose
+. $HOME/.bashrc.d/functions/_print_var_vals
+. $HOME/.bashrc.d/functions/_verify_reqs
+VERBOSE=8
+INTERACTIVE=$(! tty -s; echo $?) # 1 if interactive; 0 if not
+
 declare -a DIRS
 
 for arg in $@; do
@@ -15,6 +21,12 @@ for arg in $@; do
 done
 
 [[ ${#DIRS[*]} -gt 0 ]] || DIRS+=("$PWD")
+
+log() {
+   local message="$@"
+#   _print_var_vals DIR
+   date "+%F %H:%M:%S %Z: ($$) $(basename "$REPO_ROOT"): $(verbose 8 $message 2>&1)" | tee -a $HOME/$(basename "$REPO_ROOT")-git-pull-timestamps
+}
 
 #echo "DIRS = '"${DIRS[*]}"'"
 #echo "STASH = '$STASH'"
@@ -31,13 +43,15 @@ done
 GITBIN="/usr/bin/git"
 
 for DIR in ${DIRS[*]}; do
+   log "INTERACTIVE = '$INTERACTIVE'"
    cd "$DIR"
-   cd $(git rev-parse --show-toplevel)
+   REPO_ROOT="$(git rev-parse --show-toplevel)"
+   cd "$REPO_ROOT"
 
    # check if the directory is a git repo
    git rev-parse --is-inside-work-tree &>/dev/null || {
-      echo "not a git directory: '$DIR'"
-      echo "skipping!"
+      log "not a git directory: '$DIR'"
+      log "skipping!"
       continue
    }
 
@@ -52,15 +66,32 @@ for DIR in ${DIRS[*]}; do
 
    THERE_WERE_LOCAL_CHANGES="$($GITBIN status --untracked-files=no --porcelain)"
    STAGED_FILES="$(git diff --staged --name-only)"
+   UNSTAGED_FILES="$(git diff --name-only)"
+   UNMERGED_FILES="$(git status --porcelain=v2 | sed -rne 's;^u.? .* ([^ ]+)$;\1;p')"
    GIT_BRANCH="$(git branch --show-current)"
-   STASH_NAME="git-sync.$$"
 
-   if [[ -n "$STAGED_FILES" ]]; then
+   if [[ -n "$UNMERGED_FILES" ]]; then
       echo
-      echo "THESE STAGED FILES WILL BE STASHED AND RE-STAGED:"
-      echo "$STAGED_FILES"
+      log "THERE ARE UNMERGED FILES; EXITING..."
+      log "$UNMERGED_FILES"
+      if [[ "$INTERACTIVE" -eq 1 ]]; then
+         $GITBIN status
+      else
+         log "$($GITBIN status 2>&1)"
+      fi
+      exit
    fi
-   $GITBIN stash push --message "$STASH_NAME"
+
+   for status in STAGED_FILES UNSTAGED_FILES; do
+      if [[ -n "${!status}" ]]; then
+         echo
+         echo "THESE ${status/_FILES/} FILES WILL BE STASHED AND RE-STAGED:"
+         echo "${!status}"
+         echo
+         STASH_NAME="git-sync.$$"
+      fi
+   done
+   [[ -n "$STASH_NAME" ]] && $GITBIN stash push --message "$STASH_NAME"
 
    echo
    echo
@@ -124,33 +155,59 @@ for DIR in ${DIRS[*]}; do
    if [[ -n "$MERGE_TYPE" ]]; then
       echo
       echo
-      echo "GIT ${MERGE_TYPE} FAILED! ABORTING FURTHER CHANGES"
+      log "GIT ${MERGE_TYPE} FAILED! SKIPPING FURTHER CHANGES"
       continue
    fi
 
+   # the main branch is already updated, so we just need to update the current branch if it's not the main one
    if [[ ! "$GIT_BRANCH" =~ $MAIN_BRANCH ]]; then
       echo
       echo
       echo "ATTEMPTING TO GIT REBASE '$GIT_BRANCH' ONTO '$MAIN_BRANCH'"
-      if $GITBIN rebase $MAIN_BRANCH; then
-         echo
-         echo
-         echo "POPPING STASHED FILES"
-         $GITBIN stash pop --index stash@{/"$STASH_NAME"}
+      if [[ "$INTERACTIVE" -eq 1 ]]; then
+         $GITBIN rebase $MAIN_BRANCH
+         rebase_exit_code="$?"
       else
-         [[ -f .git/rebase-merge/done ]] &&
-            echo &&
-            echo &&
-            echo "ABORTING GIT REBASE '$GIT_BRANCH' ONTO '$MAIN_BRANCH'" &&
-            $GITBIN rebase --abort
-            date "+%F %H:%M:%S %Z: failure" | tee -a $HOME/$(basename "$DIR")-git-pull-timestamps
-            echo "stash saved as 'stash@{/"$STASH_NAME"}'"
+         rebase_result=$($GITBIN rebase $MAIN_BRANCH 2>&1; exit $?)
+         rebase_exit_code="$?"
+         log "$rebase_result"
+      fi
+      if [[ $rebase_exit_code -eq 0 ]]; then
+         echo
+         log $(_print_var_vals STASH_NAME STAGED_FILES UNSTAGED_FILES UNMERGED_FILES)
+         echo
+         if [[ -n "$STASH_NAME" ]]; then
+            echo "POPPING STASHED FILES"
+#            verbose 8 $GITBIN stash pop --index stash@{/"$STASH_NAME"}
+            log "$GITBIN stash pop --index stash@{/\"$STASH_NAME\"}"
+            $GITBIN stash pop --index stash@{/"$STASH_NAME"}
+            POP_EXIT_CODE="$?"
+            log "stash pop exit code: '$POP_EXIT_CODE'"
+            [[ "$POP_EXIT_CODE" -ne 0 ]] && exit 1
+         fi
+      else
+         if [[ -f .git/rebase-merge/done ]]; then
+            echo
+            echo
+            echo -n "ABORT GIT REBASE '$GIT_BRANCH' ONTO '$MAIN_BRANCH'? [Y/n] "
+            read
+            if [[ ! "$REPLY" =~ ^n$ || $INTERACTIVE -eq 0 ]]; then
+               $GITBIN rebase --abort
+               log "failure: rebase aborted"
+               [[ -n "$STASH_NAME" ]] && log "stash saved as 'stash@{/"$STASH_NAME"}'"
+            else
+               log 'failure: resolve any conflicts to fully rebase this branch, then retry `git-sync`'
+            fi
+         else
+            log "failure: no rebase to abort"
+         fi
+         exit 1
       fi
    fi
 
    echo
 
-   date "+%F %H:%M:%S %Z: success" | tee -a $HOME/$(basename "$DIR")-git-pull-timestamps
+   log "success"
 
 #   cd - &>/dev/null
 done

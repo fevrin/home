@@ -263,3 +263,8 @@ call plug#begin('~/.vim/plugged')
 call plug#end()
 let g:go_fmt_command = "goimports"
 let g:elm_format_autosave = 0
+
+" from <https://stackoverflow.com/questions/21708814/can-vim-diff-use-the-patience-algorithm/63079135#63079135>
+if has("patch-8.1.0360")
+  set diffopt+=internal,indent-heuristic,algorithm:patience
+endif

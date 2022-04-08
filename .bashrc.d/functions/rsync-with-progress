@@ -1,0 +1,53 @@
+#!/bin/bash
+
+rsync-with-progress() {
+   # this is just a wrapper that ensures the rsync output shows overall progress instead of per-file
+
+   _verify_reqs <<-EOF || return 1
+   base64
+   bzip2
+   rsync
+   verbose
+	EOF
+
+   local src="$1"
+   local dst="$2"
+   local rsync_only=0
+   local real_run
+   local rsync_flags="--archive --human-readable --itemize --stats"
+   rsync_flags+=" $3"
+
+   local file_count="$(find "$src" | wc --lines)"
+
+   [[ "$real_run" -eq 1 ]] || rsync_flags+=" --dry-run"
+
+   _rsync_only_method() {
+      rsync_flags+=" --compress --partial --progress --verbose"
+      echo rsync "$rsync_flags" --info=progress2 "$src" "$dst"
+   }
+
+   _pv_method() {
+      echo rsync "$rsync_flags" "$src" "$dst" | pv --eta --line-mode --progress --size "$file_count"
+   }
+
+
+   if [[ $(which pv &>/dev/null) ]]; then
+      if [[ $rsync_only -eq 1 || "$file_count" -gt 100 ]]; then
+         _rsync_only_method
+      else
+         _pv_method
+      fi
+   else
+      _rsync_only_method
+   fi
+
+   # from <https://unix.stackexchange.com/questions/188758/estimate-time-or-work-left-to-finish-for-rsync/329603#329603>:
+   # The following commands work best when there are many smallish files.
+   # If you have few huge files, then some of the rsync built in progress reports might be of more help
+
+   # To see progress when you are updating (or comparing) an existing copy:
+   # rsync "$rsync_flags" -ii --delete "$src" "$dst" | pv -l -s "$file_count" > logfile
+
+   # This command will print to screen in real time the files that differ:
+   # rsync "$rsync_flags" -ii --delete "$src" "$dst" | pv -l -s "$file_count" | tee logfile | grep -v "^\."
+}

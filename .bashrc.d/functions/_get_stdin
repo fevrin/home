@@ -27,7 +27,7 @@ _get_stdin() {
    #
    # _get_stdin $1
 
-   local input="${1}"
+   local input="${@}"
    local output_command
 
    # ensure the input isn't blank; otherwise, pull from /dev/stdin

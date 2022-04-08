@@ -64,7 +64,7 @@ diff-home-files() {
          ;;
    esac
 
-   [[ $ACTION || $ACTION = "file" ]] || ACTION="vimdiff"
+   [[ $ACTION || $ACTION =~ ^file$ ]] || ACTION="vimdiff"
    [[ $FILE_LIST ]] || FILE_LIST=$(find $HOME_DIR -type f ! -iregex '.*\/\.git\/.*')
    _print_var_vals ACTION FILE_LIST
 
@@ -91,6 +91,10 @@ diff-home-files() {
 #      echo file2="$file2"
       if [[ $(md5sum $file1 2>/dev/null | cut -d" " -f1) != $(md5sum $file2 2>/dev/null | cut -d" " -f1) ]]; then
          $ACTION $file1 $file2
+         [[ $ACTION =~ ^vimdiff$ ]] && {
+            echo "$file1"
+            echo "$file2"
+         }
       else
          [[ "$FILE_LIST" = "$i" ]] && {
             cat <<-EOF

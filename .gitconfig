@@ -163,7 +163,9 @@
              git diff --staged $(if [[ '\\'$1\\'' && -e \"$GIT_PREFIX/'$1'\" && ! \"$GIT_PREFIX/'$1'\" =~ ^/$ ]]; then echo \"$GIT_PREFIX/'$1'\"; else echo \"'$1'\"; fi) && \
              git check-whitespace \
           '"
+  diff-with = "!bash -c 'git diff HEAD..'$@"
   diff-with-main = "!bash -c 'git diff $(git get-main-branch)... '$@''"
+  diff-with-tracking = "!bash -c 'git diff-with $(git get-main-remote)/$(git current-branch) '$@"
   dump = cat-file -p
   fet = "fetch --all -p"
   fork = "clone -o upstream "
@@ -197,6 +199,10 @@
   rbr = root-branch
   hist = log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short
   make = "!make " # run make in the repo root directory with any arguments passed to it
+  restore-all = "!for i in --staged ''; do \
+                     echo git restore $i . && \
+                     git restore $i .; \
+                  done"
   root-dir = rev-parse --show-toplevel
   st = status
   sync = "!$HOME/.gitconfig.d/git-sync.sh $@"
@@ -237,6 +243,8 @@
   lg2 = log --graph -30 --abbrev-commit --decorate --simplify-by-decoration --date=relative --format=format:'%C(bold blue)%h%C(reset) - %C(bold yellow)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(auto)%d%C(reset)' --all
   lg3 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold yellow)(%ar)%C(reset)%C(auto)%d%C(reset)%n''          %C(white)%s%C(reset) %C(dim white)- %an%C(reset)' --all
   lg4 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset) %C(bold cyan)(committed: %cD)%C(reset) %C(auto)%d%C(reset)%n''          %C(white)%s%C(reset)%n''          %C(dim white)- %an <%ae> %C(reset) %C(dim white)(committer: %cn <%ce>)%C(reset)'
+[diff]
+   algorithm = patience
 [merge]
 	conflictstyle = diff3
 	tool = vimdiff
