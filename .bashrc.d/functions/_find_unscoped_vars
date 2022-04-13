@@ -18,7 +18,7 @@ _find_unscoped_vars() {
       for var in $(sed -rne "s;^\s*([^ #=[]$var_chars+)$var_assignment_chars?=.*;\1;p" "$file" | sort -u); do
 #         echo "var = '$var'"
          # ensure the variable is locally defined
-         egrep -q "((declare|typeset)( -[^g])?|local) $var[=$]" "$file" || {
+         egrep -q "(((declare|typeset)( -[^g])?)|local) $var(=|$)" "$file" || {
             # if it's not locally defined
 #            echo [[ ${unscoped_vars[*]} =~ $var ]]
             [[ ${unscoped_vars[*]} =~ $var ]] || {

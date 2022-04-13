@@ -66,9 +66,9 @@ _verify_reqs() {
       { type -t "$req" &>/dev/null && [[ "$needed_version" == "$actual_version" ]]; } || {
 
          if [[ -x /usr/lib/command-not-found ]]; then
-            failure_output="$(/usr/lib/command-not-found "$req" 2>&1 | tr '\n' '\1' | tr ' ' '\2')"
+            failure_output=$'\n'"$(/usr/lib/command-not-found "$req" 2>&1 | tr '\n' '\1' | tr ' ' '\2')"
 #            failure_output="$(/usr/lib/command-not-found "$req" 2>&1 | sed -rne 's;^ *sudo apt install (.*)$;\1;p')"
-             separator="=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+             local separator="=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
              [[ -n "$failure_output" ]] && failure_output="$separator$failure_output$separator"
          fi
 
@@ -93,7 +93,7 @@ _verify_reqs() {
 
       local failure
       for failure in ${failures[*]}; do
-         echo "$failure" 2>&1 | tr '\1' '\n' | tr '\2' ' '
+         printf "%s\n" "$failure" 2>&1 | tr '\1' '\n' | tr '\2' ' '
       done
 
       echo

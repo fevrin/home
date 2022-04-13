@@ -4,7 +4,6 @@ pushd() {
    local dir="$1"
    local newdir
    local VERBOSE="${VERBOSE:-1}"
-   VERBOSE=8
 
 #   verbose 2 "builtin pushd $(printf '%q' $newdir) >/dev/null"
    if [[ -n "$dir" ]]; then

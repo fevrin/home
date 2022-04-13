@@ -17,7 +17,12 @@ _print_var_vals() {
 	verbose
 	EOF
 
+   local flags
    local verbosity=8
+
+   [[ "$1" =~ -(n|e) ]] &&
+   flags="$1" &&
+   shift
 
    if [[ "$1" =~ ^([0-9]+|(emerg|alert|crit|err|warn|notice|info|debug).*)$ ]]; then
       case "$1" in
@@ -50,6 +55,6 @@ _print_var_vals() {
       # ensure the given arg is actually a variable and has been set
       [[ -v $i ]] || continue
       declare -n _variable="$i"
-      verbose $verbosity "${FUNCNAME[$((funcname_lineno_index + 1))]} (line ${BASH_LINENO[$funcname_lineno_index]}): $i = '$_variable'"
+      verbose $flags $verbosity "${FUNCNAME[$((funcname_lineno_index + 1))]} (line ${BASH_LINENO[$funcname_lineno_index]}): $i = '$_variable'"
    done
 }
