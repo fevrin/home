@@ -2,6 +2,10 @@
 
 # `git pull`s the main branch of the provided repos and rebases the current branch on that
 
+# possible resources:
+# https://thoughtsimproved.wordpress.com/2015/08/17/self-updating-git-repos/
+# https://gist.github.com/adilbaig/2e7ad4bf38cfc76afb4d
+
 # TODO: add color support when INTERACTIVE = 1
 # e.g., `git -c color.advice.hint=yellow rebase main`
 # `git -c color.status=always status`
@@ -16,6 +20,8 @@ export SSH_AUTH_SOCK=/run/user/$(id -u)/keyring/ssh
 . $HOME/.bashrc.d/functions/_verify_reqs
 #VERBOSE=8
 INTERACTIVE=$(! tty -s; echo $?) # 1 if interactive; 0 if not
+FETCH_REFRESH_TIME=300 # 300 seconds is the threshold before we, by default, skip fetching
+FORCE_FETCH=0 # if set to 1, fetch regardless of SYNC_REFRESH_TIME
 REBASE=1
 
 declare -a DIRS
@@ -27,6 +33,8 @@ for arg in $@; do
       GIT_ADD_FILES=1
    elif [[ "$arg" =~ ^--no-rebase( |$) ]]; then
       REBASE=0
+   elif [[ "$arg" =~ ^--force-sync$ ]]; then
+      FORCE_FETCH=1
    fi
 done
 
@@ -39,6 +47,31 @@ log() {
    [[ "$INTERACTIVE" -eq 1 ]] && echo -e "$message" 2>&1
    date "+%F %H:%M:%S %Z: ($$) $(basename "$REPO_ROOT"): $(echo -e "$message" 2>&1)" >> $HOME/$(basename "$REPO_ROOT")-git-pull-timestamps
 done
+
+branch_is_current() {
+   # inspired by <https://stackoverflow.com/questions/3258243/check-if-pull-needed-in-git/3278427#3278427>
+   local UPSTREAM=${1:-'@{u}'}
+   local LOCAL=$(git rev-parse --abbrev-ref @)
+   local LOCAL_HASH=$(git rev-parse "$LOCAL")
+   local REMOTE=$(git rev-parse --abbrev-ref "$UPSTREAM")
+   local REMOTE_HASH=$(git rev-parse "$REMOTE")
+   local BASE_HASH=$(git merge-base "$LOCAL" "$REMOTE")
+
+   _print_var_vals LOCAL LOCAL_HASH REMOTE REMOTE_HASH BASE_HASH
+   if [[ $LOCAL_HASH = $REMOTE_HASH ]]; then
+       log "$LOCAL and $REMOTE are: Up-to-date"
+       return 0
+   elif [[ $LOCAL_HASH = $BASE_HASH ]]; then
+       log "Need to pull from $REMOTE"
+       return 1
+   elif [[ $REMOTE_HASH = $BASE_HASH ]]; then
+       log "Need to push to $REMOTE"
+       return 2
+   else
+       log "$LOCAL and $REMOTE: Diverged"
+       return 3
+   fi
+}
 }
 
 #echo "DIRS = '"${DIRS[*]}"'"
@@ -72,33 +105,41 @@ for DIR in ${DIRS[*]}; do
    log "WORKING ON '$DIR'"
 
    echo
-   log "UPDATING MAIN BRANCH..."
    MAIN_BRANCH="$(git get-main-branch)"
    MAIN_REMOTE="$(git get-main-remote)"
 #   git rev-parse --verify --quiet $MAIN_BRANCH || MAIN_BRANCH="main"
    ORIGINAL_MAIN_BRANCH_REF="$(git rev-parse $MAIN_BRANCH)"
 
-   # sync any upstream first
+   # fetch any upstream first
    UPSTREAM="upstream"
 #   [[ -n $(git branch --list $UPSTREAM) ]] && git ls-remote --heads $UPSTREAM &>/dev/null {
    MERGE_TYPE=
-   fetch_output=$($GITBIN fetch --all --prune 2>&1; exit $?)
-   fetch_exit_code="$?"
-   log "$fetch_output"
-   [[ $fetch_exit_code -eq 0 ]] || {
-      log "failure"
-      continue
-   }
+   FETCH_LAST_REFRESH="$(echo "($(date +%s) - $(stat -c %Y .git/FETCH_HEAD))" | bc)"
 
-   if [[ "$REBASE" -eq 1 ]]; then
-      [[ $GIT_ADD_FILES -eq 1 && $(git diff --quiet --exit-code; echo $?) -eq 1 ]] && {
-         echo
-         echo
-         log "STAGING FILES..."
-         $GITBIN add -u
+   if [[ "$FETCH_LAST_REFRESH" -ge "$FETCH_REFRESH_TIME" || "$FORCE_FETCH" -eq 1 ]]; then
+      if [[ "$FETCH_LAST_REFRESH" -ge "$FETCH_REFRESH_TIME" ]]; then
+         log "it's been more than 5 minutes since last fetch; fetching...";
+      elif [[ "$FORCE_FETCH" -eq 1 ]]; then
+         log "force fetching...";
+      fi
+
+      log "FETCHING REMOTES..."
+      fetch_output=$($GITBIN fetch --all --prune 2>&1; exit $?)
+      fetch_exit_code="$?"
+      log "$fetch_output"
+      [[ $fetch_exit_code -eq 0 ]] || {
+         log "failure"
+         continue
       }
+   else
+      log "skipping refresh since last refreshed $FETCH_LAST_REFRESH seconds ago"
+   fi
 
-      THERE_WERE_LOCAL_CHANGES="$($GITBIN status --untracked-files=no --porcelain)"
+   if [[ "$ORIGINAL_MAIN_BRANCH_REF" = "$(git rev-parse $MAIN_BRANCH)" ]]; then
+      log "skipping further actions: no updates pulled"
+      continue
+   fi
+
       STAGED_FILES="$(git diff --staged --name-only)"
       UNSTAGED_FILES="$(git diff --name-only)"
       UNMERGED_FILES="$(git status --porcelain=v2 | sed -rne 's;^u.? .* ([^ ]+)$;\1;p')"
@@ -128,6 +169,8 @@ for DIR in ${DIRS[*]}; do
       [[ -n "$STASH_NAME" ]] && $GITBIN stash push --message "$STASH_NAME"
       echo
       log "$(_print_var_vals -e STASH_NAME STAGED_FILES UNSTAGED_FILES UNMERGED_FILES 2>&1)"
+   else
+      log "skipping stashing"
    fi
 
    if git ls-remote --heads $UPSTREAM &>/dev/null; then
@@ -235,6 +278,8 @@ for DIR in ${DIRS[*]}; do
       echo
 
       log "success"
+   else
+      log "skipping rebase: rebaes NOT requested"
    fi
 
 #   cd - &>/dev/null
