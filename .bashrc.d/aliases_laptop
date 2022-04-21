@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # gets battery power percentage
+# this can add a second to execute the subshell each time it's sourced
 alias get-bat-level="upower -i $(upower --enumerate | grep BAT | head -n1) | awk '/percentage/ {print $2}' | tr -s ' '"
 
 alias cb='blueconnect buds'

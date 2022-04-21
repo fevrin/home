@@ -5,9 +5,10 @@ _find_unscoped_vars() {
    local unscoped_vars
    local var_chars="[a-zA-Z_0-9]"
    local var_assignment_chars="([][()*/%+&^|<>-]|<<|>>)"
+   local FILES_PROCESSED=0
 
    for file in $files; do
-      [[ -f "$file" && -r "$file" ]] || {
+      file -L --mime-type "$file" | grep -q 'text/x-shellscript' || {
          echo "can't read file: '$file'"
          echo "skipping..."
          continue
@@ -28,6 +29,8 @@ _find_unscoped_vars() {
          }
       done
 
+      FILES_PROCESSED=1
+
       if [[ ${#unscoped_vars[*]} -gt 0 ]]; then
          echo -e "$file\nthese vars need to be scoped to 'local':"
 
@@ -36,8 +39,9 @@ _find_unscoped_vars() {
          done | sort -nu
 
          echo
-
-         unset unscoped_vars
       fi
    done
+   if [[ "$FILES_PROCESSED" -eq 0 ]]; then
+      echo "no Bash script files found"
+   fi
 }

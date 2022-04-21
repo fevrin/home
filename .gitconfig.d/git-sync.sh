@@ -51,11 +51,11 @@ done
 branch_is_current() {
    # inspired by <https://stackoverflow.com/questions/3258243/check-if-pull-needed-in-git/3278427#3278427>
    local UPSTREAM=${1:-'@{u}'}
-   local LOCAL=$(git rev-parse --abbrev-ref @)
-   local LOCAL_HASH=$(git rev-parse "$LOCAL")
-   local REMOTE=$(git rev-parse --abbrev-ref "$UPSTREAM")
-   local REMOTE_HASH=$(git rev-parse "$REMOTE")
-   local BASE_HASH=$(git merge-base "$LOCAL" "$REMOTE")
+   local LOCAL=$($GITBIN rev-parse --abbrev-ref @)
+   local LOCAL_HASH=$($GITBIN rev-parse "$LOCAL")
+   local REMOTE=$($GITBIN rev-parse --abbrev-ref "$UPSTREAM")
+   local REMOTE_HASH=$($GITBIN rev-parse "$REMOTE")
+   local BASE_HASH=$($GITBIN merge-base "$LOCAL" "$REMOTE")
 
    _print_var_vals LOCAL LOCAL_HASH REMOTE REMOTE_HASH BASE_HASH
    if [[ $LOCAL_HASH = $REMOTE_HASH ]]; then
@@ -72,6 +72,10 @@ branch_is_current() {
        return 3
    fi
 }
+
+local_changes_exist() {
+   $GITBIN status --untracked-files=no --porcelain=v2 | grep -qc .
+   return
 }
 
 #echo "DIRS = '"${DIRS[*]}"'"
@@ -90,7 +94,7 @@ GITBIN="/usr/bin/git"
 
 for DIR in ${DIRS[*]}; do
    cd "$DIR"
-   REPO_ROOT="$(git rev-parse --show-toplevel)"
+   REPO_ROOT="$($GITBIN rev-parse --show-toplevel)"
    cd "$REPO_ROOT"
 
    # check if the directory is a git repo
@@ -105,10 +109,10 @@ for DIR in ${DIRS[*]}; do
    log "WORKING ON '$DIR'"
 
    echo
-   MAIN_BRANCH="$(git get-main-branch)"
-   MAIN_REMOTE="$(git get-main-remote)"
+   MAIN_BRANCH="$($GITBIN get-main-branch)"
+   MAIN_REMOTE="$($GITBIN get-main-remote)"
 #   git rev-parse --verify --quiet $MAIN_BRANCH || MAIN_BRANCH="main"
-   ORIGINAL_MAIN_BRANCH_REF="$(git rev-parse $MAIN_BRANCH)"
+   ORIGINAL_MAIN_BRANCH_REF="$($GITBIN rev-parse $MAIN_BRANCH)"
 
    # fetch any upstream first
    UPSTREAM="upstream"
@@ -135,51 +139,68 @@ for DIR in ${DIRS[*]}; do
       log "skipping refresh since last refreshed $FETCH_LAST_REFRESH seconds ago"
    fi
 
-   if [[ "$ORIGINAL_MAIN_BRANCH_REF" = "$(git rev-parse $MAIN_BRANCH)" ]]; then
+   # the original conditional here didn't work since just a fetch wouldn't update where it points,
+   # even if its upstream did have changes
+#   if [[ "$ORIGINAL_MAIN_BRANCH_REF" = "$(git rev-parse $MAIN_BRANCH)" ]]; then
+   if branch_is_current; then
       log "skipping further actions: no updates pulled"
       continue
    fi
 
-      STAGED_FILES="$(git diff --staged --name-only)"
-      UNSTAGED_FILES="$(git diff --name-only)"
-      UNMERGED_FILES="$(git status --porcelain=v2 | sed -rne 's;^u.? .* ([^ ]+)$;\1;p')"
-      GIT_BRANCH="$(git branch --show-current)"
+   LOCAL_CHANGES_EXIST="$(local_changes_exist)"
+   if [[ "$LOCAL_CHANGES_EXIST" -eq 0 ]]; then
+      if [[ "$REBASE" -eq 1 ]]; then
+         [[ $GIT_ADD_FILES -eq 1 && $($GITBIN diff --quiet --exit-code; echo $?) -eq 1 ]] && {
+            echo
+            echo
+            log "STAGING FILES..."
+            $GITBIN add -u
+         }
 
-      if [[ -n "$UNMERGED_FILES" ]]; then
+         STAGED_FILES="$($GITBIN diff --staged --name-only)"
+         UNSTAGED_FILES="$($GITBIN diff --name-only)"
+         UNMERGED_FILES="$($GITBIN status --porcelain=v2 | sed -rne 's;^u.? .* ([^ ]+)$;\1;p')"
+         GIT_BRANCH="$($GITBIN branch --show-current)"
+
+         if [[ -n "$UNMERGED_FILES" ]]; then
+            echo
+            log "THERE ARE UNMERGED FILES; EXITING..."
+            log "$UNMERGED_FILES"
+            if [[ "$INTERACTIVE" -eq 1 ]]; then
+               $GITBIN status
+            else
+               log "$($GITBIN status 2>&1)"
+            fi
+            exit 1
+         fi
+
+         for status in STAGED_FILES UNSTAGED_FILES; do
+            if [[ -n "${!status}" ]]; then
+               echo
+               log "THESE ${status/_FILES/} FILES WILL BE STASHED AND RE-STAGED:"
+               log "${!status}"
+               echo
+               STASH_NAME="git-sync.$$"
+            fi
+         done
+         [[ -n "$STASH_NAME" ]] && $GITBIN stash push --message "$STASH_NAME"
          echo
-         log "THERE ARE UNMERGED FILES; EXITING..."
-         log "$UNMERGED_FILES"
-         if [[ "$INTERACTIVE" -eq 1 ]]; then
-            $GITBIN status
-         else
-            log "$($GITBIN status 2>&1)"
-         fi
-         exit 1
+         log "$(_print_var_vals -e STASH_NAME STAGED_FILES UNSTAGED_FILES UNMERGED_FILES 2>&1)"
+      else
+         log "skipping stashing; rebase NOT requested"
       fi
-
-      for status in STAGED_FILES UNSTAGED_FILES; do
-         if [[ -n "${!status}" ]]; then
-            echo
-            log "THESE ${status/_FILES/} FILES WILL BE STASHED AND RE-STAGED:"
-            log "${!status}"
-            echo
-            STASH_NAME="git-sync.$$"
-         fi
-      done
-      [[ -n "$STASH_NAME" ]] && $GITBIN stash push --message "$STASH_NAME"
-      echo
-      log "$(_print_var_vals -e STASH_NAME STAGED_FILES UNSTAGED_FILES UNMERGED_FILES 2>&1)"
    else
-      log "skipping stashing"
+      log "skipping stashing: no local changes"
    fi
 
-   if git ls-remote --heads $UPSTREAM &>/dev/null; then
+   log "UPDATING MAIN BRANCH..."
+   if $GITBIN ls-remote --heads $UPSTREAM &>/dev/null; then
       # we're in a forked repo (assuming the upstream repo is aliased to $UPSTREAM)
 
       # if we're on the main branch, just merge the changes; otherwise fetch them
       # (which also merges with the '+' marker)
       if [[ "$GIT_BRANCH" =~ $MAIN_BRANCH ]]; then
-         echo "$GITBIN merge $UPSTREAM $MAIN_BRANCH"
+         log "$GITBIN merge $UPSTREAM $MAIN_BRANCH"
          $GITBIN merge $UPSTREAM $MAIN_BRANCH || {
             MERGE_TYPE="merge upstream"
          }
@@ -189,7 +210,7 @@ for DIR in ${DIRS[*]}; do
 
 #         echo "$GITBIN merge $UPSTREAM/$MAIN_BRANCH"
 #         if $GITBIN merge $UPSTREAM/$MAIN_BRANCH; then
-         echo "$GITBIN fetch $UPSTREAM +$MAIN_BRANCH:$MAIN_BRANCH"
+         log "$GITBIN fetch $UPSTREAM +$MAIN_BRANCH:$MAIN_BRANCH"
          $GITBIN fetch $UPSTREAM +$MAIN_BRANCH:$MAIN_BRANCH || {
             MERGE_TYPE="fetch upstream"
          }
@@ -200,20 +221,19 @@ for DIR in ${DIRS[*]}; do
 
       if [[ -z "$MERGE_TYPE" ]]; then
          # if the fetch/merge was successful, push the changes to the fork
-         echo "$GITBIN push $MAIN_REMOTE $MAIN_BRANCH:$MAIN_BRANCH"
+         log "$GITBIN push $MAIN_REMOTE $MAIN_BRANCH:$MAIN_BRANCH"
          $GITBIN push $MAIN_REMOTE $MAIN_BRANCH:$MAIN_BRANCH
       fi
    else
       log "$(_print_var_vals -e GIT_BRANCH MAIN_BRANCH 2>&1)"
       if [[ "$GIT_BRANCH" =~ $MAIN_BRANCH ]]; then
-         echo "$GITBIN merge"
+         log "$GITBIN merge"
          $GITBIN merge || {
             MERGE_TYPE=merge
          }
 
       else
-         verbose 8 "$GITBIN fetch $MAIN_REMOTE $MAIN_BRANCH:$MAIN_BRANCH"
-         echo "$GITBIN fetch $MAIN_REMOTE $MAIN_BRANCH:$MAIN_BRANCH"
+         log "$GITBIN fetch $MAIN_REMOTE $MAIN_BRANCH:$MAIN_BRANCH"
          $GITBIN fetch $MAIN_REMOTE $MAIN_BRANCH:$MAIN_BRANCH || {
             MERGE_TYPE=fetch
          }
@@ -279,7 +299,7 @@ for DIR in ${DIRS[*]}; do
 
       log "success"
    else
-      log "skipping rebase: rebaes NOT requested"
+      log "skipping rebase: rebase NOT requested"
    fi
 
 #   cd - &>/dev/null

@@ -260,6 +260,7 @@ call plug#begin('~/.vim/plugged')
    Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries' }
    Plug 'https://github.com/ElmCast/elm-vim'
    Plug 'https://github.com/fevrin/AnsiEsc.vim', { 'branch': 'main' }
+   Plug 'pearofducks/ansible-vim', { 'branch': 'main' }
 call plug#end()
 let g:go_fmt_command = "goimports"
 let g:elm_format_autosave = 0

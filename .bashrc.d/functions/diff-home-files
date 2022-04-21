@@ -44,6 +44,12 @@ diff-home-files() {
          ;;
       copy|cp|-a)
          ACTION="cp -aiv"
+         shift
+         for file in $@; do
+            file="${1##$HOME/}"
+            $ACTION "$HOME/$file" "$HOME_DIR/$file"
+            return
+         done
          ;;
       file)
          shift
@@ -52,6 +58,8 @@ diff-home-files() {
             file="${1##$HOME/}"
             [[ $file =~ ^$HOME ]] || file="$HOME_DIR/$file"
             for i in ${!skip_files[*]}; do
+               # if the file would normally be skipped, remove it from the
+               # skip list since the user explicitly specified it
                { echo "$file" | grep -q "${skip_files[$i]}"; } && unset skip_files[$i]
             done
             FILE_LIST+="$file "
@@ -76,7 +84,11 @@ diff-home-files() {
       }
 
       # the item is within the .bashrc.d directory
-      [[ -f "$i" ]] || continue
+      [[ -f "$i" ]] || {
+         [[ -f "${i/$HOME_DIR/$HOME}" ]] && echo "you'll need to first copy the file to '$HOME_DIR'"
+#         echo "i = '$i'"
+         continue
+      }
 
       # and it isn't .toprc, and it's not a vim swap file
       [[ ! "$i" =~ \.toprc &&

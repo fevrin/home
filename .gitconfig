@@ -16,10 +16,7 @@
                 main_remote=\"$(git get-main-remote)\"; \
                 main_branch=\"$(git get-main-branch)\"; \
                 current_branch=$(git current-branch); \
-                if [[ $(echo \"($(date +%s) - $(stat -c %Y $(git root-dir)/.git/FETCH_HEAD))\" | bc) -ge 300 ]]; then \
-                   echo \"it'\\''s been more than 5 minutes since last sync; syncing...\"; \
-                   git sync --no-rebase; \
-                fi; \
+                git sync --no-rebase; \
                 affected_branches=$(\
                    git branch --merged $main_remote/$main_branch | \
                    sed -re \"s;^\\*?\\s+;;\" | \
