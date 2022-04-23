@@ -26,6 +26,9 @@ set bell-style none
 # some defaults / modifications for the emacs mode
 #$if mode=emacs
 
+# this doesn't seem to fix the issue with pasting tmux's buffer into vim not triggering autoindent
+#set enable-bracketed-paste on
+
 # allow the use of the Home/End keys
 "\e[1~": beginning-of-line
 "\e[4~": end-of-line

@@ -51,31 +51,49 @@ done
 branch_is_current() {
    # inspired by <https://stackoverflow.com/questions/3258243/check-if-pull-needed-in-git/3278427#3278427>
    local UPSTREAM=${1:-'@{u}'}
-   local LOCAL=$($GITBIN rev-parse --abbrev-ref @)
-   local LOCAL_HASH=$($GITBIN rev-parse "$LOCAL")
-   local REMOTE=$($GITBIN rev-parse --abbrev-ref "$UPSTREAM")
-   local REMOTE_HASH=$($GITBIN rev-parse "$REMOTE")
-   local BASE_HASH=$($GITBIN merge-base "$LOCAL" "$REMOTE")
+   local LOCAL
+   local LOCAL_HASH
+   local REMOTE
+   local REMOTE_HASH
+   local BASE_HASH
+
+   LOCAL="$($GITBIN rev-parse --abbrev-ref @ 2>&1)" &&
+   LOCAL_HASH="$($GITBIN rev-parse "$LOCAL" 2>&1)" &&
+   REMOTE="$MAIN_BRANCH" &&
+   REMOTE_HASH="$($GITBIN rev-parse "$REMOTE" 2>&1)" &&
+   BASE_HASH="$($GITBIN merge-base "$LOCAL" "$REMOTE" 2>&1)"
+#   REMOTE="$($GITBIN rev-parse --abbrev-ref "$UPSTREAM" 2>&1)" &&
+#   REMOTE_HASH="$($GITBIN rev-parse "$REMOTE" 2>&1)" &&
+#   BASE_HASH="$($GITBIN merge-base "$LOCAL" "$REMOTE" 2>&1)"
+
+   for var in UPSTREAM LOCAL LOCAL_HASH REMOTE REMOTE_HASH BASE_HASH; do
+      if [[ -z "${!var}" || "${!var}" =~ ^fatal: ]]; then
+         log "cannot determine $var:\n${!var}"
+         return 4
+      fi
+   done
 
    _print_var_vals LOCAL LOCAL_HASH REMOTE REMOTE_HASH BASE_HASH
    if [[ $LOCAL_HASH = $REMOTE_HASH ]]; then
-       log "$LOCAL and $REMOTE are: Up-to-date"
+       log "'$LOCAL' and '$REMOTE' are: Up-to-date"
        return 0
    elif [[ $LOCAL_HASH = $BASE_HASH ]]; then
-       log "Need to pull from $REMOTE"
+       log "Need to pull from '$REMOTE'"
        return 1
    elif [[ $REMOTE_HASH = $BASE_HASH ]]; then
-       log "Need to push to $REMOTE"
+       log "Need to push to '$REMOTE'"
        return 2
    else
-       log "$LOCAL and $REMOTE: Diverged"
+       log "'$LOCAL' and '$REMOTE': Diverged"
        return 3
    fi
 }
 
 local_changes_exist() {
-   $GITBIN status --untracked-files=no --porcelain=v2 | grep -qc .
-   return
+   [[ $($GITBIN status --untracked-files=no --porcelain=v2 | grep -c .) -gt 0 ]] && {
+      return 1
+   }
+   return 0
 }
 
 #echo "DIRS = '"${DIRS[*]}"'"
@@ -139,60 +157,6 @@ for DIR in ${DIRS[*]}; do
       log "skipping refresh since last refreshed $FETCH_LAST_REFRESH seconds ago"
    fi
 
-   # the original conditional here didn't work since just a fetch wouldn't update where it points,
-   # even if its upstream did have changes
-#   if [[ "$ORIGINAL_MAIN_BRANCH_REF" = "$(git rev-parse $MAIN_BRANCH)" ]]; then
-   if branch_is_current; then
-      log "skipping further actions: no updates pulled"
-      continue
-   fi
-
-   LOCAL_CHANGES_EXIST="$(local_changes_exist)"
-   if [[ "$LOCAL_CHANGES_EXIST" -eq 0 ]]; then
-      if [[ "$REBASE" -eq 1 ]]; then
-         [[ $GIT_ADD_FILES -eq 1 && $($GITBIN diff --quiet --exit-code; echo $?) -eq 1 ]] && {
-            echo
-            echo
-            log "STAGING FILES..."
-            $GITBIN add -u
-         }
-
-         STAGED_FILES="$($GITBIN diff --staged --name-only)"
-         UNSTAGED_FILES="$($GITBIN diff --name-only)"
-         UNMERGED_FILES="$($GITBIN status --porcelain=v2 | sed -rne 's;^u.? .* ([^ ]+)$;\1;p')"
-         GIT_BRANCH="$($GITBIN branch --show-current)"
-
-         if [[ -n "$UNMERGED_FILES" ]]; then
-            echo
-            log "THERE ARE UNMERGED FILES; EXITING..."
-            log "$UNMERGED_FILES"
-            if [[ "$INTERACTIVE" -eq 1 ]]; then
-               $GITBIN status
-            else
-               log "$($GITBIN status 2>&1)"
-            fi
-            exit 1
-         fi
-
-         for status in STAGED_FILES UNSTAGED_FILES; do
-            if [[ -n "${!status}" ]]; then
-               echo
-               log "THESE ${status/_FILES/} FILES WILL BE STASHED AND RE-STAGED:"
-               log "${!status}"
-               echo
-               STASH_NAME="git-sync.$$"
-            fi
-         done
-         [[ -n "$STASH_NAME" ]] && $GITBIN stash push --message "$STASH_NAME"
-         echo
-         log "$(_print_var_vals -e STASH_NAME STAGED_FILES UNSTAGED_FILES UNMERGED_FILES 2>&1)"
-      else
-         log "skipping stashing; rebase NOT requested"
-      fi
-   else
-      log "skipping stashing: no local changes"
-   fi
-
    log "UPDATING MAIN BRANCH..."
    if $GITBIN ls-remote --heads $UPSTREAM &>/dev/null; then
       # we're in a forked repo (assuming the upstream repo is aliased to $UPSTREAM)
@@ -246,6 +210,63 @@ for DIR in ${DIRS[*]}; do
       echo
       log "GIT ${MERGE_TYPE} FAILED! SKIPPING FURTHER CHANGES"
       continue
+   fi
+
+   # the original conditional here didn't work since just a fetch wouldn't update where it points,
+   # even if its upstream did have changes
+#   if [[ "$ORIGINAL_MAIN_BRANCH_REF" = "$(git rev-parse $MAIN_BRANCH)" ]]; then
+
+   branch_is_current_output="$(branch_is_current 2>&1; exit $?)"
+   branch_is_current_exit="$?"
+   log "$branch_is_current_output"
+   if [[ "$branch_is_current_exit" -ne 1 ]]; then
+      continue
+   fi
+
+   LOCAL_CHANGES_EXIST="$(local_changes_exist)"
+   if [[ "$LOCAL_CHANGES_EXIST" -eq 0 ]]; then
+      if [[ "$REBASE" -eq 1 ]]; then
+         [[ $GIT_ADD_FILES -eq 1 && $($GITBIN diff --quiet --exit-code; echo $?) -eq 1 ]] && {
+            echo
+            echo
+            log "STAGING FILES..."
+            $GITBIN add -u
+         }
+
+         STAGED_FILES="$($GITBIN diff --staged --name-only)"
+         UNSTAGED_FILES="$($GITBIN diff --name-only)"
+         UNMERGED_FILES="$($GITBIN status --porcelain=v2 | sed -rne 's;^u.? .* ([^ ]+)$;\1;p')"
+         GIT_BRANCH="$($GITBIN branch --show-current)"
+
+         if [[ -n "$UNMERGED_FILES" ]]; then
+            echo
+            log "THERE ARE UNMERGED FILES; EXITING..."
+            log "$UNMERGED_FILES"
+            if [[ "$INTERACTIVE" -eq 1 ]]; then
+               $GITBIN status
+            else
+               log "$($GITBIN status 2>&1)"
+            fi
+            exit 1
+         fi
+
+         for status in STAGED_FILES UNSTAGED_FILES; do
+            if [[ -n "${!status}" ]]; then
+               echo
+               log "THESE ${status/_FILES/} FILES WILL BE STASHED AND RE-STAGED:"
+               log "${!status}"
+               echo
+               STASH_NAME="git-sync.$$"
+            fi
+         done
+         [[ -n "$STASH_NAME" ]] && $GITBIN stash push --message "$STASH_NAME"
+         echo
+         log "$(_print_var_vals -e STASH_NAME STAGED_FILES UNSTAGED_FILES UNMERGED_FILES 2>&1)"
+      else
+         log "skipping stashing; rebase NOT requested"
+      fi
+   else
+      log "skipping stashing: no local changes"
    fi
 
    if [[ "$REBASE" -eq 1 ]]; then

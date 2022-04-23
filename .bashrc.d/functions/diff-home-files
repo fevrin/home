@@ -78,7 +78,9 @@ diff-home-files() {
 
    for i in $FILE_LIST; do
       # check if the file should be skipped
-      echo "$i" | grep -qxf <(for i in  ${skip_files[*]}; do echo "$HOME_DIR/$i"; done) && {
+      { echo "$i" | grep -qxf <(for i in  ${skip_files[*]}; do echo "$HOME_DIR/$i"; done) ||
+         [[ "$i" =~ \.un\~$ ]]
+      } && [[ $(echo "$FILE_LIST" | wc -l 2>&1) -gt 1 ]] && {
          echo "skipping ignored file '$i'..."
          continue
       }

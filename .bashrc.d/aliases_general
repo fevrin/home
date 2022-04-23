@@ -60,6 +60,12 @@ alias jobs='jobs -l'
 # always grep recursively
 #alias grep='grep -r'
 
+# color grep output by default
+alias grep='grep --color '
+
+# use the `grep` alias defaults for egrep
+alias egrep='grep -E '
+
 # always create parent directories if they do not exist already
 alias mkdir='mkdir -p'
 

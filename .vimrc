@@ -1,6 +1,11 @@
+"unlet! skip_defaults_vim
+"source $VIMRUNTIME/vimrc_example.vim
+
 " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 " MAIN OPTIONS
 " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+" see options with :options
+
 " 1 important
 set nocompatible " cp; do *not* behave very Vi compatible
 
@@ -62,6 +67,9 @@ set omnifunc=syntaxcomplete#Complete "ofu; function for filetype-specific Insert
 "set digraph "dg; enables entering digraphs with c1 <BS> c2 instead of just Ctrl-K c1c2
 set matchpairs=(:),{:},[:],<:>,':',":" " mps; list of pairs that match for the "%" command
 set joinspaces " js; use two spaces after '.' when joining a line
+if exists('+undofile')
+  set undofile " automatically save and restore undo history
+endif
 
 " 15 tabs and indenting
 set tabstop=3 " ts; one tab equals three spaces (instead of 8)
@@ -256,16 +264,87 @@ endif
 
 " git clone https://github.com/fatih/vim-go.git ~/.vim/bundle/vim-go
 " git clone https://github.com/fatih/vim-go.git ~/.vim/plugged/vim-go
+
+" some plugins Red Hat suggests:
+" <https://www.redhat.com/sysadmin/five-vim-plugins>
 call plug#begin('~/.vim/plugged')
    Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries' }
-   Plug 'https://github.com/ElmCast/elm-vim'
+"   Plug 'https://github.com/ElmCast/elm-vim'
    Plug 'https://github.com/fevrin/AnsiEsc.vim', { 'branch': 'main' }
    Plug 'pearofducks/ansible-vim', { 'branch': 'main' }
+   if has("patch-8.1.0360")
+      Plug 'roxma/vim-paste-easy'
+   endif
+"   Plug 'airblade/vim-gitgutter'
+"   Plug 'vim-airline/vim-airline'
+"   Plug 'tpope/vim-fugitive'
+"   Plug 'roxma/vim-paste-easy'
+"   Plug 'editorconfig/editorconfig-vim' " https://github.com/editorconfig/editorconfig/wiki/EditorConfig-Properties
+"   Plug 'tpope/vim-sensible'
+"   Plug 'tpope/vim-sleuth'
+"   Plug 'preservim/nerdtree'
+"   Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+"   Plug 'junegunn/fzf.vim'
+"   for jump-to-definition functionality without ctags:
+"   https://stackoverflow.com/questions/635770/jump-to-function-definition/51195409#51195409
+"   Plug 'neoclide/coc.nvim', {'branch': 'release'}
+"   Plug 'dense-analysis/ale'
+"   Plug 'puremourning/vimspector'
+"   Plug 'scrooloose/nerdtree'
+"   Plug 'scrooloose/nerdcommenter'
+"   Plug 'sheerun/vim-polyglot'
+"   Plug 'yggdroot/indentline'
+"   Plug 'tpope/vim-surround'
+"   Plug 'kana/vim-textobj-user'
+"     \| Plug 'glts/vim-textobj-comment'
+"   Plug 'janko/vim-test'
+"   Plug 'vim-scripts/vcscommand.vim'
+"   Plug 'mhinz/vim-signify'
 call plug#end()
 let g:go_fmt_command = "goimports"
 let g:elm_format_autosave = 0
+
+" key mappings example for COC
+" nmap <silent> gd <Plug>(coc-definition)
+" nmap <silent> gD <Plug>(coc-implementation)
+" nmap <silent> gr <Plug>(coc-references)
+" there's way more, see `:help coc-key-mappings@en'
+
 
 " from <https://stackoverflow.com/questions/21708814/can-vim-diff-use-the-patience-algorithm/63079135#63079135>
 if has("patch-8.1.0360")
   set diffopt+=internal,indent-heuristic,algorithm:patience
 endif
+
+" from <https://coderwall.com/p/if9mda/automatically-set-paste-mode-in-vim-when-pasting-in-insert-mode>
+" these functions don't fix the issue with tmux buffer pasting, though (the default keybinding in tmux is the vim equivalent of <Ctrl>B])
+" the only working solution I've found is:
+" https://github.com/roxma/vim-paste-easy
+"function! WrapForTmux(s)
+"  if !exists('$TMUX')
+"    return a:s
+"  endif
+"
+"  let tmux_start = "\<Esc>Ptmux;"
+"  let tmux_end = "\<Esc>\\"
+"
+"  return tmux_start . substitute(a:s, "\<Esc>", "\<Esc>\<Esc>", 'g') . tmux_end
+"endfunction
+"
+"let &t_SI .= WrapForTmux("\<Esc>[?2004h")
+"let &t_EI .= WrapForTmux("\<Esc>[?2004l")
+"
+"function! XTermPasteBegin()
+"  set pastetoggle=<Esc>[201~
+"  set paste
+"  return ""
+"endfunction
+"
+"inoremap <special> <expr> <Esc>[200~ XTermPasteBegin()
+
+" if &term =~ "screen"
+"   let &t_BE = "\e[?2004h"
+"   let &t_BD = "\e[?2004l"
+"   exec "set t_PS=\e[200~"
+"   exec "set t_PE=\e[201~"
+" endif

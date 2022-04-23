@@ -159,6 +159,8 @@ HISTIGNORE+=":$(
 		aptshow
 		cp
 		dir
+		egrep
+		grep
 		list
 		mtr
 		mv
