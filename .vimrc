@@ -24,16 +24,31 @@ set linebreak " lbr; break/wrap lines at a space (not in the middle of a word)
 "set list " ; show non-printable characters
 set listchars=eol:$,tab:^_,trail:_ " lcs; strings to use in 'list' mode
 set number " nu; enable line numbering
-set relativenumber " rnu; show the relative line number for each line
 
 " 5 syntax, highlighting, and spelling
 set background=dark " bg; set the background to dark, so highlighting is adjusted appropriately
 syntax enable " enable syntax highlighting
 set hlsearch " hls; highlight all matches for the last used search pattern
+"let s:clocksource_file = "/sys/devices/system/clocksource/clocksource0/current_clocksource"
+"if (
+"\     has("patch-8.2.3455") || (
+"\        filereadable(s:clocksource_file) &&
+"\        readfile(s:clocksource_file)[0] == 'tsc'
+"\     )
+"\  ) &&
+"\  getfsize(s:clocksource_file) <= 524288000
 if has("patch-8.2.3455")
+
+   " this block restricts the situations in which the following option is enabled
+
    " this is causing severely slow performance in recent versions
    " <https://github.com/vim/vim/issues/8908>
+   " it could possibly due to a clock issue:
+   " <https://github.com/vim/vim/issues/2712#issuecomment-537690095>
    set cursorcolumn " cuc; highlight the screen column of the cursor
+
+   " this can also cause degraded performance, so we'll want to gate it for now
+   set relativenumber " rnu; show the relative line number for each line
 endif
 set cursorline " cul; highlight the screen line of the cursor
 set nospell " automatically spell-check; okay, I give up: no spell-check by default!!!
@@ -257,11 +272,9 @@ imap img<tab> <img src="" alt="" /><esc>10hi
 " <http://www.linux.com/articles/54936>
 " <http://concisionandconcinnity.blogspot.com/2009_07_01_archive.html>
 
-" scripts:
-" <http://www.linux.com/articles/62139>
-
-" use ":verbose set xyz" to find out which file's settings are overriding ~/.vimrc
-" helpful article at <http://peox.net/articles/vimconfig.html>
+" =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+" PLUGINS
+" =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 " from <https://github.com/tpope/vim-pathogen>
 " this allows you to install plugins without having to restart vim
@@ -285,9 +298,6 @@ if empty(glob(data_dir . '/autoload/plug.vim'))
    autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
 
-" git clone https://github.com/fatih/vim-go.git ~/.vim/bundle/vim-go
-" git clone https://github.com/fatih/vim-go.git ~/.vim/plugged/vim-go
-
 " some plugins Red Hat suggests:
 " <https://www.redhat.com/sysadmin/five-vim-plugins>
 call plug#begin(s:vim_home_dir . '/plugged')
@@ -295,15 +305,11 @@ call plug#begin(s:vim_home_dir . '/plugged')
 "   Plug 'https://github.com/ElmCast/elm-vim'
    Plug 'https://github.com/fevrin/AnsiEsc.vim', { 'branch': 'main', 'frozen': 'true' }
    Plug 'pearofducks/ansible-vim', { 'branch': 'master', 'frozen': 'true' }
-   if has("patch-8.1.0360")
-      Plug 'roxma/vim-paste-easy', { 'frozen': 'true' }
-   endif
    Plug 'tpope/vim-eunuch'
 "   Plug 'arp242/undofile_warn.vim'
 "   Plug 'airblade/vim-gitgutter'
 "   Plug 'vim-airline/vim-airline'
 "   Plug 'tpope/vim-fugitive'
-"   Plug 'roxma/vim-paste-easy'
 "   Plug 'editorconfig/editorconfig-vim' " https://github.com/editorconfig/editorconfig/wiki/EditorConfig-Properties
 "   Plug 'tpope/vim-sensible'
 "   Plug 'tpope/vim-sleuth'
@@ -341,35 +347,20 @@ if has("patch-8.1.0360")
    set diffopt+=internal,indent-heuristic,algorithm:patience
 endif
 
-" from <https://coderwall.com/p/if9mda/automatically-set-paste-mode-in-vim-when-pasting-in-insert-mode>
-" these functions don't fix the issue with tmux buffer pasting, though (the default keybinding in tmux is the vim equivalent of <Ctrl>B])
-" the only working solution I've found is:
-" https://github.com/roxma/vim-paste-easy
-"function! WrapForTmux(s)
-"  if !exists('$TMUX')
-"    return a:s
-"  endif
-"
-"  let tmux_start = "\<Esc>Ptmux;"
-"  let tmux_end = "\<Esc>\\"
-"
-"  return tmux_start . substitute(a:s, "\<Esc>", "\<Esc>\<Esc>", 'g') . tmux_end
-"endfunction
-"
-"let &t_SI .= WrapForTmux("\<Esc>[?2004h")
-"let &t_EI .= WrapForTmux("\<Esc>[?2004l")
-"
-"function! XTermPasteBegin()
-"  set pastetoggle=<Esc>[201~
-"  set paste
-"  return ""
-"endfunction
-"
-"inoremap <special> <expr> <Esc>[200~ XTermPasteBegin()
+" =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+" TROUBLESHOOTING
+" =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-" if &term =~ "screen"
-"   let &t_BE = "\e[?2004h"
-"   let &t_BD = "\e[?2004l"
-"   exec "set t_PS=\e[200~"
-"   exec "set t_PE=\e[201~"
-" endif
+" use this to profile scrolling down a large file:
+" let g:profstart=reltime() | for i in range(1,50) | exec "normal \<C-E>" | redraw | endfor | echo reltimestr(reltime(g:profstart)) . ' seconds'
+" let g:profstart=reltime() | for i in range(1,50) | exec "normal j" | redraw | endfor | echo reltimestr(reltime(g:profstart)) . ' seconds'
+
+" =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+" MISCELLANEOUS
+" =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+" scripts:
+" <http://www.linux.com/articles/62139>
+
+" use ":verbose set xyz" to find out which file's settings are overriding ~/.vimrc
+" helpful article at <http://peox.net/articles/vimconfig.html>
