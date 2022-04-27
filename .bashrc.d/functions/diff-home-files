@@ -4,6 +4,8 @@ diff-home-files() {
    local i
    local HOME_DIR="$HOME/home"
    local ACTION="${1:-vimdiff}"
+   local VIMDIFF_OPTIONS="-c :windo set wrap"
+   local ACTION_OPTIONS
    local FILE_LIST
 
    _help() {
@@ -73,6 +75,7 @@ diff-home-files() {
    esac
 
    [[ $ACTION || $ACTION =~ ^file$ ]] || ACTION="vimdiff"
+   [[ $ACTION =~ ^vimdiff$ ]] && ACTION_OPTIONS="$VIMDIFF_OPTIONS"
    [[ $FILE_LIST ]] || FILE_LIST=$(find $HOME_DIR -type f ! -iregex '.*\/\.git\/.*')
    _print_var_vals ACTION FILE_LIST
 
@@ -104,7 +107,7 @@ diff-home-files() {
       local file2=$i
 #      echo file2="$file2"
       if [[ $(md5sum $file1 2>/dev/null | cut -d" " -f1) != $(md5sum $file2 2>/dev/null | cut -d" " -f1) ]]; then
-         $ACTION $file1 $file2
+         $ACTION "$ACTION_OPTIONS" $file1 $file2
          [[ $ACTION =~ ^vimdiff$ ]] && {
             echo "$file1"
             echo "$file2"

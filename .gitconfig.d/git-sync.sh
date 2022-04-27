@@ -216,10 +216,11 @@ for DIR in ${DIRS[*]}; do
    # even if its upstream did have changes
 #   if [[ "$ORIGINAL_MAIN_BRANCH_REF" = "$(git rev-parse $MAIN_BRANCH)" ]]; then
 
+   GIT_BRANCH="$($GITBIN branch --show-current)"
    branch_is_current_output="$(branch_is_current 2>&1; exit $?)"
    branch_is_current_exit="$?"
    log "$branch_is_current_output"
-   if [[ "$branch_is_current_exit" -ne 1 ]]; then
+   if [[ "$branch_is_current_exit" -ne 1 && "$branch_is_current_exit" -ne 3 ]]; then
       continue
    fi
 
@@ -236,7 +237,6 @@ for DIR in ${DIRS[*]}; do
          STAGED_FILES="$($GITBIN diff --staged --name-only)"
          UNSTAGED_FILES="$($GITBIN diff --name-only)"
          UNMERGED_FILES="$($GITBIN status --porcelain=v2 | sed -rne 's;^u.? .* ([^ ]+)$;\1;p')"
-         GIT_BRANCH="$($GITBIN branch --show-current)"
 
          if [[ -n "$UNMERGED_FILES" ]]; then
             echo
@@ -253,7 +253,7 @@ for DIR in ${DIRS[*]}; do
          for status in STAGED_FILES UNSTAGED_FILES; do
             if [[ -n "${!status}" ]]; then
                echo
-               log "THESE ${status/_FILES/} FILES WILL BE STASHED AND RE-STAGED:"
+               log "THESE ${status/_FILES/} FILES WILL BE STASHED FOR THE REBASE:"
                log "${!status}"
                echo
                STASH_NAME="git-sync.$$"

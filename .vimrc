@@ -1,6 +1,13 @@
 "unlet! skip_defaults_vim
 "source $VIMRUNTIME/vimrc_example.vim
 
+" some good info at <https://www.vi-improved.org/vim-tips/>
+
+let s:vim_home_dir = $HOME . "/.vim"
+if !isdirectory(s:vim_home_dir)
+   call mkdir(s:vim_home_dir, "", 0770)
+endif
+
 " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 " MAIN OPTIONS
 " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -17,12 +24,17 @@ set linebreak " lbr; break/wrap lines at a space (not in the middle of a word)
 "set list " ; show non-printable characters
 set listchars=eol:$,tab:^_,trail:_ " lcs; strings to use in 'list' mode
 set number " nu; enable line numbering
+set relativenumber " rnu; show the relative line number for each line
 
 " 5 syntax, highlighting, and spelling
 set background=dark " bg; set the background to dark, so highlighting is adjusted appropriately
 syntax enable " enable syntax highlighting
 set hlsearch " hls; highlight all matches for the last used search pattern
-set cursorcolumn " cuc; highlight the screen column of the cursor
+if has("patch-8.2.3455")
+   " this is causing severely slow performance in recent versions
+   " <https://github.com/vim/vim/issues/8908>
+   set cursorcolumn " cuc; highlight the screen column of the cursor
+endif
 set cursorline " cul; highlight the screen line of the cursor
 set nospell " automatically spell-check; okay, I give up: no spell-check by default!!!
 
@@ -67,8 +79,14 @@ set omnifunc=syntaxcomplete#Complete "ofu; function for filetype-specific Insert
 "set digraph "dg; enables entering digraphs with c1 <BS> c2 instead of just Ctrl-K c1c2
 set matchpairs=(:),{:},[:],<:>,':',":" " mps; list of pairs that match for the "%" command
 set joinspaces " js; use two spaces after '.' when joining a line
-if exists('+undofile')
-  set undofile " automatically save and restore undo history
+if exists('+undofile') || has('persistent_undo')
+   let s:desired_undodir = s:vim_home_dir . "/undodir"
+   if !isdirectory(s:desired_undodir)
+      call mkdir(s:desired_undodir, "", 0700)
+   endif
+   let &undodir=s:desired_undodir
+"   set undodir=s:desired_undodir
+   set undofile " automatically save and restore undo history
 endif
 
 " 15 tabs and indenting
@@ -122,16 +140,21 @@ syntax sync minlines=50 " ensure vim doesn't keep changing syntax highlighting; 
 " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 " this section partially augments /usr/share/vim/vim80/filetype.vim
 
+" wrap long lines when diffing
+" <https://stackoverflow.com/questions/16840433/forcing-vimdiff-to-wrap-lines/16867953#16867953>
+au VimEnter * if &diff | execute 'windo set wrap' | endif
+"autocmd FilterWritePre * if &diff | setlocal wrap< | endif
+
 " OpenSSH configuration
 " ensure all */.ssh/config* files are set to be of "sshconfig" type
-au BufNewFile,BufRead ssh_config,*/.ssh/config*	setf sshconfig
+au BufNewFile,BufRead ssh_config,*/.ssh/config* setf sshconfig
 
 " help from
 " <https://stackoverflow.com/questions/11023194/automatically-wrap-long-git-commit-messages-in-vim/11023282#11023282>
 au FileType gitcommit setlocal spell
 
 " since 'textwidth' is overriden in the global file /usr/share/vim/vim80/ftplugin/gitcommit.vim, we have to put this config
-" in a separate file, ~/.vim/after/ftplugin/gitcommit.vim
+" in a separate file, ~/.vim/after/ftplugin/gitcommit.vim, as that's at the very end of the 'runtimepath'
 " not even rearranging the 'runtime' value so ~/.vimrc is at the end fixes the issue
 "au FileType gitcommit setlocal tw=125
 
@@ -162,27 +185,27 @@ autocmd FileType typescriptreact setlocal ft=typescript
 set backupskip+=*.gpg,*.asc
 
 augroup encrypted
-  au!
-  " Before reading the file:
-  " * disable swap files
-  " * set binary file format
-  " * empty the 'viminfo' option to avoid parts of the file being saved to .viminfo when yanking or deleting
-  autocmd BufReadPre,FileReadPre *.gpg,*.asc
+   au!
+   " Before reading the file:
+   " * disable swap files
+   " * set binary file format
+   " * empty the 'viminfo' option to avoid parts of the file being saved to .viminfo when yanking or deleting
+   autocmd BufReadPre,FileReadPre *.gpg,*.asc
     \ setlocal noswapfile bin viminfo=
-  " Decrypt the contents after reading the file, reset binary file format
-  " and run any BufReadPost autocmds matching the file name without the .gpg
-  " extension
-  autocmd BufReadPost,FileReadPost *.gpg,*.asc
+   " Decrypt the contents after reading the file, reset binary file format
+   " and run any BufReadPost autocmds matching the file name without the .gpg
+   " extension
+   autocmd BufReadPost,FileReadPost *.gpg,*.asc
     \ execute "'[,']!gpg --decrypt --quiet --default-recipient-self" |
     \ setlocal nobin |
     \ execute "doautocmd BufReadPost " . expand("%:r")
-  " Set binary file format and encrypt the contents before writing the file
-  autocmd BufWritePre,FileWritePre *.gpg,*.asc
+   " Set binary file format and encrypt the contents before writing the file
+   autocmd BufWritePre,FileWritePre *.gpg,*.asc
     \ setlocal bin |
     \ '[,']!gpg --armor --symmetric --cipher-algo AES256 --default-recipient-self
-  " After writing the file, do an :undo to revert the encryption in the
-  " buffer, and reset binary file format
-  autocmd BufWritePost,FileWritePost *.gpg,*.asc
+   " After writing the file, do an :undo to revert the encryption in the
+   " buffer, and reset binary file format
+   autocmd BufWritePost,FileWritePost *.gpg,*.asc
     \ silent u |
     \ setlocal nobin
 augroup END
@@ -244,9 +267,9 @@ imap img<tab> <img src="" alt="" /><esc>10hi
 " this allows you to install plugins without having to restart vim
 
 " but, to avoid needless errors, first ensure the file exists before attempting to source it
-if filereadable("~/.vim/autoload/pathogen.vim")
-   execute pathogen#infect()
-endif
+"if filereadable("~/.vim/autoload/pathogen.vim")
+"   execute pathogen#infect()
+"endif
 
 
 " for vim-go to automatically grab imports, as needed
@@ -255,11 +278,11 @@ endif
 "
 " automatically install vim-plug
 " <https://github.com/junegunn/vim-plug/wiki/tips#automatic-installation>
-let data_dir = has('nvim') ? stdpath('data') . '/site' : '~/.vim'
+let data_dir = has('nvim') ? stdpath('data') . '/site' : s:vim_home_dir
 if empty(glob(data_dir . '/autoload/plug.vim'))
-  silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
+   silent !curl -fLo s:vim_home_dir . "/autoload/plug.vim" --create-dirs
     \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+   autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
 
 " git clone https://github.com/fatih/vim-go.git ~/.vim/bundle/vim-go
@@ -267,14 +290,16 @@ endif
 
 " some plugins Red Hat suggests:
 " <https://www.redhat.com/sysadmin/five-vim-plugins>
-call plug#begin('~/.vim/plugged')
-   Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries' }
+call plug#begin(s:vim_home_dir . '/plugged')
+   Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries', 'frozen': 'true' }
 "   Plug 'https://github.com/ElmCast/elm-vim'
-   Plug 'https://github.com/fevrin/AnsiEsc.vim', { 'branch': 'main' }
-   Plug 'pearofducks/ansible-vim', { 'branch': 'main' }
+   Plug 'https://github.com/fevrin/AnsiEsc.vim', { 'branch': 'main', 'frozen': 'true' }
+   Plug 'pearofducks/ansible-vim', { 'branch': 'master', 'frozen': 'true' }
    if has("patch-8.1.0360")
-      Plug 'roxma/vim-paste-easy'
+      Plug 'roxma/vim-paste-easy', { 'frozen': 'true' }
    endif
+   Plug 'tpope/vim-eunuch'
+"   Plug 'arp242/undofile_warn.vim'
 "   Plug 'airblade/vim-gitgutter'
 "   Plug 'vim-airline/vim-airline'
 "   Plug 'tpope/vim-fugitive'
@@ -313,7 +338,7 @@ let g:elm_format_autosave = 0
 
 " from <https://stackoverflow.com/questions/21708814/can-vim-diff-use-the-patience-algorithm/63079135#63079135>
 if has("patch-8.1.0360")
-  set diffopt+=internal,indent-heuristic,algorithm:patience
+   set diffopt+=internal,indent-heuristic,algorithm:patience
 endif
 
 " from <https://coderwall.com/p/if9mda/automatically-set-paste-mode-in-vim-when-pasting-in-insert-mode>
