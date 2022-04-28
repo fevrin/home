@@ -29,7 +29,7 @@ export HISTFILESIZE=20000
 
 # ensure vim is the default editor of choice
 export EDITOR="vim"
-export LESS="QFRX"
+export LESS="QFRX --no-histdups -+i" # '-+i' resets search case sensitivity, which seems to be getting set somehow (formerly, this was '+-+i', as '-+i' alone didn't seem to work; that longer version executes when `less` opens and makes searches case sensitive and (with ) bypasses the message about that)
 
 # set default pager for manpages to "less -Qc" so the terminal bell doesn't ring and refreshes from the top instead of the bottom
 export MANPAGER="less -$(echo $LESS)"

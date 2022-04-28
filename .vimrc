@@ -58,7 +58,7 @@ set nospell " automatically spell-check; okay, I give up: no spell-check by defa
 set laststatus=2 "ls; statusline will always be displayed, showing modification status; Ctrl+G shows status regardless if
 "this is set or not
 
-set statusline=%f\ %m\ \ ft=%y\ \ char=%b,\ %B,\ #%o,\ #%O%=%l(%L),%c\ \ \ \ \ \ \ %p%% "stl; determines what to show in the
+set statusline=%f\ (bf\ #%n)\ %m\ \ ft=%y\ \ char=%b,\ %B,\ #%o,\ #%O%=%l(%L),%c\ \ \ \ \ \ \ %p%% "stl; determines what to show in the
 "status line; the default is:
 "statusline=%-f\ %-m%=%l,%c\ \ \ \ \ \ \ %P; help default is: statusline=%-t\ %-h%-r%=%l,%c%V\ \ \ \ \ \ \ %P
 

@@ -35,16 +35,17 @@ verbose() {
    local VERBOSE="${VERBOSE:-1}"
 
    # if we got called via the log() function, set the index accordingly
-   [[ ${FUNCNAME[1]} =~ log ]] && funcname_lineno_index=1
+   # this must be in a subshell in order to not overwrite a $BASH_REMATCH array the caller may have
+   ([[ ${FUNCNAME[1]} =~ log ]]) && funcname_lineno_index=1
 
    # default verbosity threshold
    verbosity=3
 
-   [[ "$1" =~ -(n|e) ]] &&
+   ([[ "$1" =~ -(n|e) ]]) &&
    flags="$1" &&
    shift
 
-   if [[ "$1" =~ ^([0-9]+|(emerg|alert|crit|err|warn|notice|info|debug).*)$ ]]; then
+   if ([[ "$1" =~ ^([0-9]+|(emerg|alert|crit|err|warn|notice|info|debug).*)$ ]]); then
       case "$1" in
       # levels taken from syslog
          emerg*) # system is unusable
@@ -71,7 +72,7 @@ verbose() {
    fi
 
    if [[ $VERBOSE -ge $verbosity ]]; then
-      [[ $verbosity -eq 8 ]] && DEBUG="${FUNCNAME[$((funcname_lineno_index + 1))]} (line ${BASH_LINENO[$funcname_lineno_index]}): "
+      [[ $verbosity -eq 8 ]] && DEBUG="${FUNCNAME[$((funcname_lineno_index + 1))]} (line $((${BASH_LINENO[$funcname_lineno_index]} +2))): "
 
       echo $flags "$DEBUG$@" >&2
    fi
