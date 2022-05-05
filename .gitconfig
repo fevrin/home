@@ -1,196 +1,238 @@
 [core]
 	repositoryformatversion = 0
 	filemode = true
-	bare = false
-	logallrefupdates = true
-	editor = vim
-	excludesfile = ~/.gitconfig.d/gitignore
-	attributesfile = ~/.gitconfig.d/gitattributes
+  bare = false
+  logallrefupdates = true
+  editor = vim
+  excludesfile = ~/.gitconfig.d/gitignore
+  attributesfile = ~/.gitconfig.d/gitattributes
 [color]
-	ui = true
+  ui = true
 [alias]
   # inspired by <https://www.atlassian.com/blog/git/advanced-git-aliases>
 #  bclean = "!git branch --merged HEAD | sed -re 's;^\\*?\\s+;;' | egrep -v \"^($(git rev-parse --abbrev-ref HEAD)|master)$\" -Z | xargs -0 -I{} echo -e 'these branches would be cleared:\n{}'"
-   bclean = "!\
-             bash -c '\
-                main_remote=\"$(git get-main-remote)\"; \
-                main_branch=\"$(git get-main-branch)\"; \
-                current_branch=$(git current-branch); \
-                git sync --no-rebase; \
-                affected_branches=$(\
-                   git branch --merged $main_remote/$main_branch | \
-                   sed -re \"s;^\\*?\\s+;;\" | \
-                   egrep -v \"^$main_branch$\" -Z \
-                );\
-                \
-                if [[ $affected_branches ]]; then\
-                   echo -e \"these branches would be cleared:\\n$(echo \"${affected_branches}\" | sed -e \"s;^;- ;\")\"; \
-                   echo; \
-                   echo -n \"would you like to clear them? [y/N] \";\
-                   read;\
-                   echo;\
-                   if [[ $REPLY =~ [Yy] ]]; then \
-                      for branch in $affected_branches; do \
-                         if [[ $branch = $current_branch ]]; then \
-                            echo -n \"delete current branch '\\''\"$current_branch\"'\\''? [y/N] \" && \
-                            read && \
-                            echo && \
-                            [[ $REPLY =~ [Yy] ]] || { \
-                               echo \"skipping '\\''\"$current_branch\"'\\''\"; \
-                               continue; \
-                            }; \
-                            git trunk; \
-                         fi; \
-                         git branch -d $branch;\
-                         if [[ $? -ne 0 ]]; then \
-                            echo && \
-                            echo -n \"try force deleting '\\''\"$branch\"'\\''? [y/N] \" && \
-                            read && \
-                            echo && \
-                            [[ $REPLY =~ [Yy] ]] || { \
-                               echo \"skipping '\\''\"$branch\"'\\''\"; \
-                               continue; \
-                            }; \
-                            git branch -D $branch;\
-                         fi; \
-                      done; \
-                   else \
-                      echo \"cancelling branch clearing\"; \
-                   fi;\
-                else\
-                   echo \"no branches to clean!\";\
-                fi;\
-                echo; \
-                echo \"running '\\''git clean'...\\''\"; \
-                git_clean=\"$(git clean -ndf)\"; \
-                echo \"$git_clean\" | sed -re \"s;^Would remove ;;\"; \
-                if [[ \"$git_clean\" ]]; then \
-                   echo && \
-                   echo -n \"remove the above files? [y/N] \" && \
-                   read; \
-                   [[ \"$REPLY\" =~ [Yy] ]] && git clean -df && unset REPLY; \
-                else \
-                   echo \"no files to clean\"; \
-                fi; \
-                echo; \
-                echo -n \"run '\\''git gc'\\''? [y/N] \"; read; \
-                [[ \"$REPLY\" =~ [Yy] ]] && git gc || exit 0 \
-             '"
+  bclean = "!\
+     bash -c '\
+        main_remote=\"$(git get-main-remote)\"; \
+        main_branch=\"$(git get-main-branch)\"; \
+        current_branch=$(git current-branch); \
+        git sync --no-rebase; \
+        affected_branches=$(\
+           git branch --merged $main_remote/$main_branch | \
+           sed -re \"s;^\\*?\\s+;;\" | \
+           egrep -v \"^$main_branch$\" -Z \
+        );\
+        \
+        if [[ -n \"$affected_branches\" ]]; then\
+           echo -e \"these branches would be cleared:\\n$(echo \"${affected_branches}\" | sed -e \"s;^;- ;\")\"; \
+           echo; \
+           echo -n \"would you like to clear them? [y/N] \";\
+           read;\
+           echo;\
+           if [[ $REPLY =~ [Yy] ]]; then \
+              for branch in $affected_branches; do \
+                 if [[ $branch = $current_branch ]]; then \
+                    echo -n \"delete current branch '\\''\"$current_branch\"'\\''? [y/N] \" && \
+                    read && \
+                    echo && \
+                    [[ $REPLY =~ [Yy] ]] || { \
+                       echo \"skipping '\\''\"$current_branch\"'\\''\"; \
+                       continue; \
+                    }; \
+                    git trunk; \
+                 fi; \
+                 git branch -d $branch;\
+                 if [[ $? -ne 0 ]]; then \
+                    echo && \
+                    echo -n \"try force deleting '\\''\"$branch\"'\\''? [y/N] \" && \
+                    read && \
+                    echo && \
+                    [[ $REPLY =~ [Yy] ]] || { \
+                       echo \"skipping '\\''\"$branch\"'\\''\"; \
+                       continue; \
+                    }; \
+                    git branch -D $branch;\
+                 fi; \
+              done; \
+           else \
+              echo \"cancelling branch clearing\"; \
+           fi;\
+        else\
+           echo \"no branches to clean!\";\
+        fi;\
+        brs_with_remote_configs_but_no_remote_counterpart=$(git get-local-brs-with-remote-config-without-remote-counterpart); \
+        if [[ -n \"$brs_with_remote_configs_but_no_remote_counterpart\" ]]; then \
+           echo -e \"these branches have a remote config but no remote counterpart:\\n\"${brs_with_remote_configs_but_no_remote_counterpart}\"\"; \
+           echo; \
+           echo -n \"would you like to clear them? [y/N] \";\
+           read;\
+           echo;\
+           if [[ $REPLY =~ [Yy] ]]; then \
+              for branch in $brs_with_remote_configs_but_no_remote_counterpart; do \
+                 if [[ $branch = $current_branch ]]; then \
+                    echo -n \"delete current branch '\\''\"$current_branch\"'\\''? [y/N] \" && \
+                    read && \
+                    echo && \
+                    [[ $REPLY =~ [Yy] ]] || { \
+                       echo \"skipping '\\''\"$current_branch\"'\\''\"; \
+                       continue; \
+                    }; \
+                    git trunk; \
+                 fi; \
+                 git branch -d $branch;\
+                 if [[ $? -ne 0 ]]; then \
+                    echo && \
+                    echo -n \"try force deleting '\\''\"$branch\"'\\''? [y/N] \" && \
+                    read && \
+                    echo && \
+                    [[ $REPLY =~ [Yy] ]] || { \
+                       echo \"skipping '\\''\"$branch\"'\\''\"; \
+                       continue; \
+                    }; \
+                    git branch -D $branch;\
+                 fi; \
+              done; \
+           else \
+              echo \"cancelling branch clearing\"; \
+           fi; \
+        fi; \
+        echo; \
+        echo \"running '\\''git clean'...\\''\"; \
+        git_clean=\"$(git clean -ndf)\"; \
+        echo \"$git_clean\" | sed -re \"s;^Would remove ;;\"; \
+        if [[ \"$git_clean\" ]]; then \
+           echo && \
+           echo -n \"remove the above files? [y/N] \" && \
+           read; \
+           [[ \"$REPLY\" =~ [Yy] ]] && git clean -df && unset REPLY; \
+        else \
+           echo \"no files to clean\"; \
+        fi; \
+        echo; \
+        echo -n \"run '\\''git gc'\\''? [y/N] \"; read; \
+        [[ \"$REPLY\" =~ [Yy] ]] && git gc || exit 0 \
+  '"
   br = branch
   co = checkout
   ci = "!bash -c '\
-           if ! git diff --staged --quiet --exit-code || { ! git diff --quiet --exit-code && [[ \"'$@'\" =~ (^-a | -a | -a$|^-a$) ]]; } then\
-              git sync \"'$@'\";\
-              \
-              if ! git diff --staged --quiet --exit-code || { ! git diff --quiet --exit-code && [[ \"'$@'\" =~ (^-a | -a | -a$|^-a$) ]]; } then\
-                 echo -e \"\npress ENTER to continue with commit\";\
-                 read;\
-                 git commit -v '$@';\
-              else\
-                 echo -e \"\nnothing in index to commit!\";\
-              fi;\
-           else\
-              if git diff --quiet --exit-code; then\
-                 echo -e \"\nnothing in index to commit!\";\
-              elif [[ ! \"'$@'\" =~ (^-a | -a | -a$|^-a$) ]]; then\
-                 echo -e \"\nre-run with '\\''-a'\\'' to stage files to commit\";\
-              fi;\
-           fi;\
-        '"
-   changelog = "!bash -c '\
-                  child_tags=\"$(git tag --contains HEAD^ | head -n1)\"; \
-                  first_commit=\"$(git rev-list --max-parents=0 HEAD)\"; \
-                  compare=\"$(git describe --abbrev=0 --tags HEAD 2>/dev/null)\"; \
-                  head=\"$(git rev-parse --abbrev-ref HEAD)\"; \
-                  [[ -z \"$compare\" || \"$(git rev-list -n1 $compare)\" = \"$(git rev-list -n1 $head)\" ]] && { \
-                     compare=\"$first_commit\"; \
-                     using_first_commit=1; \
-                  }; \
-                  echo \"compare = '\\''$compare'\\''\"; \
-                  echo \"head = '\\''$head'\\''\"; \
-                  log_output=\"$(git log --date=format:\"%Y-%m-%d (%a, %b %d %Y)\" --format=\"### %ad%x02%n%B\" ${compare}..${head})\"; \
-                  [[ \"$using_first_commit\" -eq 1 ]] && log_output+=\"\n\n$(git log --format=\"### %ad%x02%n%B\" ${compare})\"; \
-                  if [[ -n \"$log_output\" ]]; then \
-                     echo -e \"$log_output\" | \
-                     tr \"\n\" \"\\1\" | \
-                     sed -re \"s;(\\o1\\o1|\\o2\\o1)([^-+*#\\o1]+);\\1#### \\2;g\" | \
-                     tr \"\\1\" \"\n\" | \
-                     tr -d \"\\2\"; \
-                  fi; \
-                  '"
+     if ! git diff --staged --quiet --exit-code || { ! git diff --quiet --exit-code && [[ \"'$@'\" =~ (^-a | -a | -a$|^-a$) ]]; } then\
+        git sync \"'$@'\";\
+        \
+        if ! git diff --staged --quiet --exit-code || { ! git diff --quiet --exit-code && [[ \"'$@'\" =~ (^-a | -a | -a$|^-a$) ]]; } then\
+           echo -e \"\npress ENTER to continue with commit\";\
+           read;\
+           git commit -v '$@';\
+        else\
+           echo -e \"\nnothing in index to commit!\";\
+        fi;\
+     else\
+        if git diff --quiet --exit-code; then\
+           echo -e \"\nnothing in index to commit!\";\
+        elif [[ ! \"'$@'\" =~ (^-a | -a | -a$|^-a$) ]]; then\
+           echo -e \"\nre-run with '\\''-a'\\'' to stage files to commit\";\
+        fi;\
+     fi;\
+  '"
+  changelog = "!bash -c '\
+     child_tags=\"$(git tag --contains HEAD^ | head -n1)\"; \
+     first_commit=\"$(git rev-list --max-parents=0 HEAD)\"; \
+     compare=\"$(git describe --abbrev=0 --tags HEAD 2>/dev/null)\"; \
+     head=\"$(git rev-parse --abbrev-ref HEAD)\"; \
+     [[ -z \"$compare\" || \"$(git rev-list -n1 $compare)\" = \"$(git rev-list -n1 $head)\" ]] && { \
+        compare=\"$first_commit\"; \
+        using_first_commit=1; \
+     }; \
+     echo \"compare = '\\''$compare'\\''\"; \
+     echo \"head = '\\''$head'\\''\"; \
+     log_output=\"$(git log --date=format:\"%Y-%m-%d (%a, %b %d %Y)\" --format=\"### %ad%x02%n%B\" ${compare}..${head})\"; \
+     [[ \"$using_first_commit\" -eq 1 ]] && log_output+=\"\n\n$(git log --format=\"### %ad%x02%n%B\" ${compare})\"; \
+     if [[ -n \"$log_output\" ]]; then \
+        echo -e \"$log_output\" | \
+        tr \"\n\" \"\\1\" | \
+        sed -re \"s;(\\o1\\o1|\\o2\\o1)([^-+*#\\o1]+);\\1#### \\2;g\" | \
+        tr \"\\1\" \"\n\" | \
+        tr -d \"\\2\"; \
+     fi; \
+  '"
                   # grab the tag before the one that encompasses HEAD
                   # if $compare is blank, there is no previous tag, so we should use the initial commit to compare
   check-whitespace = "!bash -c '\
-                        git diff --check &>/dev/null; \
-                        [[ $? -eq 0 ]] || { \
-                           echo && \
-                           echo && \
-                           echo && \
-                           echo && \
-                           echo \"changes introduce conflict markers or whitespace errors:\" && \
-                           echo && \
-                           git diff --check; \
-                        } \
-                     '"
+     git diff --check &>/dev/null; \
+     [[ $? -eq 0 ]] || { \
+        echo && \
+        echo && \
+        echo && \
+        echo && \
+        echo \"changes introduce conflict markers or whitespace errors:\" && \
+        echo && \
+        git diff --check; \
+     } \
+  '"
   com = commit -v
-  current-branch = symbolic-ref --short HEAD
+  current-branch = symbolic-ref --short HEAD # alternatives: '$(git rev-parse --abbrev-ref HEAD)' and '$(git branch --show-current)'
   df-alt = "!bash -c '\
-              git diff --minimal -U0 | \
-              wdiff -dn -w $(tput setaf 1) -x $(tput sgr0) -y $(tput setaf 2) -z $(tput sgr0) | \
-              fold -s -w180 \
-           '"
+     git diff --minimal -U0 | \
+     wdiff -dn -w $(tput setaf 1) -x $(tput sgr0) -y $(tput setaf 2) -z $(tput sgr0) | \
+     fold -s -w180 \
+  '"
   df = "!bash -c '\
-          git diff --word-diff-regex=\".\" $(if [[ '\\'$1\\'' && -e \"$GIT_PREFIX/'$1'\" && ! \"$GIT_PREFIX/'$1'\" =~ ^/$ ]]; then echo \"$GIT_PREFIX/'$1'\"; else echo \"'$1'\"; fi) && \
-          git check-whitespace \
-       '"
+     git diff --word-diff-regex=\".\" $(if [[ '\\'$1\\'' && -e \"$GIT_PREFIX/'$1'\" && ! \"$GIT_PREFIX/'$1'\" =~ ^/$ ]]; then echo \"$GIT_PREFIX/'$1'\"; else echo \"'$1'\"; fi) && \
+     git check-whitespace \
+  '"
   dff = "!bash -c '\
-           git diff --word-diff-regex=\"(\\[[^]]+\\]|\\([^)]+\\)|\\w)+\" $([[ '\\'$1\\'' ]] && echo \"$GIT_PREFIX/'$1'\") && \
-           git check-whitespace \
-        '"
+     git diff --word-diff-regex=\"(\\[[^]]+\\]|\\([^)]+\\)|\\w)+\" $([[ '\\'$1\\'' ]] && echo \"$GIT_PREFIX/'$1'\") && \
+     git check-whitespace \
+  '"
         # formerly used this, but it may not show changes in other directories: `git diff --staged --word-diff-regex=\".\" $(echo \"$GIT_PREFIX\")'$1' && \`
   dfs = "!bash -c '\
-           git diff --staged --word-diff-regex=\".\" && \
-           git check-whitespace \
-        '"
+     git diff --staged --word-diff-regex=\".\" && \
+     git check-whitespace \
+  '"
   dffs = "!bash -c '\
-            git diff --staged --word-diff-regex=\"[ ]+|[^ ]+\" $(if [[ '\\'$1\\'' && -e \"$GIT_PREFIX/'$1'\" && ! \"$GIT_PREFIX/'$1'\" =~ ^/$ ]]; then echo \"$GIT_PREFIX/'$1'\"; else echo \"'$1'\"; fi) && \
-            git check-whitespace \
-         '"
+     git diff --staged --word-diff-regex=\"[ ]+|[^ ]+\" $(if [[ '\\'$1\\'' && -e \"$GIT_PREFIX/'$1'\" && ! \"$GIT_PREFIX/'$1'\" =~ ^/$ ]]; then echo \"$GIT_PREFIX/'$1'\"; else echo \"'$1'\"; fi) && \
+     git check-whitespace \
+  '"
   diffs = "!bash -c '\
-             git diff --staged $(if [[ '\\'$1\\'' && -e \"$GIT_PREFIX/'$1'\" && ! \"$GIT_PREFIX/'$1'\" =~ ^/$ ]]; then echo \"$GIT_PREFIX/'$1'\"; else echo \"'$1'\"; fi) && \
-             git check-whitespace \
-          '"
+     git diff --staged $(if [[ '\\'$1\\'' && -e \"$GIT_PREFIX/'$1'\" && ! \"$GIT_PREFIX/'$1'\" =~ ^/$ ]]; then echo \"$GIT_PREFIX/'$1'\"; else echo \"'$1'\"; fi) && \
+     git check-whitespace \
+  '"
   diff-with = diff HEAD
 #  diff-with = "!cd \"$GIT_PREFIX\"; echo bash -c 'git diff --name-only HEAD $@'"
   diff-with-main = "!cd \"$GIT_PREFIX\"; bash -c 'git diff $(git get-main-branch)... '$@''"
-  diff-with-tracking = "!cd \"$GIT_PREFIX\"; bash -c 'git diff-with $(git get-main-remote)/$(git current-branch) $@'"
+#  diff-with-tracking = "!cd \"$GIT_PREFIX\"; bash -c 'git diff-with $(git get-main-remote)/$(git current-branch) $@'"
+  diff-with-tracking = "!cd \"$GIT_PREFIX\"; bash -c 'git diff $(git get-upstream-branch) $@'"
   dump = cat-file -p
-  fet = "fetch --all -p"
+  fet = "fetch --all --prune"
   fork = "clone -o upstream "
+  get-local-brs-without-remote-counterpart = "!bash -c 'grep -xvf <(grep -xf <(git br --sort=refname --format=\"%(refname:short)\" | tr -s \"\n\") <(git br -r --sort=refname --format=\"%(refname:lstrip=3)\")) <(git br --sort=refname --format=\"%(refname:short)\" | tr -s \"\n\")'"
+  get-local-brs-with-remote-counterpart = "!bash -c 'grep -xf <(git br --sort=refname --format=\"%(refname:short)\" | tr -s \"\n\") <(git br -r --sort=refname --format=\"%(refname:lstrip=3)\")'"
+  get-remote-brs-without-local-counterpart = "!bash -c 'egrep -xvf <(git br --sort=refname --format=\"^[^/]+/%(refname:short)\" | tr -s \"\n\"; echo \"^[^/]+/HEAD\") <(git br -r --sort=refname --format=\"%(refname:lstrip=2)\")'"
+  get-local-brs-with-remote-config-without-remote-counterpart = "!bash -c 'egrep -xvf <(git get-local-brs-with-remote-counterpart) <(git config --fixed-value --get-regexp \"branch.*\\.remote\" origin | sed -re \"s;^branch\\.(.+)\\.remote .*;\\1;\" | sort -u)'"
   get-main-branch = "!bash -c '\
      main_remote=\"$(git get-main-remote)\"; \
      remote_file=\".git/refs/remotes/${main_remote}/HEAD\"; \
      if [[ -s \"${remote_file}\" ]]; then \
-        sed -rne \"s;.*${main_remote}/(.*);\\1;p\" \"${remote_file}\" 2>/dev/null || {\
+        egrep -q \".*${main_remote}/(.+)$\" \"${remote_file}\" 2>/dev/null || {\
            echo \"using slower, more accurate method to determine the main branch\" >&2; \
            echo \"setting head so this will be quicker next time\" >&2; \
            git remote -v set-head origin -a >&2; \
-           sed -rne \"s;.*${main_remote}/(.*);\\1;p\" \"${remote_file}\"  2>/dev/null; \
+           sed -rne \"s;.*${main_remote}/(.*);\\1;p\" \"${remote_file}\" 2>/dev/null; \
         } \
-     else \
-        main_branch=\"$(git rev-parse --abbrev-ref HEAD)\"; \
-        [[ $? -eq 0 ]] || { \
-           echo \"no remote exists with \\`git rev-parse --abbrev-ref HEAD\\` or at the file below; this may be a new repo\" >&2; \
-           echo \"${remote_file}\" >&2; \
-           echo >&2; \
-           echo \"in this case, you may need to first pull from the remote or set the tracking branch (e.g., \\`git push -u $(git get-main-remote) $(git current-branch)\\`)\" >&2; \
-           exit 1; \
-        }; \
-        echo \"${main_branch}\"; \
      fi; \
-     '" # try a quick method first, but if that fails, try a slower though potentially more up-to-date method
+     main_branch=\"$(git rev-parse --abbrev-ref ${main_remote}/HEAD | sed \"s;^${main_remote}/;;\")\"; \
+     [[ -n \"$main_branch\" ]] || { \
+        echo \"no remote exists with \\`git rev-parse --abbrev-ref ${main_remote}/HEAD\\` or at the file below; this may be a new, non-cloned repo\" >&2; \
+        echo \"${remote_file}\" >&2; \
+        echo >&2; \
+        echo \"in this case, you may need to first pull from the remote or set the tracking branch (e.g., \\`git push -u $(git get-main-remote) $(git current-branch)\\`)\" >&2; \
+        exit 1; \
+     }; \
+     echo \"${main_branch}\"; \
+  '" # try a quick method first, but if that fails, try a slower though potentially more up-to-date method
      # old, slower method: git remote -v show $(git get-main-remote) | sed -rne \"s;.*HEAD branch: (.*)$;\\1;p\";\
-  get-main-remote = config --get remote.pushdefault
+  get-main-remote = config --default --get remote.pushdefault
+#  get-upstream-branch = "!bash -c 'git config --get branch.$(git current-branch).merge'"
+  get-upstream-branch = "!bash -c 'git br --format=\"%(if:equals=$(git current-branch))%(refname:short)%(then)%(upstream:lstrip=2)%(end)\" | tr -d \"\n\"; echo'"
   list-tracked-files="!git ls-tree -r $(git current-branch) --name-only"
   trunk = "!git co $(git get-main-branch)"
   root-branch = trunk
@@ -219,7 +261,8 @@
            echo -n \"are you sure you wish to push \"$branch\" to all remotes? [y/N] \" &&\
            read;\
         [[ $REPLY =~ [Yy] || ! \"$branch\" =~ \"$main_branch\" ]] &&\
-        parallel --will-cite git push -v --tags {} $(git rev-parse --abbrev-ref HEAD) ::: $(git remote); \
+        [[ -n \"$(git get-upstream-branch)\" ]] || git branch --set-upstream-to=$(git get-main-remote)/\"$branch\" \"$branch\"; \
+        parallel --will-cite \"git push -v --tags {} $(git rev-parse --abbrev-ref HEAD); git remote set-branches --add {} $(git rev-parse --abbrev-ref HEAD); git fet\" ::: $(git remote); \
      else \
         exit $?; \
      fi'"
@@ -231,10 +274,12 @@
            echo -n \"are you sure you wish to push \"$branch\" to all remotes? [y/N] \" &&\
            read;\
         [[ $REPLY =~ [Yy] || ! \"$branch\" =~ \"$main_branch\" ]] &&\
-        git remote | xargs --max-procs=1 -L1 -I{} git push -v --tags {} $(git rev-parse --abbrev-ref HEAD) '$@'; \
+        [[ -n \"$(git get-upstream-branch)\" ]] || git branch --set-upstream-to=$(git get-main-remote)/\"$branch\" \"$branch\"; \
+        parallel --will-cite \"git push -v '$@' --tags {} $(git rev-parse --abbrev-ref HEAD); git remote set-branches --add {} $(git rev-parse --abbrev-ref HEAD); git fet\" ::: $(git remote); \
      else \
         exit $?; \
      fi'"
+        #git remote | xargs --max-procs=1 -L1 -I{} git push -uv --tags {} $(git rev-parse --abbrev-ref HEAD) '$@'; \
 
   # from <http://stackoverflow.com/questions/1057564/pretty-git-branch-graphs#answer-9074343>
   lg1 = log --graph -30 --abbrev-commit --decorate --date=relative --color --format=format:'%C(bold blue)%h%C(reset) - %C(bold yellow)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(auto)%d%C(reset)' --all
@@ -242,22 +287,24 @@
   lg3 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold yellow)(%ar)%C(reset)%C(auto)%d%C(reset)%n''          %C(white)%s%C(reset) %C(dim white)- %an%C(reset)' --all
   lg4 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset) %C(bold cyan)(committed: %cD)%C(reset) %C(auto)%d%C(reset)%n''          %C(white)%s%C(reset)%n''          %C(dim white)- %an <%ae> %C(reset) %C(dim white)(committer: %cn <%ce>)%C(reset)'
 [diff]
-   algorithm = patience
+  algorithm = patience
+[init]
+  defaultBranch = main
 [merge]
-	conflictstyle = diff3
-	tool = vimdiff
+  conflictstyle = diff3
+  tool = vimdiff
 [pull]
-	ff = only
+  ff = only
 [push]
-	default = simple
+  default = current
 [rerere]
-   enabled = true # from <http://psung.blogspot.com/2011/02/reducing-merge-headaches-git-meets.html>
+  enabled = true # from <http://psung.blogspot.com/2011/02/reducing-merge-headaches-git-meets.html>
 [remote]
-	pushdefault = origin
+  pushdefault = origin
 [status]
-   showUntrackedFiles = all
+  showUntrackedFiles = all
 [branch "master"]
-	pushremote = no_push
+  pushremote = no_push
 #[user]
 #	email = 
 #	name = 

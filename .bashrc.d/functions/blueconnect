@@ -32,8 +32,8 @@ blueconnect() {
 
    _print_var_vals bluetooth_versions[\$bluetooth_version] device
 
-   OIFS="$IFS"
-   IFS=$'\n'
+   local OIFS="$IFS"
+   local IFS=$'\n'
    local connected_devs="$(bluetoothctl info 2>&1 | sed -rne "s;.*Name: (.+)$;\1;p")"
       _print_var_vals connected_devs device
    for dev in $connected_devs; do
@@ -83,7 +83,7 @@ _blueconnect_completions() {
 #   echo "COMP_WORDS = '${COMP_WORDS[@]}'"
 #   echo "COMP_CWORD = '${COMP_CWORD[*]}'"
    # generate completions based on the last word on the commandline
-   COMPREPLY=($(compgen -W "$VALUES" "${COMP_WORDS[-1]}"))
+   local COMPREPLY=($(compgen -W "$VALUES" "${COMP_WORDS[-1]}"))
 }
 
 complete -F _blueconnect_completions $(basename $BASH_SOURCE)

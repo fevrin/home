@@ -5,9 +5,9 @@
 # <https://unix.stackexchange.com/questions/4219/how-do-i-get-bash-completion-for-command-aliases/4220#4220>
 # <https://www.tldp.org/LDP/abs/html/tabexpansion.html>
 
-for func in $(realpath $(dirname "$BASH_SOURCE"))/functions/*; do
-   [[ -d "$func" ]] && continue
-   funcname="$(sed -rne '3 s;^(function\s+)?([^#( ]+)\(\) \{$;\2;p' "$func")"
+for funcfile in $(realpath $(dirname "$BASH_SOURCE"))/functions/*; do
+   [[ -d "$funcfile" ]] && continue
+   funcname="$(sed -rne '3 s;^(function\s+)?([^#( ]+)\(\) \{$;\2;p' "$funcfile")"
 
    # export all the functions here so subshells can utilize them, if needed
    # for some reason, exported pushd() causes issues in direnv-allowed directories
@@ -15,16 +15,17 @@ for func in $(realpath $(dirname "$BASH_SOURCE"))/functions/*; do
    # also, we don't want to source and export files with functions that don't match their filenames
    {
       # test conditions
-      [[ "$funcname" =~ ^${func//*\/}$ ]] &&
-      [[ -r "$file" ]] &&
-      file -L --mime-type "$file" | grep -q 'text/x-shellscript' &&
-      bash -n "$func" 2>/dev/null
+      [[ "$funcname" =~ ^${funcfile//*\/}$ ]] &&
+      [[ -r "$funcfile" ]] &&
+      file -L --mime-type "$funcfile" | grep -q 'text/x-shellscript' &&
+      bash -n "$funcfile" 2>/dev/null
    } && {
-      # export the function
-      [[ $(type -t funcname) =~ ^function$ ]] && unset -f funcname
-      . "$func" &&
-      [[ ! "$func" =~ pushd ]] &&
+      # unset the function if it already exists so we start fresh
+      # then export the function
+      [[ $(type -t $funcname) =~ ^function$ ]] && unset -f funcname
+      . "$funcfile" &&
+      [[ ! "$funcfile" =~ pushd ]] &&
       export -f "$funcname"
    }
 done
-unset func
+unset funcfile funcname

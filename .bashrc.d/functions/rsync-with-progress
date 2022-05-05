@@ -10,25 +10,223 @@ rsync-with-progress() {
    verbose
 	EOF
 
-   local src="$1"
-   local dst="$2"
+   local SRC
+   local DST
+   local NO_USE_LINK_DEST=0
    local rsync_only=0
-   local real_run
-   local rsync_flags="--archive --human-readable --itemize --stats"
-   rsync_flags+=" $3"
+   local DRY_RUN=0
+   local LINK_DEST
+   # using lots of flags explicitly just to avoid the `--times` that `--archive` includes
+   # doesn't support this or daemon options:
+   # -F                          same as --filter='dir-merge /.rsync-filter'
+   #                             repeated: --filter='- .rsync-filter'
+   # options with only long variants at the bottom
+   declare -A ALL_RSYNC_FLAGS=(
+      [-0]=--from0
+      [-4]=--ipv4
+      [-6]=--ipv6
+      [-8]=--8-bit-output
+      [-@]=--modify-window=NUM
+      [-A]=--acls
+      [-B]=--block-size=SIZE
+      [-C]=--cvs-exclude
+      [-D]="--devices --specials"
+      [-E]=--executability
+      [-H]=--hard-links
+      [-I]=--ignore-times
+      [-J]=--omit-link-times
+      [-K]=--keep-dirlinks
+      [-L]=--copy-links
+      [-M]=--remote-option=OPTION
+      [-O]=--omit-dir-times
+      [-P]="--partial --progress"
+      [-R]=--relative
+      [-S]=--sparse
+      [-T]=--temp-dir=DIR
+      [-W]=--whole-file
+      [-X]=--xattrs
+      [-a]=--archive
+      [-b]=--backup
+      [-c]=--checksum
+      [-d]=--dirs
+      [-e]=--rsh=COMMAND
+      [-f]=--filter=RULE
+      [-g]=--group
+      [-h]=--human-readable
+      [-i]=--itemize-changes
+      [-k]=--copy-dirlinks
+      [-l]=--links
+      [-m]=--prune-empty-dirs
+      [-n]=--dry-run
+      [-o]=--owner
+      [-p]=--perms
+      [-q]=--quiet
+      [-r]=--recursive
+      [-s]=--protect-args
+      [-t]=--times
+      [-u]=--update
+      [-v]=--verbose
+      [-x]=--one-file-system
+      [-y]=--fuzzy
+      [-z]=--compress
+   )
+   declare -a RSYNC_FLAGS=(
+      --recursive
+      --links
+      --perms
+      --group
+      --owner
+      --devices
+      --specials
+      --update
+      --human-readable
+      --itemize-changes
+      --stats
+      --min-size=1
+      --exclude='.trashed-*'
+   )
+   declare -a RSYNC_FLAGS_NEGATIONS=(
+   )
+
+   for arg in "$@"; do
+      case "$arg" in
+         --no-*)
+               RSYNC_FLAGS_NEGATIONS+=("$arg")
+               continue
+            ;;
+         -[A-Za-z]*)
+            # process combined short options
+            if ([[ "$arg" =~ ^-([A-Za-z]+)$ ]]); then
+#               echo "${arg}"
+#               echo "${#arg}"
+               local flag
+               for ((i=1; i<"${#arg}"; i++)); do
+#                  echo "i = '$i'"
+#                  echo "letter \${arg:$i:1} = '${arg:i:1}'"
+                  # possibly convert short options to their long variants here before adding them
+                  flag="${ALL_RSYNC_FLAGS[-${arg:$i:1}]}"
+#                  echo "flag = '$flag'" && echo "'${flag// /}' != '$flag'" && continue
+
+                  [[ "${flag// /}" != "$flag" ]] && {
+                     # the flag stands for multiple other flags, so we should see each individually
+                     for x in $flag; do
+                        RSYNC_FLAGS+=("$x")
+                     done
+                     continue
+                  }
+                  [[ -z "$flag" ]] && echo "unknown flag: '$flag'" && continue
+                  RSYNC_FLAGS+=("$flag")
+               done
+            fi
+            ;;
+         --[-a-z]*)
+            RSYNC_FLAGS+=("$arg")
+            ;;
+         *)
+            if [[ -r "$arg" && -z "$SRC" ]]; then
+               SRC="$arg"
+            elif [[ -z "$DST" ]]; then
+               DST="${arg%/}"
+               [[ -d "${DST%/*}" ]] || {
+                  echo "this directory doesn't exist; create this path? [Y/n] "
+                  echo "${DST%/*}"
+                  read
+                  ([[ $REPLY =~ ^n$ ]]) || mkdir -p "${DST%/*}"
+               }
+               LINK_DEST="${DST/drive_backups\/google\/drive\/}"
+            fi
+            ;;
+      esac
+      shift
+   done
+   [[ -r "$SRC" && ( -r "$DST" || "${RSYNC_FLAGS[@]}" =~ --list-only ) ]] || {
+      echo "error: source and destination must be provided and exist"
+      return 1
+   }
+#   VERBOSE=8 _print_var_vals RSYNC_FLAGS[@]
 
    local file_count="$(find "$src" | wc --lines)"
 
-   [[ "$real_run" -eq 1 ]] || rsync_flags+=" --dry-run"
+   for i in "${RSYNC_FLAGS[@]}"; do
+      ([[ "$i" =~ ^(-n|--dry-run)$ ]]) && DRY_RUN=1
+   done
+   [[ $NO_USE_LINK_DEST -eq 1 && "$LINK_DEST" != "$DST" ]] && RSYNC_FLAGS+=(--link-dest="$LINK_DEST")
+   _clean_up_rsync_flags() {
+      declare -a temparray
+      # remove any options that the user overrode with the "--no-*" variant
+      for x in "${RSYNC_FLAGS[@]}"; do
+         for y in "${RSYNC_FLAGS_NEGATIONS[@]}"; do
+            [[ "$x" =~ ^--${y/#--no-} ]] && break
+         done
+         [[ "$x" =~ ^--${y/#--no-} ]] && continue
+         temparray+=("$x")
+      done
+      RSYNC_FLAGS=("${temparray[@]}")
+   }
 
    _rsync_only_method() {
-      rsync_flags+=" --compress --partial --progress --verbose"
-      echo rsync "$rsync_flags" --info=progress2 "$src" "$dst"
+      RSYNC_FLAGS+=(
+         --compress
+         --partial
+         --progress
+         --info=progress2
+      )
+      for i in  rsync "${RSYNC_FLAGS[@]}" "$SRC" "$DST"; do
+         echo "$i"
+      done
+      _clean_up_rsync_flags
+      for i in  rsync "${RSYNC_FLAGS[@]}" "$SRC" "$DST"; do
+         echo "$i"
+      done
+      return
+      echo
+      if [[ $DRY_RUN -ne 1 ]]; then
+         echo -n "proceed (y) or dry run (d) first? [y/d/N] "; read
+         if ([[ $REPLY =~ ^d$ ]]); then
+            echo
+            echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+            echo "DRY RUN"
+            echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+            rsync --dry-run "${RSYNC_FLAGS[@]}" "$SRC" "$DST"
+            echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+            echo
+            echo -n "proceed? [y/N] "
+            read
+         fi
+         ([[ $REPLY =~ ^y$ ]]) || return 1
+      fi
+
+      echo
+      rsync "${RSYNC_FLAGS[@]}" "$SRC" "$DST"
    }
 
    _pv_method() {
-      echo rsync "$rsync_flags" "$src" "$dst" | pv --eta --line-mode --progress --size "$file_count"
+      for i in  rsync "${RSYNC_FLAGS[@]}" "$SRC" "$DST" \| pv --eta --line-mode --progress --size "$file_count"; do
+         echo "$i"
+      done
+      echo
+      if [[ $DRY_RUN -ne 1 ]]; then
+         echo -n "proceed (y) or dry run (d) first? [y/d/N] "; read
+         if ([[ $REPLY =~ ^d$ ]]); then
+            echo
+            echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+            echo "DRY RUN"
+            echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+            rsync --dry-run "${RSYNC_FLAGS[@]}" "$SRC" "$DST" | pv --eta --line-mode --progress --size "$file_count"
+            echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+            echo
+            echo -n "proceed? [y/N] "
+            read
+         fi
+         ([[ $REPLY =~ ^y$ ]]) || return 1
+      fi
+
+      echo
+      rsync "${RSYNC_FLAGS[@]}" "$SRC" "$DST" | pv --eta --line-mode --progress --size "$file_count"
    }
+
+#   echo -n "do you want to skip updating times? [Y/n] "; read
+#   [[ $REPLY =~ ^n$ ]] || rsync_flags+=" --size-only"
 
 
    if [[ $(which pv &>/dev/null) ]]; then
@@ -46,8 +244,101 @@ rsync-with-progress() {
    # If you have few huge files, then some of the rsync built in progress reports might be of more help
 
    # To see progress when you are updating (or comparing) an existing copy:
-   # rsync "$rsync_flags" -ii --delete "$src" "$dst" | pv -l -s "$file_count" > logfile
+   # rsync "$RSYNC_FLAGS" -ii --delete "$SRC" "$DST" | pv -l -s "$file_count" > logfile
 
    # This command will print to screen in real time the files that differ:
-   # rsync "$rsync_flags" -ii --delete "$src" "$dst" | pv -l -s "$file_count" | tee logfile | grep -v "^\."
+   # rsync "$RSYNC_FLAGS" -ii --delete "$SRC" "$DST" | pv -l -s "$file_count" | tee logfile | grep -v "^\."
+
+
+
+
+
+
+
+
+
+
+   # options with only long variants:
+   # --address=ADDRESS
+   # --append
+   # --append-verify
+   # --backup-dir=DIR
+   # --blocking-io
+   # --bwlimit=RATE
+   # --checksum-choice=STR
+   # --checksum-seed=NUM
+   # --chmod=CHMOD
+   # --chown=USER:GROUP
+   # --compare-dest=DIR
+   # --compress-level=NUM
+   # --contimeout=SECONDS
+   # --copy-dest=DIR
+   # --copy-unsafe-links
+   # --debug=FLAGS
+   # --del
+   # --delay-updates
+   # --delete
+   # --delete-after
+   # --delete-before
+   # --delete-delay
+   # --delete-during
+   # --delete-excluded
+   # --delete-missing-args
+   # --devices
+   # --exclude-from=FILE
+   # --exclude=PATTERN
+   # --existing
+   # --fake-super
+   # --files-from=FILE
+   # --force
+   # --groupmap=STRING
+   # --iconv=CONVERT_SPEC
+   # --ignore-errors
+   # --ignore-existing
+   # --ignore-missing-args
+   # --include-from=FILE
+   # --include=PATTERN
+   # --info=FLAGS
+   # --inplace
+   # --link-dest=DIR
+   # --list-only
+   # --log-file-format=FMT
+   # --log-file=FILE
+   # --max-delete=NUM
+   # --max-size=SIZE
+   # --min-size=SIZE
+   # --msgs2stderr
+   # --munge-links
+   # --no-OPTION
+   # --no-implied-dirs
+   # --no-motd
+   # --noatime
+   # --numeric-ids
+   # --only-write-batch=FILE
+   # --out-format=FORMAT
+   # --outbuf=N|L|B
+   # --partial
+   # --partial-dir=DIR
+   # --password-file=FILE
+   # --port=PORT
+   # --preallocate
+   # --progress
+   # --protocol=NUM
+   # --read-batch=FILE
+   # --remove-source-files
+   # --rsync-path=PROGRAM
+   # --safe-links
+   # --size-only
+   # --skip-compress=LIST
+   # --sockopts=OPTIONS
+   # --specials
+   # --stats
+   # --stop-at=y-m-dTh:m
+   # --suffix=SUFFIX
+   # --super
+   # --time-limit=MINS
+   # --timeout=SECONDS
+   # --usermap=STRING
+   # --version
+   # --write-batch=FILE
 }

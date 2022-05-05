@@ -21,7 +21,7 @@ export SSH_AUTH_SOCK=/run/user/$(id -u)/keyring/ssh
 #VERBOSE=8
 INTERACTIVE=$(! tty -s; echo $?) # 1 if interactive; 0 if not
 FETCH_REFRESH_TIME=300 # 300 seconds is the threshold before we, by default, skip fetching
-FORCE_FETCH=0 # if set to 1, fetch regardless of SYNC_REFRESH_TIME
+FORCE_FETCH="${FORCE_FETCH:-0}" # if set to 1, fetch regardless of SYNC_REFRESH_TIME
 REBASE=1
 
 declare -a DIRS
@@ -126,6 +126,8 @@ for DIR in ${DIRS[*]}; do
 
    log "WORKING ON '$DIR'"
 
+   GIT_BRANCH="$($GITBIN branch --show-current)"
+
    echo
    MAIN_BRANCH="$($GITBIN get-main-branch)"
    MAIN_REMOTE="$($GITBIN get-main-remote)"
@@ -189,19 +191,23 @@ for DIR in ${DIRS[*]}; do
          $GITBIN push $MAIN_REMOTE $MAIN_BRANCH:$MAIN_BRANCH
       fi
    else
-      log "$(_print_var_vals -e GIT_BRANCH MAIN_BRANCH 2>&1)"
-      if [[ "$GIT_BRANCH" =~ $MAIN_BRANCH ]]; then
-         log "$GITBIN merge"
-         $GITBIN merge || {
-            MERGE_TYPE=merge
-         }
-
+      if [[ $(git rev-parse $MAIN_REMOTE/$MAIN_BRANCH) = $(git rev-parse $MAIN_BRANCH) ]]; then
+         log "main branch already up-to-date"
       else
-         log "$GITBIN fetch $MAIN_REMOTE $MAIN_BRANCH:$MAIN_BRANCH"
-         $GITBIN fetch $MAIN_REMOTE $MAIN_BRANCH:$MAIN_BRANCH || {
-            MERGE_TYPE=fetch
-         }
+         log "$(_print_var_vals -e GIT_BRANCH MAIN_BRANCH 2>&1)"
+         if [[ "$GIT_BRANCH" =~ $MAIN_BRANCH ]]; then
+            log "$GITBIN merge"
+            $GITBIN merge || {
+               MERGE_TYPE=merge
+            }
 
+         else
+            log "$GITBIN fetch $MAIN_REMOTE $MAIN_BRANCH:$MAIN_BRANCH"
+            $GITBIN fetch $MAIN_REMOTE $MAIN_BRANCH:$MAIN_BRANCH || {
+               MERGE_TYPE=fetch
+            }
+
+         fi
       fi
    fi
 
@@ -216,17 +222,16 @@ for DIR in ${DIRS[*]}; do
    # even if its upstream did have changes
 #   if [[ "$ORIGINAL_MAIN_BRANCH_REF" = "$(git rev-parse $MAIN_BRANCH)" ]]; then
 
-   GIT_BRANCH="$($GITBIN branch --show-current)"
-   branch_is_current_output="$(branch_is_current 2>&1; exit $?)"
-   branch_is_current_exit="$?"
-   log "$branch_is_current_output"
-   if [[ "$branch_is_current_exit" -ne 1 && "$branch_is_current_exit" -ne 3 ]]; then
-      continue
-   fi
+   if [[ "$REBASE" -eq 1 ]]; then
 
-   LOCAL_CHANGES_EXIST="$(local_changes_exist)"
-   if [[ "$LOCAL_CHANGES_EXIST" -eq 0 ]]; then
-      if [[ "$REBASE" -eq 1 ]]; then
+      branch_is_current_output="$(branch_is_current 2>&1; exit $?)"
+      branch_is_current_exit="$?"
+      log "$branch_is_current_output"
+      if [[ "$branch_is_current_exit" -ne 1 && "$branch_is_current_exit" -ne 3 ]]; then
+         continue
+      fi
+
+      if [[ "$(local_changes_exist; echo $?)" -eq 1 ]]; then
          [[ $GIT_ADD_FILES -eq 1 && $($GITBIN diff --quiet --exit-code; echo $?) -eq 1 ]] && {
             echo
             echo
@@ -263,13 +268,9 @@ for DIR in ${DIRS[*]}; do
          echo
          log "$(_print_var_vals -e STASH_NAME STAGED_FILES UNSTAGED_FILES UNMERGED_FILES 2>&1)"
       else
-         log "skipping stashing; rebase NOT requested"
+         log "skipping stashing: no local changes"
       fi
-   else
-      log "skipping stashing: no local changes"
-   fi
 
-   if [[ "$REBASE" -eq 1 ]]; then
       # the main branch is already updated, so we just need to update the current branch if it's not the main one
       if [[ ! "$GIT_BRANCH" =~ $MAIN_BRANCH ]]; then
          echo
@@ -320,7 +321,7 @@ for DIR in ${DIRS[*]}; do
 
       log "success"
    else
-      log "skipping rebase: rebase NOT requested"
+         log "skipping stashing; rebase NOT requested"
    fi
 
 #   cd - &>/dev/null

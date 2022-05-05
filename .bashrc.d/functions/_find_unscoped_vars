@@ -40,6 +40,7 @@ _find_unscoped_vars() {
 
          echo
       fi
+      unset unscoped_vars
    done
    if [[ "$FILES_PROCESSED" -eq 0 ]]; then
       echo "no Bash script files found"

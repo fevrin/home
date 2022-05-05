@@ -37,7 +37,7 @@ show-disk-space-usage() {
          file -L --mime-type "$i" | grep -q 'inode/directory' && dirs_array+=("$i/*")
       done
 #      echo "length = '${#dirs_array[*]}'"
-      dirs_array_length="${#dirs_array[*]}"
+      local dirs_array_length="${#dirs_array[*]}"
 
       echo
       if [[ $dirs_array_length -eq 1 ]]; then

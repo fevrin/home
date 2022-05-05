@@ -31,12 +31,14 @@ verbose() {
    local flags
    local verbosity
    local DEBUG
-   local funcname_lineno_index=0
+   local LINE_OFFSET
    local VERBOSE="${VERBOSE:-1}"
 
-   # if we got called via the log() function, set the index accordingly
+   # if we got called via the command line or a script, set the index accordingly
    # this must be in a subshell in order to not overwrite a $BASH_REMATCH array the caller may have
-   ([[ ${FUNCNAME[1]} =~ log ]]) && funcname_lineno_index=1
+   if ([[ ! ${FUNCNAME[1]} =~ (main) ]]); then
+      LINE_OFFSET="+ 2"
+   fi
 
    # default verbosity threshold
    verbosity=3
@@ -72,7 +74,7 @@ verbose() {
    fi
 
    if [[ $VERBOSE -ge $verbosity ]]; then
-      [[ $verbosity -eq 8 ]] && DEBUG="${FUNCNAME[$((funcname_lineno_index + 1))]} (line $((${BASH_LINENO[$funcname_lineno_index]} +2))): "
+      [[ $verbosity -eq 8 ]] && DEBUG="${FUNCNAME[1]} (line $((${BASH_LINENO[0]} ${LINE_OFFSET}))): "
 
       echo $flags "$DEBUG$@" >&2
    fi

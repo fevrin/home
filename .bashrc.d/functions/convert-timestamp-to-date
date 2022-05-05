@@ -23,6 +23,7 @@ convert-timestamp-to-date() {
 
    local input="$(_get_stdin "$@")"
    local curdate="$(date +%s)"
+   local line
 
    _print_var_vals 8 output_command
 

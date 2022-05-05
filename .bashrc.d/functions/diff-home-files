@@ -154,7 +154,7 @@ _diff_home_files_completions() {
 #   echo "COMP_WORDS = '${COMP_WORDS[@]}'"
 #   echo "COMP_CWORD = '${COMP_CWORD[*]}'"
    # generate completions based on the last word on the commandline
-   COMPREPLY=($(compgen -W "$VALUES" "${COMP_WORDS[-1]}"))
+   local COMPREPLY=($(compgen -W "$VALUES" "${COMP_WORDS[-1]}"))
 }
 
 complete -F _diff_home_files_completions $(basename $BASH_SOURCE)
