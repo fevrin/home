@@ -58,7 +58,7 @@ set nospell " automatically spell-check; okay, I give up: no spell-check by defa
 set laststatus=2 "ls; statusline will always be displayed, showing modification status; Ctrl+G shows status regardless if
 "this is set or not
 
-set statusline=%f\ (bf\ #%n)\ %m\ \ ft=%y\ \ char=%b,\ %B,\ #%o,\ #%O%=%l(%L),%c\ \ \ \ \ \ \ %p%% "stl; determines what to show in the
+set statusline=%f\ (bf\ #%n)\ %m\ \ ft=%y\ \ char=%b,\ %B,\ #%o,\ #%O%=(line\ %l/%L),(chars\ %{wordcount().chars}),%v\ \ \ \ \ \ \ %p%% "stl; determines what to show in the
 "status line; the default is:
 "statusline=%-f\ %-m%=%l,%c\ \ \ \ \ \ \ %P; help default is: statusline=%-t\ %-h%-r%=%l,%c%V\ \ \ \ \ \ \ %P
 
@@ -112,11 +112,12 @@ set autoindent " ai; autoindent all subsequent lines
 set indentexpr="" " inde; indicates when to indent; comment out in $VIMRUNTIME/indent/html.vim
 " filetype indent off " disables filetype-based indentation settings
 set copyindent " ci; new line indents use same characters (spaces, tabs, etc.) as previous line
+"set smartindent " it suggests using ':inoremap # X^H#' so that comments starting with '#' are indented properly, as well
 
 "set textwidth=125 " tw; maximum formatted width before text starts wrapping around to the next line; 125, as that's the
 "maximum monospace width in GHE's editing window before a horizontal scroll bar appears
 
-set formatoptions=crqlt " fo; ensures any text width that's set will take effect
+set formatoptions=croqlt " fo; ensures any text width that's set will take effect
                          " c.......Auto-wrap comments using textwidth, inserting the current comment
                          "         leader automatically.
                          " r.......Automatically insert the current comment leader after hitting
@@ -130,6 +131,7 @@ set formatoptions=crqlt " fo; ensures any text width that's set will take effect
                          " l.......Long lines are not broken in insert mode: When a line was longer than
                          "         'textwidth' when the insert command started, Vim does not
                          "         automatically format it.
+                         " t.......Auto-wrap text using textwidth
 
 " 16 folding
 "set foldmethod=indent " fdm; sets folding type

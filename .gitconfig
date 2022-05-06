@@ -192,8 +192,9 @@
 #  diff-with-tracking = "!cd \"$GIT_PREFIX\"; bash -c 'git diff-with $(git get-main-remote)/$(git current-branch) $@'"
   diff-with-tracking = "!cd \"$GIT_PREFIX\"; bash -c 'git diff $(git get-upstream-branch) $@'"
   dump = cat-file -p
-  fet = "fetch --all --prune"
+  fet = !git -c fetch.parallel=2 fetch --multiple --prune $(git remote | egrep -v ^all$)   # if this hadn't worked, then this may have: parallel \"git fetch {} --prune 'refs/heads/*:refs/remotes/{}/*'\" ::: $(git remote);
   fork = "clone -o upstream "
+  gen-all-remote = "!git remote get-url all 2>/dev/null || git remote add all get-main-remote; parallel '{ git config --get-all remote.all.pushurl | grep -q {}; } || git remote set-url --add --push all {}' ::: $(git remote | egrep -v ^all$ | xargs -I{} git config --get-all remote.{}.url)"
   get-local-brs-without-remote-counterpart = "!bash -c 'grep -xvf <(grep -xf <(git br --sort=refname --format=\"%(refname:short)\" | tr -s \"\n\") <(git br -r --sort=refname --format=\"%(refname:lstrip=3)\")) <(git br --sort=refname --format=\"%(refname:short)\" | tr -s \"\n\")'"
   get-local-brs-with-remote-counterpart = "!bash -c 'grep -xf <(git br --sort=refname --format=\"%(refname:short)\" | tr -s \"\n\") <(git br -r --sort=refname --format=\"%(refname:lstrip=3)\")'"
   get-remote-brs-without-local-counterpart = "!bash -c 'egrep -xvf <(git br --sort=refname --format=\"^[^/]+/%(refname:short)\" | tr -s \"\n\"; echo \"^[^/]+/HEAD\") <(git br -r --sort=refname --format=\"%(refname:lstrip=2)\")'"
@@ -251,8 +252,9 @@
            echo -n \"are you sure you wish to push \"$branch\" to all remotes? [y/N] \" &&\
            read;\
         [[ $REPLY =~ [Yy] || ! \"$branch\" =~ \"$main_branch\" ]] &&\
+        git fet; \
         [[ -n \"$(git get-upstream-branch)\" ]] || git branch --set-upstream-to=$(git get-main-remote)/\"$branch\" \"$branch\"; \
-        parallel --will-cite \"git push -v --tags {} $(git rev-parse --abbrev-ref HEAD); git fet\" ::: $(git remote); \
+        parallel \"git push -v --tags {} $(git rev-parse --abbrev-ref HEAD)\" ::: $(git remote); \
      else \
         exit $?; \
      fi'"
