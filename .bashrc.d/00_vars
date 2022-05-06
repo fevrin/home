@@ -29,10 +29,20 @@ export HISTFILESIZE=20000
 
 # ensure vim is the default editor of choice
 export EDITOR="vim"
-export LESS="QFRX --no-histdups -+i" # '-+i' resets search case sensitivity, which seems to be getting set somehow (formerly, this was '+-+i', as '-+i' alone didn't seem to work; that longer version executes when `less` opens and makes searches case sensitive and (with ) bypasses the message about that)
+export LESS="-QFRX --no-histdups" # '-+i' resets search case sensitivity, which seems to be getting set somehow (formerly, this was '+-+i', as '-+i' alone didn't seem to work; that longer version executes when `less` opens and makes searches case sensitive and (with ) bypasses the message about that)
 
-# set default pager for manpages to "less -Qc" so the terminal bell doesn't ring and refreshes from the top instead of the bottom
-export MANPAGER="less -$(echo $LESS)"
+# set default pager for manpages
+export MANPAGER="/bin/sh -c 'fmt -s -w $(($(tput cols) - 6)) - | tail -n+2 | less $(echo $LESS) -N'" # until `less` v571+, we have to reduce the available width that `less` uses so that we can number the man page lines without messing up the formatting (the '$(($(tput cols) - 6))') accounts for `less`'s current default line number column width of 7, though it seems 6 works here just as well
+# once we're on `less` version 571+, we can add the `-N -J --line-num-width=4 --status-col-width=2` options to print line numbers and a status column while not affecting formatting/wrapping
+# the `--line-num-width` option was added in `less` v571:
+# https://github.com/gwsw/less/issues/103
+# https://github.com/gwsw/less/commit/65e5afd5f4a0f591e265a0edb75d0556da8761a5
+# https://github.com/gwsw/less/commit/13f1a7d9efe3a017a08bf3666a6da87771734d17
+# https://github.com/gwsw/less/compare/v569...v570
+# https://github.com/gwsw/less/compare/v570...v571
+
+# a further enhancement will be when you can conditionally use line numbers based on file size:
+# https://github.com/gwsw/less/issues/230
 
 # needed to ensure windows aren't open if it's not desired
 # invoke no windows using a command like `SCREEN_CONF= screen`
