@@ -80,6 +80,13 @@ diff-home-files() {
    _print_var_vals ACTION FILE_LIST
 
    for i in $FILE_LIST; do
+      local file1="$(echo "$i" | sed -re "s;$HOME_DIR/(.*);$HOME/\1;")"
+#      echo file1="$file1"
+
+      local file2=$i
+      _print_var_vals file1 file2
+#      echo file2="$file2"
+#
       # check if the file should be skipped
       { echo "$i" | grep -qxf <(for i in  ${skip_files[*]}; do echo "$HOME_DIR/$i"; done) ||
          [[ "$i" =~ \.un\~$ ]]
@@ -89,10 +96,18 @@ diff-home-files() {
       }
 
       # the item is within the .bashrc.d directory
-      [[ -f "$i" ]] || {
-         [[ -f "${i/$HOME_DIR/$HOME}" ]] && echo "you'll need to first copy the file to '$HOME_DIR'"
+      [[ -f "$file2" ]] || {
+         [[ -f "${file1}" ]] && {
+         echo "you'll need to first copy the file to '$HOME_DIR'"
+         echo
+         echo -n "would you like to copy '$file1' to $file2? [Y/n] "; read
+         if [[ $REPLY =~ ^n$ ]]; then
+            continue
+         else
+            ${FUNCNAME[0]} cp "$file1" "$file2"
+         fi
 #         echo "i = '$i'"
-         continue
+         }
       }
 
       # and it isn't .toprc, and it's not a vim swap file
@@ -101,11 +116,6 @@ diff-home-files() {
       ! "$i" =~ \.md &&
       ! "$i" =~ \.vim\/ ]] || continue
 
-      local file1="$(echo "$i" | sed -re "s;$HOME_DIR/(.*);$HOME/\1;")"
-#      echo file1="$file1"
-
-      local file2=$i
-#      echo file2="$file2"
       if [[ $(md5sum $file1 2>/dev/null | cut -d" " -f1) != $(md5sum $file2 2>/dev/null | cut -d" " -f1) ]]; then
          $ACTION "$ACTION_OPTIONS" $file1 $file2
          [[ $ACTION =~ ^vimdiff$ ]] && {

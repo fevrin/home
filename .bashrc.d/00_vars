@@ -4,6 +4,8 @@
 ######Global Variables#######
 #############################
 
+export FUNCNEST=6 # for safety against fork bombs :3
+
 export DOMAIN_REGEX='([a-zA-Z0-9]+[-a-zA-Z0-9@]+\.)+[-a-zA-Z0-9]{2,4}'
 export HTTP_REGEX="https?://$DOMAIN_REGEX(:[0-9]+|\/[^ \/;,\)\"\'\`|]+[^\.,: \(\)\"]?)*"
 export IP_REGEX='(((2([0-4][0-9]|5[0-5])|1[0-9][0-9]|[1-9][0-9]?|0)\.){3}(2([0-4][0-9]|5[0-5])|1[0-9][0-9]|[1-9][0-9]?|0))'
@@ -32,23 +34,7 @@ export EDITOR="vim"
 export LESS="-QFRX --no-histdups" # '-+i' resets search case sensitivity, which seems to be getting set somehow (formerly, this was '+-+i', as '-+i' alone didn't seem to work; that longer version executes when `less` opens and makes searches case sensitive and (with ) bypasses the message about that)
 
 # set default pager for manpages
-export MANPAGER="less $LESS -N" # until `less` v571+, we have to reduce the available width that `less` uses so that we can number the man page lines without messing up the formatting (the '$(($(tput cols) - 6))') accounts for `less`'s current default line number column width of 7, though it seems 6 works here just as well
-if [[ "$MANPAGER" =~ -N ]]; then
-   # we're numbering lines in man pages, so we need to accomodate `less`'s line number column width
-   # `man` seems to already subtract 6 columns from the terminal window width, so any value above 1 here should work (6 + 1 = `less`'s current default line number column width of 7)
-   # anything higher than 1 will add a margin to the right
-   export MANWIDTH="$(($(tput cols) - 6))"
-else
-   # partially cancel out the 6 columns that `man` already subtracts
-   export MANWIDTH="$(($(tput cols) + 2 ))"
-fi
-# once we're on `less` version 571+, we can add the `-N -J --line-num-width=4 --status-col-width=2` options to print line numbers and a status column while not affecting formatting/wrapping
-# the `--line-num-width` option was added in `less` v571:
-# https://github.com/gwsw/less/issues/103
-# https://github.com/gwsw/less/commit/65e5afd5f4a0f591e265a0edb75d0556da8761a5
-# https://github.com/gwsw/less/commit/13f1a7d9efe3a017a08bf3666a6da87771734d17
-# https://github.com/gwsw/less/compare/v569...v570
-# https://github.com/gwsw/less/compare/v570...v571
+export MANPAGER="less $LESS"
 
 # a further enhancement will be when you can conditionally use line numbers based on file size:
 # https://github.com/gwsw/less/issues/230
