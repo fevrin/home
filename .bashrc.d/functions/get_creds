@@ -1,0 +1,395 @@
+#!/bin/bash
+
+get_creds() {
+   # this function retrieves creds in a standardized format either retrieved from LastPass (as done initially)
+   # or from a local file saved from a previous run of this function
+
+   # this exists mostly because `lpass` is so slow, even when using its own local cache
+   # use of this is of course a trade-off between security and convenience
+   # it's recommended to use this only on an encrypted partition—update the $creds_dir
+   # value if needed to achieve that
+
+   # lpass is required for this. you can get it with:
+
+   #    mkdir /tmp/lpass
+   #    curl -sLo /tmp/lpass/lpass.tar.gz "$(curl -sL https://github.com/lastpass/lastpass-cli/releases/latest | sed -rne 's;.* href\="([^"]+\/download\/[^"]+\.tar\.gz)" .*;https://github.com\1;p')"
+
+
+   # you may need to install these packages:
+   # build-essential
+   # ca-certificates
+   # cmake
+   # libcurl4-openssl-dev
+   # libssl-dev
+   # libssl1.1
+   # libxml2
+   # libxml2-dev
+
+   # then:
+
+   #    cd /tmp/lpass/
+   #    sudo make
+   #    sudo make install
+
+   # input: the standardized lowercase name of the entry in LP, and optionally, a specific field to retrieve
+   # output: either full variable assignment output or a single field in the entry (if specified)
+
+   # you can use these templates for adding new files in ${creds_dir}/templates
+
+   # [name]="API RO key"
+   # [key_field]="API_PROD_KEY_RO"
+   # [key]=""
+   # [url_field]="API_URL"
+   # [url]=""
+
+   # [name]="DB"
+   # [username_field]="DB_PROD_RO_USER"
+   # [username]=""
+   # [password_field]="DB_PROD_RO_PASS"
+   # [password]=""
+   # [database_field]="DB_PROD_RO_DB_NAME"
+   # [database]=""
+   # [hostname_field]="DB_PROD_RO_DB_HOST"
+   # [hostname]=""
+
+   # each template file should correspond with a single LastPass entry
+
+   # as long as the keys/fields in the template files match the same fields in
+   # LastPass (case insensitive), things should work
+
+   # in particular,[name] should be the case-sensitive name of the LastPass
+   # Secure Note entry
+
+   # the "_field" fields are simply for descriptive purposes, though
+   # can be used as environmental variable names to quickly export,
+   # such as when output when get_creds() is run without a field name
+
+   # or you could simply source the appropriate ${creds_dir}/keys/ file
+
+   local entry_name="$1"
+   local creds_dir="${CREDS_DIR:-$HOME}/.creds"
+   local template_location="${creds_dir}/templates"
+   local cache_location="${creds_dir}/keys"
+   local file="$cache_location/$entry_name"
+   local entry_field="$2" # like username, password, etc.
+   local entry_type
+   local SELF_NAME="${FUNCNAME[0]}"
+   local contents
+
+   _verify_reqs \
+   lpass \
+   || return 1
+
+   # if we're getting called directly, not via a function, honor the VERBOSE level
+   if caller 2>&1 | grep -q NULL; then
+      local VERBOSE=${VERBOSE:-1}
+   else
+      local VERBOSE=1
+   fi
+
+   [[ -d "$cache_location" ]] || mkdir -p "$cache_location"
+
+   _print_template_examples() {
+      # bash 5 doesn't like <<- heredocs with leading tabs within nested functions
+      echo "
+
+		check out the example template files here and update or copy them to reflect your LastPass entries:
+
+		$template_location/api_template_example
+		$template_location/db_template_example
+		$template_location/site_template_example
+
+		afterward, rerun $SELF_NAME() $@
+
+		" | tr -d '\t' >&2
+	}
+
+   # if no template file exists, create it and a couple of example templates
+   if [[ ! -d "$template_location" ]]; then
+      echo "making $template_location..."
+      mkdir -p "$template_location"
+
+      echo "
+		[name]="API RO key"
+		[key_field]="API_PROD_KEY_RO"
+		[key]=""
+		[url_field]="API_URL"
+		[url]=""
+		" | tr -d '\t' > "$template_location"/api_template_example
+
+      echo "
+		[name]="DB"
+		[username_field]="DB_PROD_RO_USER"
+		[username]=""
+		[password_field]="DB_PROD_RO_PASS"
+		[password]=""
+		[database_field]="DB_PROD_RO_DB_NAME"
+		[database]=""
+		[hostname_field]="DB_PROD_RO_DB_HOST"
+		[hostname]=""
+		" | tr -d '\t' > "$template_location"/db_template_example
+
+      echo "
+		[name]="VPN"
+		[username_field]="VPN_USER"
+		[username]=""
+		[password_field]="VPN_PASS"
+		[password]=""
+		" | tr -d '\t' > "$template_location"/site_template_example
+
+		_print_template_examples
+
+		return 1
+   fi
+
+   declare -a available_creds
+
+   # populate available creds
+   for i in "$template_location"/*; do
+      available_creds+=("${i//*\/}")
+   done
+
+   [[ ${#available_creds[*]} -eq 0 ]] && available_creds+="none!"
+
+   _print_usage() {
+      echo "
+
+		USAGE
+
+		   $SELF_NAME <cred_entry> [username|password|database|hostname|key|key_id]
+
+		EXAMPLES
+
+		   $SELF_NAME db_prod database
+
+		   $SELF_NAME api_prod key
+
+		   $SELF_NAME work_vpn password
+
+
+		AVAILABLE CRED ENTRIES
+
+		" | tr -d '\t' >&2
+
+      if [[ -n "${available_creds[@]}" ]]; then
+         echo ${available_creds[@]} | sort | tr ' ' '\n' >&2
+         verbose 1
+      else
+         verbose 1 "none available"
+
+         _print_template_examples
+      fi
+   }
+
+   [[ $# -eq 0 ]] && _print_usage && return 1
+
+   verbose 4 "f = ${FUNCNAME}"
+
+   # protect us from infinitely recursive sub-function calls
+   # based on the current execution possibilities, this would be 6 calls deep
+   # (calls made from right to left):
+
+   # funcname =
+   # get_creds
+   # assign_values
+   # get_creds
+   # assign_values
+   # gen_file
+   # verbose
+
+   # we'll set that as the max, then (though we may have to increase it in the
+   # future if further nested calls are done
+   local FUNCNEST=10
+
+   # used later on if we have to call $FUNCNAME again
+   local GLOBAL_ARGS="$@"
+
+   # check if the requested cred entry exists
+   local is_value_valid=0
+   local i
+   for i in ${available_creds[*]}; do
+      [[ "$entry_name" = "$i" ]] && is_value_valid=1
+   done
+
+   if [[ $is_value_valid -ne 1 ]]; then
+      verbose 1
+      verbose 1 "'$entry_name' doesn't match an available file in this directory:"
+      verbose 1
+      verbose 1 "$template_location"
+
+      _print_template_examples
+
+      _print_usage
+
+      return 1
+   fi
+
+   verbose 8 "entry_name = '$entry_name'"
+   declare -A entry_array
+   while read line; do
+      local key=$(echo $line | sed -re 's;^\[?([^]=]+)\]?=.*;\1;')
+      local val="$(echo $line | sed -re 's;^[^=]+=(.*)($| #.*);\1;' -e 's;(^"|"$);;g')"
+      entry_array["$key"]="$val"
+
+      verbose 8 "\${entry_array[$key]} = '${entry_array[$key]}'"
+   done <"$template_location"/"$entry_name"
+
+   if [[ -n "$entry_field" ]]; then
+      # also check if the requested field, if any, exists for the entry
+
+      is_value_valid=0
+
+      for i in ${!entry_array[*]}; do
+         [[ "$entry_field" = "$i" ]] && is_value_valid=1
+      done
+
+      if [[ $is_value_valid -ne 1 ]]; then
+         verbose 1
+         verbose 1 "'$entry_field' doesn't match an available field:"
+         verbose 1
+         verbose 1 "$(echo ${!entry_array[@]} | tr ' ' '\n' | grep -v 'field' | sort)"
+         verbose 1
+
+         _print_usage
+
+         return 1
+      fi
+   fi
+
+   _assign_values() {
+      local is_from_file=0
+      local pattern
+
+      echo "$contents" | egrep -q '^[A-Z_0-9]+=' && is_from_file=1
+
+      for i in ${!entry_array[*]}; do
+         # go through each array entry and assign the appropriate value
+
+         # skip any "name" field or a field with a name ending in "field"
+         [[ "$i" =~ (field|^name$) ]] && continue
+
+         # set the pattern to use later based on whether we're retrieving
+         # from the cache or LastPass
+         if [[ $is_from_file -eq 1 ]]; then
+            pattern="${entry_array[${i}_field]}="
+         else
+            pattern="${i}: "
+            [[ "$pattern" =~ key_id ]] && pattern="${pattern//_/}"
+         fi
+         verbose 8 "i = $i"
+         verbose 8 "pattern = $pattern"
+
+         # do the actual array key assignments
+         entry_array[$i]="$(echo "$contents" | grep -ioP "^$pattern\K.*" | sed -e "s;[\"'];;g" | head -n1)"
+
+         # attempt to retrieve the values from LastPass if the local cache is incomplete
+         if [[ $is_from_file -eq 1 && -z "${entry_array[$i]}" ]]; then
+            # one of the cached entries is empty, and we cannot trust the
+            # overall accuracy of the local cache, so re-run this after
+            # completely clearing the local cache, which triggers a remote retrieval
+
+            # determine the parent function name so we can call that again
+            local PARENT_FUNC
+            local i
+            # account for 0-indexing and find the index for this function
+            # the parent caller will have the next highest index
+            for i in $(seq 0 $((${#FUNCNAME[*]} - 1))); do
+               if [[ ${FUNCNAME[$i]} =~ ^$SELF_NAME$ ]]; then
+                  verbose 8 "$SELF_NAME"
+                  verbose 8 "FUNCNAME = ${FUNCNAME[*]}"
+                  PARENT_FUNC="${FUNCNAME[$((i + 1))]}"
+                  verbose 8 "$i + 1"
+                  break
+               fi
+            done
+
+            verbose 2 "'${entry_array[${i}_field]}' is empty!"
+            verbose 2 "re-running '$SELF_NAME $GLOBAL_ARGS'"
+            verbose 2
+
+            >"$file"
+
+            # re-run the parent function using the args original provided to it
+            $SELF_NAME $GLOBAL_ARGS
+            echo "re-run '$SELF_NAME $GLOBAL_ARGS'"
+            return 1
+
+            # this is to ensure execution of the parent task finishes here
+            # the child task is assumed to get things working
+            return 8
+         fi
+      done
+
+      # if the creds were retrieved from LastPass, write a local cache
+      if [[ $is_from_file -ne 1 ]]; then
+        _gen_file
+      fi
+   }
+
+   _gen_file() {
+      # now make the file for easier retrieval next time
+      for i in ${!entry_array[*]}; do
+         [[ "$i" =~ (field|^name$) ]] && continue
+         verbose 8 "i='$i', '${entry_array[${i}_field]}'='${entry_array[$i]}'"
+         echo "${entry_array[${i}_field]}='${entry_array[$i]}'" >>"$file"
+      done
+
+      chmod 600 "$file"
+
+      verbose 2 "source this file to export the updated values:" >&2
+      [[ -s "$file" ]] &&
+      verbose 2 "creds cached in this file:" &&
+      verbose 2 "$file"
+      verbose 2
+   }
+
+   if [[ -s "$file" ]]; then
+      # use local cache
+      verbose 2 "using local cache!"
+      verbose 2 "$file"
+      verbose 2
+
+      contents="$(cat "$file")"
+
+     _assign_values || return 1
+   else
+      # retrieve creds from LP
+
+      verbose 2 "local creds not found!"
+      verbose 2 "retrieving creds from LastPass"
+      verbose 2
+
+		lpass status 2>&1 || {
+         return 1
+      }
+
+      contents="$(lpass show "${entry_array[name]}" 2>&1)" || {
+         echo "
+			error from lpass:
+
+			$contents
+
+			" | tr -d '\t' >&2
+         return 1
+      }
+
+      [[ $? -ne 0 ]] && { echo "error: $contents"; return 3; }
+
+      verbose 8 "contents = '$contents'"
+
+     _assign_values || return 2
+   fi
+
+   # either output the requested entry field or all of them, if not specified
+   if [[ "$entry_field" ]]; then
+      verbose 8 "'${entry_array[${entry_field}_field]}'='${entry_array[$entry_field]}'"
+      echo "${entry_array[$entry_field]}"
+   else
+      # output the newly set values
+      verbose 8 "outputting all entry values"
+      for i in ${!entry_array[*]}; do
+         [[ "$i" =~ (field|^name$) ]] && continue
+         echo "${entry_array[${i}_field]}='${entry_array[$i]}'"
+      done
+   fi
+}

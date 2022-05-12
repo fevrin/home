@@ -148,7 +148,7 @@ for DIR in ${DIRS[*]}; do
       fi
 
       log "FETCHING REMOTES..."
-      fetch_output=$($GITBIN fetch --all --prune 2>&1; exit $?)
+      fetch_output=$($GITBIN -c fetch.parallel=2 fetch --multiple --prune $(git remote | egrep -v ^all$) 2>&1; exit $?)
       fetch_exit_code="$?"
       log "$fetch_output"
       [[ $fetch_exit_code -eq 0 ]] || {

@@ -1,0 +1,270 @@
+#!/bin/bash
+
+mysql() {
+   # this function is a wrapper around the standard `mysql` client
+   # it attempts to output to stderr the given query such that SQL commands are
+   # capitalized for clarity
+
+   # it also provides some safeguards when used in conjunction with other
+   # front-end functions with more specific purposes
+
+   # input: a MySQL query
+
+   # output: mostly-formatted MySQL output, including the original query with
+   # capitalized reserved terms
+
+   # example:
+   # $ mysql -e 'show tables;'
+   #
+   # SHOW tables;
+   #
+   # $output
+
+   # NOTE: the CRED_NAME variables should be set to the name of the get_creds()
+   # formatted template files containing environment variables with the creds
+   # of the relevant DB
+
+   # see the `get_creds` file for more info
+
+   # requires `lpass`: <https://github.com/lastpass/lastpass-cli/releases>
+
+   _verify_reqs \
+   get_creds \
+   lpass \
+   mysql \
+   verbose \
+   || return 1
+
+   local flags="-t"
+   local CRED_NAME="${CRED_NAME:-main_db_ro}"
+   local VERBOSE
+
+   VERBOSE="${VERBOSE:-1}"
+
+   local PERMITTED_OPS=(
+   "BEGIN"
+   "SELECT"
+   "SHOW"
+   "DESCRIBE"
+   "SET SQL_BIG_SELECTS"
+   )
+
+   [[ ${FUNCNAME[*]} =~ sendmailsql ]] &&
+    CRED_NAME="sendmailer_db_rw"
+
+   [[ ${FUNCNAME[*]} =~ get-node-reservation-history ]] &&
+    CRED_NAME="reservation_system_db_rw"
+
+   [[ ${FUNCNAME[*]} =~ add-node-to-reservation-system ]] &&
+    CRED_NAME="reservation_system_db_rw" &&
+    PERMITTED_OPS+=("INSERT")
+
+   [[ ${FUNCNAME[*]} =~ update-node-name-in-reservation-system ]] &&
+    CRED_NAME="reservation_system_db_rw" &&
+    PERMITTED_OPS+=("UPDATE")
+
+   [[ ${FUNCNAME[*]} =~ remove-node-from-reservation-system ]] &&
+    CRED_NAME="reservation_system_db_rw" &&
+    PERMITTED_OPS+=("DELETE")
+
+   verbose 8 "\${FUNCNAME[*]}=${FUNCNAME[*]}"
+   verbose 8 "CRED_NAME=$CRED_NAME"
+   verbose 8 "PERMITTED_OPS=${PERMITTED_OPS[*]}"
+   verbose 8 "\$@='$@'"
+
+   local PERMITTED_OPS_REGEX="^[ "$'\n'"]*("
+   for i in $(seq 0 ${#PERMITTED_OPS[*]}); do
+      PERMITTED_OPS_REGEX+="${PERMITTED_OPS[$i]}"
+      [[ $i -lt $((${#PERMITTED_OPS[*]} - 1)) ]] && PERMITTED_OPS_REGEX+="|"
+      [[ $i -eq $((${#PERMITTED_OPS[*]} - 1)) ]] && PERMITTED_OPS_REGEX+=")"
+   done
+
+   if [[ -z "$CRED_NAME" ]]; then
+      cat <<-EOF
+		you must set CRED_NAME to be the standardized lowercase name of the corresponding LP entry
+
+		EOF
+      return 1
+   fi
+
+   # have LP log out after 8 hours instead of the default 1 hour
+   export LPASS_AGENT_TIMEOUT="$((8*60*60))"
+#   lpass status -q || { echo "you must log into LastPass first!"; return 1; }
+
+   declare -A db_creds=(
+   [username]=""
+   [password]=""
+   [database]=""
+   [hostname]=""
+   )
+
+   for i in ${!db_creds[*]}; do
+      db_creds[$i]="$(get_creds $CRED_NAME $i 2>&1)" || {
+         cat <<-EOF >&2
+			error from get_creds():
+
+			'${db_creds[$i]}'
+
+			EOF
+         return 1
+      }
+      _print_var_vals {db_creds[$i]}
+   done
+
+   local arg
+   for arg in "$@"; do
+      # add support for disabling the default of formatting output in a table
+      [[ $arg =~ --no-table ]] && flags="${flags/-t/}" && shift && continue
+
+      # add other args as-is
+      [[ $arg =~ ^- ]] && {
+         if [[ "$arg" =~ ^(--?execute)$ ]]; then
+            _print_var_vals arg
+            arg="${arg//${BASH_REMATCH[0]}/}"
+            _print_var_vals arg
+         elif [[ $arg =~ ^-[^-]+$ ]]; then
+            arg="${arg//e/}"
+            [[ $arg =~ ^-$ ]] &&
+               arg=""
+         fi
+         flags="$flags $arg"
+         shift
+      }
+   done
+
+   local query="$@"
+
+   _print_var_vals query PERMITTED_OPS_REGEX
+   if [[ "${query^^}" =~ $PERMITTED_OPS_REGEX ]]; then
+
+      local words_array=(
+         and
+         as
+         begin
+         between
+         case
+         collate
+         concat
+         delete
+         describe
+         else
+         end\\\)
+         from
+         "group by"
+         having
+         insert
+         into
+         join
+         like
+         limit
+         lpad
+         on
+         or
+         "order by"
+         round
+         select
+         set
+         show
+         sql_big_selects
+         substring
+         sum
+         then
+         update
+         value
+         values
+         when
+         where
+      )
+
+      for word in "${words_array[@]}"; do
+         local newline
+         if [[ "$word" =~ (having|like|on|as) ]]; then
+            newline=""
+         else
+            # do the normal query, but prepend a newline
+            newline="\n"
+         fi
+
+#         echo "$LINENO: word = '$word'"
+#         echo "$LINENO: query = '$query'"
+#         query=$(
+#            echo "$query" |
+#            sed -rf /dev/fd/5 5<<-SED_SCRIPT
+#				s;(^| +|\()$word([=;, \(]);\
+#				$newline\1${word^^*}\2;gi
+#				SED_SCRIPT
+##            |    # first, capture any leading blank characters and any trailing left parentheses
+##                                              # next, output a newline (if applicable), the word transformed to uppercase, and any trailing parentheses
+##            sed -e 's;^ \+;;'                 # lastly, remove leading blank characters
+#         )
+
+         # for the below sed commands:
+         # first, capture any leading blank characters, $word and any trailing left parentheses
+         # next, output a newline (if applicable), $word transformed to uppercase, and any trailing parentheses
+         # lastly, remove leading blank characters
+#            sed -r \
+#            -e "s;(^| +|\()$word([=;, \(]);\
+#            "$newline"\1${word^^*}\2;gi" \
+#            -e "s;([[:space:]]+)?\o2;;g" \
+#            -e 's;^ \+;;'
+         query=$(
+            echo "$query" |
+            sed -re "{
+               s;(^|\(| )((left|right|outer|inner) $word|$word)([=;, \(]);${newline}\U&;gi
+            }"
+         )
+#         query=$(
+#            echo "$query" |
+#            sed -re "{
+#               s;(^|\()$word([=;, \(]);\1${newline}${word^^*}\2;gi
+#            }"
+#         )
+      done
+
+      # some post-processing
+      echo -e "$query" |
+      sed -re "{
+         # just for SELECT lines
+         /^SELECT[^()]+$/{
+            s;^(SELECT) ;\1\n   ;;   # seprate SELECT onto its own line
+            s; *, *;,\n   ;g         # separate SELECT fields onto new lines
+         }
+
+         # for all other lines
+         s;^[[:space:]]+;;   # remove all leading whitespace
+         s;[[:space:]]+$;;   # remove all trailing whitespace
+      }" >&2
+
+      if [[ "${query^^}" =~ UPDATE[^D] ]]; then
+         echo
+         echo -n "are you sure you wish to run this update? [y/N] "
+         read
+
+         [[ $REPLY =~ y ]] || { echo "cancelling request"; return 1; }
+      fi
+      if [[ "${query^^}" =~ (^|;(' '|$'\n'))DELETE ]]; then
+         echo
+         echo -n "are you sure you wish to run this delete (type YES to confirm)? "
+         read
+
+         [[ $REPLY =~ YES ]] || { echo "cancelling request"; return 1; }
+      fi
+
+      verbose 8 mysql $flags -h "${db_creds[hostname]}" -u "${db_creds[username]}" -p"${db_creds[password]}" "${db_creds[database]}" -e "$query"
+      command mysql $flags -h "${db_creds[hostname]}" -u "${db_creds[username]}" -p"${db_creds[password]}" "${db_creds[database]}" -e "$query" 2>&1 | sed -e 's;.*Warning.*;;'
+
+      # this ensures we get the exit code of the MySQL command, rather than the sed one
+      # note that mysql returns a non-zero exit code only if there's a syntax error
+      # you shouldn't rely on the exit code to determine if, for instance, an UPDATE succeeded
+      return ${PIPESTATUS[0]}
+   else
+      echo
+      echo 'operation not permitted'
+      echo
+      echo 'query must start with one of these operators:'
+      for i in $(seq 0 ${#PERMITTED_OPS[*]}); do
+         echo "${PERMITTED_OPS[$i]}"
+      done
+
+   fi
+}
