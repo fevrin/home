@@ -253,7 +253,7 @@
            read;\
         [[ $REPLY =~ [Yy] || ! \"$branch\" =~ \"$main_branch\" ]] &&\
         git fet; \
-        [[ -n \"$(git get-upstream-branch)\" ]] || git branch --set-upstream-to=$(git get-main-remote)/\"$branch\" \"$branch\"; \
+        [[ -n \"$(git get-upstream-branch)\" ]] || parallel \"echo git config branch.test/branch.{}\" ::: remote merge :::+ $(git get-main-remote) refs/heads/\"$branch\"; \
         parallel \"git push -v --tags {} $(git rev-parse --abbrev-ref HEAD)\" ::: $(git remote); \
      else \
         exit $?; \
@@ -267,11 +267,12 @@
            echo -n \"are you sure you wish to push \"$branch\" to all remotes? [y/N] \" &&\
            read;\
         [[ $REPLY =~ [Yy] || ! \"$branch\" =~ \"$main_branch\" ]] &&\
-        [[ -n \"$(git get-upstream-branch)\" ]] || git branch --set-upstream-to=$(git get-main-remote)/\"$branch\" \"$branch\"; \
+        [[ -n \"$(git get-upstream-branch)\" ]] || parallel \"echo git config branch.test/branch.{}\" ::: remote merge :::+ $(git get-main-remote) refs/heads/\"$branch\"; \
         parallel --will-cite \"git push -v '$@' --tags {} $(git rev-parse --abbrev-ref HEAD); git fet\" ::: $(git remote); \
      else \
         exit $?; \
      fi'"
+        # this doesn't work if the remote branch doesn't already exist... [[ -n \"$(git get-upstream-branch)\" ]] || git branch --set-upstream-to=$(git get-main-remote)/\"$branch\" \"$branch\"; \
         #git remote | xargs --max-procs=1 -L1 -I{} git push -uv --tags {} $(git rev-parse --abbrev-ref HEAD) '$@'; \
 
   # from <http://stackoverflow.com/questions/1057564/pretty-git-branch-graphs#answer-9074343>
