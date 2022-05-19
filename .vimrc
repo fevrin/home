@@ -136,6 +136,9 @@ set formatoptions=croqlt " fo; ensures any text width that's set will take effec
 " 16 folding
 "set foldmethod=indent " fdm; sets folding type
 
+" 18 mapping
+let g:mapleader="," " changes the initial character that triggers execution of a map that uses <Leader>
+
 " 19 reading and writing files
 set fileformat=unix " ff; always use unix EOLs (end of lines), by default
 
@@ -249,6 +252,8 @@ vmap "" c"<esc>pa"<esc> " wraps visual selection in double quotes
 " creates an XHTML image tag; help from <http://linuxgazette.net/148/misc/tag/vimrc>
 imap img<tab> <img src="" alt="" /><esc>10hi
 
+"https://stackoverflow.com/questions/597687/how-to-quickly-change-variable-names-in-vim/597932#597932
+
 "map <CR> o<Esc> " inserts a newline below current line from within normal mode; from
 "<http://vim.wikia.com/wiki/Insert_newline_without_entering_insert_mode>
 
@@ -308,6 +313,7 @@ call plug#begin(s:vim_home_dir . '/plugged')
    Plug 'https://github.com/fevrin/AnsiEsc.vim', { 'branch': 'main', 'frozen': 'true' }
    Plug 'pearofducks/ansible-vim', { 'branch': 'master', 'frozen': 'true' }
    Plug 'tpope/vim-eunuch'
+   Plug 'ekalinin/Dockerfile.vim'
 "   Plug 'arp242/undofile_warn.vim'
 "   Plug 'airblade/vim-gitgutter'
 "   Plug 'vim-airline/vim-airline'
@@ -315,6 +321,7 @@ call plug#begin(s:vim_home_dir . '/plugged')
 "   Plug 'editorconfig/editorconfig-vim' " https://github.com/editorconfig/editorconfig/wiki/EditorConfig-Properties
 "   Plug 'tpope/vim-sensible'
 "   Plug 'tpope/vim-sleuth'
+"   Plug 'tpope/vim-unimpaired'
 "   Plug 'preservim/nerdtree'
 "   Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 "   Plug 'junegunn/fzf.vim'
@@ -353,7 +360,7 @@ endif
 " TROUBLESHOOTING
 " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-" use this to profile scrolling down a large file:
+" use this to profile the performance when scrolling down a large file:
 " let g:profstart=reltime() | for i in range(1,50) | exec "normal \<C-E>" | redraw | endfor | echo reltimestr(reltime(g:profstart)) . ' seconds'
 " let g:profstart=reltime() | for i in range(1,50) | exec "normal j" | redraw | endfor | echo reltimestr(reltime(g:profstart)) . ' seconds'
 
@@ -366,3 +373,9 @@ endif
 
 " use ":verbose set xyz" to find out which file's settings are overriding ~/.vimrc
 " helpful article at <http://peox.net/articles/vimconfig.html>
+
+" =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+" HANDY KEYSTROKES
+" =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+" viw " useful for selecting up until the next word, such as spaces; v_iw iw; "inner word", select [count] words (see |word|). White space between words is counted too. When used in Visual linewise mode "iw" switches to Visual characterwise mode.

@@ -84,8 +84,39 @@ fi
 #export CDPATH=~/documents:~/music:~/programs:~/pictures:~/movies:~/desktop:~/programs/program_documentation--Linux/miscellaneous
 
 ##########################################################
-########Source Files#########
-#############################
+######## Bash Completions #####
+###############################
+
+# it seems the `git` package sets up only /etc/bash_completion.d/git-prompt (which sources /usr/lib/git-core/git-sh-prompt), but not an equivalent for git-completion.bash, which is needed for additional completions, like branch names
+for completion_file in \
+   /usr/lib/git-core/git-sh-prompt \
+   /usr/local/git/contrib/completion/git-prompt.sh \
+   /usr/local/git/contrib/completion/git-completion.bash \
+   /usr/share/bash-completion/completions/git \
+; do
+   completion_link="/etc/bash_completion.d/${completion_file##*/}-completion"
+      # the source completion file exists
+      [[ -f "${completion_file}" ]] && {
+         # and it's either copied to, symlinked to, or sourced from a file in /etc/bash_completion
+         [[ -f "${completion_link}" || -h "${completion_link}" ]] ||
+            egrep -q "(\.|source) ${completion_file}" /etc/bash_completion.d/* || {
+            # otherwise, symlink to it
+            echo -n "symlink "${completion_file}" "${completion_link}"? [Y/n] "; read
+            [[ $REPLY =~ ^n$ ]] ||
+            sudo ln -s "${completion_file}" "${completion_link}" ||
+            # or source it directly if that doesn't work
+            . "${completion_file}"
+         }
+      }
+done
+unset completion_file
+unset completion_link
+
+[[ -x $HOME/go/bin/gocomplete ]] && complete -C $HOME/go/bin/gocomplete go
+
+##########################################################
+######## Source Files #########
+###############################
 
 declare -a files_to_source
 declare -a dirs_for_path
@@ -94,12 +125,9 @@ declare -a dirs_for_gopath
 # to add more files, just either add them here or in any sourced directories
 # note that they are sourced in alphanumeric order, which you can use to source in a particular order, based on dependencies
 files_to_source=(
-~/.bashrc.d/*
-~/bin/lib/lib_all
-/etc/bash_completion # needed for git completion
-/usr/lib/git-core/git-sh-prompt
-/usr/local/git/contrib/completion/git-prompt.sh
-/usr/local/git/contrib/completion/git-completion.bash
+   ~/.bashrc.d/*
+   ~/bin/lib/lib_all
+   /etc/bash_completion
 )
 
 # prep apple terminal, if we're using it
@@ -120,7 +148,7 @@ for file in ${files_to_source[*]}; do
 
    [[ -r "$file" ]] &&
    [[ ! "$file" =~ python ]] &&
-   file -L --mime-type "$file" | egrep -q '(text/x-shellscript|git-sh-prompt|bash_completion)' && # git-sh-prompt shows as 'text/plain'
+   file -L --mime-type "$file" | egrep -q '(text/x-shellscript|bash_completion)' && # git-sh-prompt shows as 'text/plain'
    bash -n "$file" 2>/dev/null &&
 #   echo "sourcing '$file'..." >&2 &&
 #   TIMEFORMAT='%R' &&
@@ -132,8 +160,8 @@ unset files_to_source file
 ##########################################################
 
 ##########################################################
-########Source Dirs##########
-#############################
+######## Source Dirs ##########
+###############################
 
 dirs_for_path+=(
    $HOME/bin

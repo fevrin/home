@@ -301,15 +301,21 @@ for DIR in ${DIRS[*]}; do
             if [[ -f .git/rebase-merge/done ]]; then
                echo
                echo
+               rebase_abort() {
+                  [[ "$1" =~ trapped ]] && echo
+                  if [[ ! "$REPLY" =~ ^n$ || $INTERACTIVE -eq 0 ]]; then
+                     $GITBIN rebase --abort
+                     log "failure: rebase aborted"
+                     [[ -n "$STASH_NAME" ]] && log "stash saved as 'stash@{/"$STASH_NAME"}'"
+                  else
+                     log 'failure: resolve any conflicts to fully rebase this branch, then retry `git-sync`'
+                  fi
+                  exit 1
+               }
+               trap "rebase_abort trapped" SIGINT
                echo -n "ABORT GIT REBASE '$GIT_BRANCH' ONTO '$MAIN_BRANCH'? [Y/n] "
                read
-               if [[ ! "$REPLY" =~ ^n$ || $INTERACTIVE -eq 0 ]]; then
-                  $GITBIN rebase --abort
-                  log "failure: rebase aborted"
-                  [[ -n "$STASH_NAME" ]] && log "stash saved as 'stash@{/"$STASH_NAME"}'"
-               else
-                  log 'failure: resolve any conflicts to fully rebase this branch, then retry `git-sync`'
-               fi
+               rebase_abort
             else
                log "failure: no rebase to abort"
             fi

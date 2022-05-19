@@ -210,7 +210,8 @@ mysql() {
          query=$(
             echo "$query" |
             sed -re "{
-               s;(^|\(| )((left|right|outer|inner) $word|$word)([=;, \(]);${newline}\U&;gi
+               s;^(\()?((left|right|outer|inner) $word|$word)([=;, \(]);\U&;gi             # don't add ${newline} if the word already starts at the beginning of the line
+               s;(\(| )((left|right|outer|inner) $word|$word)([=;, \(]);${newline}\U&;gi   # add a newline and convert to uppercase
             }"
          )
 #         query=$(
@@ -221,13 +222,17 @@ mysql() {
 #         )
       done
 
+      local indentation='   '
       # some post-processing
       echo -e "$query" |
       sed -re "{
-         # just for SELECT lines
-         /^SELECT[^()]+$/{
-            s;^(SELECT) ;\1\n   ;;   # seprate SELECT onto its own line
-            s; *, *;,\n   ;g         # separate SELECT fields onto new lines
+         # just for SELECT lines that have commas (thus multiple fields)
+         /^SELECT .+,.+.*/{
+            # but don't have parentheses (which themselves could have commas, which would be too complicated right now)
+            /^SELECT [^()]+$/{
+               s;^(SELECT) ;\1\n${indentation};;   # seprate SELECT onto its own line
+               s; *, *;,\n${indentation};g         # separate SELECT fields onto new lines
+            }
          }
 
          # for all other lines

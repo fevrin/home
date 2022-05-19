@@ -145,7 +145,7 @@ rsync-with-progress() {
    }
 #   VERBOSE=8 _print_var_vals RSYNC_FLAGS[@]
 
-   local file_count="$(find "$src" | wc --lines)"
+   local file_count="$(find "$SRC" | wc --lines)"
 
    for i in "${RSYNC_FLAGS[@]}"; do
       ([[ "$i" =~ ^(-n|--dry-run)$ ]]) && DRY_RUN=1

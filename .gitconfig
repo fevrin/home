@@ -194,11 +194,17 @@
   dump = cat-file -p
   fet = !git -c fetch.parallel=2 fetch --multiple --prune $(git remote | egrep -v ^all$)   # if this hadn't worked, then this may have: parallel \"git fetch {} --prune 'refs/heads/*:refs/remotes/{}/*'\" ::: $(git remote);
   fork = "clone -o upstream "
-  gen-all-remote = "!git remote get-url all 2>/dev/null || git remote add all get-main-remote; parallel '{ git config --get-all remote.all.pushurl | grep -q {}; } || git remote set-url --add --push all {}' ::: $(git remote | egrep -v ^all$ | xargs -I{} git config --get-all remote.{}.url)"
-  get-local-brs-without-remote-counterpart = "!bash -c 'grep -xvf <(grep -xf <(git br --sort=refname --format=\"%(refname:short)\" | tr -s \"\n\") <(git br -r --sort=refname --format=\"%(refname:lstrip=3)\")) <(git br --sort=refname --format=\"%(refname:short)\" | tr -s \"\n\")'"
+   # even with `all`, the git history shows that instead of the individual remotes, which can be confusing...
+#  gen-all-remote = "!git remote get-url all 2>/dev/null || git remote add all get-main-remote; parallel '{ git config --get-all remote.all.pushurl | grep -q {}; } || git remote set-url --add --push all {}' ::: $(git remote | egrep -v ^all$ | xargs -I{} git config --get-all remote.{}.url)"
+  get-local-brs-info = br --format='ref: %(refname:short)%0aupstream: %(upstream)%0apush: %(push)%0apush track: %(push:track)%0aobject name: %(objectname)%0a'
+  get-all-brs-info = br -a --format='ref: %(refname)%0aupstream: %(upstream)%0aupstream remoteref: %(upstream:remoteref)%0apush: %(push)%0apush track: %(push:track)%0apush remotename: %(push:remotename)%0apush remoteref: %(push:remoteref)%0aobject name: %(objectname)%0asymref: %(symref)%0aworktreepath: %(worktreepath)%0a'
+  get-remote-brs-info = br -r --format='ref: %(refname:short)%0aobject name: %(objectname)%0a'
+  get-local-brs-without-remote-counterpart = !git br --format='%(if:equals=gone)%(push:track,nobracket)%(then)%(refname:short)%00%(end)' | tr -d '\n' | tr '\\0' '\n'
+  get-local-brs-with-remote-counterpart = !git br --format='%(if:notequals=gone)%(push:track,nobracket)%(then)%(refname:short)%00%(end)' | tr -d '\n' | tr '\\0' '\n'
   get-local-brs-with-remote-counterpart = "!bash -c 'grep -xf <(git br --sort=refname --format=\"%(refname:short)\" | tr -s \"\n\") <(git br -r --sort=refname --format=\"%(refname:lstrip=3)\")'"
   get-remote-brs-without-local-counterpart = "!bash -c 'egrep -xvf <(git br --sort=refname --format=\"^[^/]+/%(refname:short)\" | tr -s \"\n\"; echo \"^[^/]+/HEAD\") <(git br -r --sort=refname --format=\"%(refname:lstrip=2)\")'"
-  get-local-brs-with-remote-config-without-remote-counterpart = "!bash -c 'egrep -xvf <(git get-local-brs-with-remote-counterpart) <(git config --fixed-value --get-regexp \"branch.*\\.remote\" origin | sed -re \"s;^branch\\.(.+)\\.remote .*;\\1;\" | sort -u)'"
+  get-local-brs-with-remote-config = !git br --format='%(if)%(upstream)%(then)%(refname:short)%00%(end)' | tr -d '\n' | tr '\\0' '\n'
+  get-local-brs-with-remote-config-without-remote-counterpart = !git br --format='%(if)%(upstream)%(then)%(if:equals=gone)%(push:track,nobracket)%(then)%(refname:short)%00%(end)%(end)' | tr -d '\n' | tr '\\0' '\n'
   get-main-branch = "!bash -c '\
      main_remote=\"$(git get-main-remote)\"; \
      remote_file=\".git/refs/remotes/${main_remote}/HEAD\"; \
@@ -230,10 +236,14 @@
   rbr = root-branch
   hist = log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short
   make = "!make " # run make in the repo root directory with any arguments passed to it
-  restore-all = "!for i in --staged ''; do \
-                     echo git restore $i . && \
-                     git restore $i .; \
-                  done"
+  restore-all = "!bash -c '\
+     echo -n \"are you SURE you want to delete all uncommitted changes to all files? [y/N] \"; read;\
+     [[ $REPLY =~ ^y$ ]] && \
+     for i in --staged \"\"; do \
+        echo git restore $i . && \
+        git restore $i .; \
+     done; \
+  '"
   root-dir = rev-parse --show-toplevel
   st = status
   sync = "!$HOME/.gitconfig.d/git-sync.sh $@"
@@ -253,8 +263,8 @@
            read;\
         [[ $REPLY =~ [Yy] || ! \"$branch\" =~ \"$main_branch\" ]] &&\
         git fet; \
-        [[ -n \"$(git get-upstream-branch)\" ]] || parallel \"echo git config branch.test/branch.{}\" ::: remote merge :::+ $(git get-main-remote) refs/heads/\"$branch\"; \
-        parallel \"git push -v --tags {} $(git rev-parse --abbrev-ref HEAD)\" ::: $(git remote); \
+        [[ -n \"$(git get-upstream-branch)\" ]] || parallel \"git config branch.${branch}.{}\" ::: remote merge :::+ $(git get-main-remote) refs/heads/\"$branch\"; \
+        parallel \"git push -v --tags {} $(git rev-parse --abbrev-ref HEAD)\" ::: $(git remote | egrep -v ^all$); \
      else \
         exit $?; \
      fi'"
@@ -267,8 +277,9 @@
            echo -n \"are you sure you wish to push \"$branch\" to all remotes? [y/N] \" &&\
            read;\
         [[ $REPLY =~ [Yy] || ! \"$branch\" =~ \"$main_branch\" ]] &&\
-        [[ -n \"$(git get-upstream-branch)\" ]] || parallel \"echo git config branch.test/branch.{}\" ::: remote merge :::+ $(git get-main-remote) refs/heads/\"$branch\"; \
-        parallel --will-cite \"git push -v '$@' --tags {} $(git rev-parse --abbrev-ref HEAD); git fet\" ::: $(git remote); \
+        git fet; \
+        [[ -n \"$(git get-upstream-branch)\" ]] || parallel \"git config branch.${branch}.{}\" ::: remote merge :::+ $(git get-main-remote) refs/heads/\"$branch\"; \
+        parallel \"git push -v '$@' --tags {} $(git rev-parse --abbrev-ref HEAD)\" ::: $(git remote | egrep -v ^all$); \
      else \
         exit $?; \
      fi'"
