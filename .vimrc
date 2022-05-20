@@ -58,7 +58,7 @@ set nospell " automatically spell-check; okay, I give up: no spell-check by defa
 set laststatus=2 "ls; statusline will always be displayed, showing modification status; Ctrl+G shows status regardless if
 "this is set or not
 
-set statusline=%f\ (bf\ #%n)\ %m\ \ ft=%y\ \ char=%b,\ %B,\ #%o,\ #%O%=(line\ %l/%L),(chars\ %{wordcount().chars}),%v\ \ \ \ \ \ \ %p%% "stl; determines what to show in the
+set statusline=%f\ (bf\ #%n)\ %m\ \ ft=%y\ \ char=%b,\ %B,\ #%o,\ #%O%<%=(line\ %l/%L),(chars\ %{wordcount().chars}),%v\ \ \ \ \ \ \ %p%% "stl; determines what to show in the
 "status line; the default is:
 "statusline=%-f\ %-m%=%l,%c\ \ \ \ \ \ \ %P; help default is: statusline=%-t\ %-h%-r%=%l,%c%V\ \ \ \ \ \ \ %P
 
@@ -378,4 +378,5 @@ endif
 " HANDY KEYSTROKES
 " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
+" K " in normal mode, this displays the man page for the word under the cursor (programs other than `man` can be set in `keywordprg`)
 " viw " useful for selecting up until the next word, such as spaces; v_iw iw; "inner word", select [count] words (see |word|). White space between words is counted too. When used in Visual linewise mode "iw" switches to Visual characterwise mode.

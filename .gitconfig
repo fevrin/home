@@ -197,6 +197,7 @@
   set-fetch = "!bash -c '\
      parallel -kj1 --header : '\\''git config --get-regexp \"remote\\.{repo}\\.fetch\" >/dev/null || { echo \"not set: setting up remote.{repo}.fetch\"; echo git config remote.{repo}\\.fetch \"+refs/heads/*:refs/remotes/{repo}/*\"; git config remote.{repo}\\.fetch \"+refs/heads/*:refs/remotes/{repo}/*\"; }'\\'' ::: repo $(git remote | grep -v all)\
      '"
+#   fetch-only = !username=${$(git config --get user.username):-USER}; remote="$(git get-main-remote)"; branch="$(git get-main-branch)"; git fetch --dry-run -v origin refs/heads/${username}*:refs/remotes/${remote}/${username}* refs/heads/${branch}*:refs/remotes/${remote}/${branch}*
   fork = "clone -o upstream "
    # even with `all`, the git history shows that instead of the individual remotes, which can be confusing...
 #  gen-all-remote = "!git remote get-url all 2>/dev/null || git remote add all get-main-remote; parallel '{ git config --get-all remote.all.pushurl | grep -q {}; } || git remote set-url --add --push all {}' ::: $(git remote | egrep -v ^all$ | xargs -I{} git config --get-all remote.{}.url)"
@@ -325,6 +326,8 @@
 [status]
   showUntrackedFiles = all
 [branch "master"]
+  pushremote = no_push
+[branch "main"]
   pushremote = no_push
 #[user]
 #	email = 
