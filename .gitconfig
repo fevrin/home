@@ -188,11 +188,15 @@
   '"
   diff-with = diff HEAD
 #  diff-with = "!cd \"$GIT_PREFIX\"; echo bash -c 'git diff --name-only HEAD $@'"
-  diff-with-main = "!cd \"$GIT_PREFIX\"; bash -c 'git diff $(git get-main-branch)... '$@''"
+  diff-with-main = "!cd \"$GIT_PREFIX\"; git diff $(git get-main-branch)..."
 #  diff-with-tracking = "!cd \"$GIT_PREFIX\"; bash -c 'git diff-with $(git get-main-remote)/$(git current-branch) $@'"
   diff-with-tracking = "!cd \"$GIT_PREFIX\"; bash -c 'git diff $(git get-upstream-branch) $@'"
   dump = cat-file -p
-  fet = !git -c fetch.parallel=2 fetch --multiple --prune $(git remote | egrep -v ^all$)   # if this hadn't worked, then this may have: parallel \"git fetch {} --prune 'refs/heads/*:refs/remotes/{}/*'\" ::: $(git remote);
+  fet = !git set-fetch";" git -c fetch.parallel=2 fetch --multiple --prune $(git remote | egrep -v ^all$)   # if this hadn't worked, then this may have: parallel \"git fetch {} --prune 'refs/heads/*:refs/remotes/{}/*'\" ::: $(git remote);
+  # &>/dev/null in the "parallel" command apparently eats the exit code...
+  set-fetch = "!bash -c '\
+     parallel -kj1 --header : '\\''git config --get-regexp \"remote\\.{repo}\\.fetch\" >/dev/null || { echo \"not set: setting up remote.{repo}.fetch\"; echo git config remote.{repo}\\.fetch \"+refs/heads/*:refs/remotes/{repo}/*\"; git config remote.{repo}\\.fetch \"+refs/heads/*:refs/remotes/{repo}/*\"; }'\\'' ::: repo $(git remote | grep -v all)\
+     '"
   fork = "clone -o upstream "
    # even with `all`, the git history shows that instead of the individual remotes, which can be confusing...
 #  gen-all-remote = "!git remote get-url all 2>/dev/null || git remote add all get-main-remote; parallel '{ git config --get-all remote.all.pushurl | grep -q {}; } || git remote set-url --add --push all {}' ::: $(git remote | egrep -v ^all$ | xargs -I{} git config --get-all remote.{}.url)"
