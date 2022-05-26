@@ -12,7 +12,7 @@ for funcfile in $(realpath $(dirname "$BASH_SOURCE"))/functions/*; do
    # export all the functions here so subshells can utilize them, if needed
    # for some reason, exported pushd() causes issues in direnv-allowed directories
    # though simply sourced (and not exported) pushd() is fine
-   # also, we don't want to source and export files with functions that don't match their filenames
+   # we don't want to source and export files with functions that don't match their filenames
    {
       # test conditions
       [[ "$funcname" =~ ^${funcfile//*\/}$ ]] &&

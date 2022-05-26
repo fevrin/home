@@ -252,7 +252,7 @@ mysql() {
          echo -n "are you sure you wish to run this delete (type YES to confirm)? "
          read
 
-         [[ $REPLY =~ YES ]] || { echo "cancelling request"; return 1; }
+         [[ $REPLY =~ ^YES$ ]] || { echo "cancelling request"; return 1; }
       fi
 
       verbose 8 mysql $flags -h "${db_creds[hostname]}" -u "${db_creds[username]}" -p"${db_creds[password]}" "${db_creds[database]}" -e "$query"

@@ -107,14 +107,17 @@
   ci = "!bash -c '\
      if ! git diff --staged --quiet --exit-code || { ! git diff --quiet --exit-code && [[ \"'$@'\" =~ (^-a | -a | -a$|^-a$) ]]; } then\
         git sync \"'$@'\";\
-        \
-        if ! git diff --staged --quiet --exit-code || { ! git diff --quiet --exit-code && [[ \"'$@'\" =~ (^-a | -a | -a$|^-a$) ]]; } then\
-           echo -e \"\npress ENTER to continue with commit\";\
-           read;\
-           git commit -v '$@';\
-        else\
-           echo -e \"\nnothing in index to commit!\";\
-        fi;\
+        if [[ $? -eq 0 ]]; then \
+           if ! git diff --staged --quiet --exit-code || { ! git diff --quiet --exit-code && [[ \"'$@'\" =~ (^-a | -a | -a$|^-a$) ]]; } then\
+              echo -e \"\npress ENTER to continue with commit\";\
+              read;\
+              git commit -v '$@';\
+           else\
+              echo -e \"\nnothing in index to commit!\";\
+           fi;\
+        else \
+           echo \"git sync failed; skipping commit....\"; \
+        fi; \
      else\
         if git diff --quiet --exit-code; then\
            echo -e \"\nnothing in index to commit!\";\
@@ -190,7 +193,7 @@
 #  diff-with = "!cd \"$GIT_PREFIX\"; echo bash -c 'git diff --name-only HEAD $@'"
   diff-with-main = "!cd \"$GIT_PREFIX\"; git diff $(git get-main-branch)..."
 #  diff-with-tracking = "!cd \"$GIT_PREFIX\"; bash -c 'git diff-with $(git get-main-remote)/$(git current-branch) $@'"
-  diff-with-tracking = "!cd \"$GIT_PREFIX\"; bash -c 'git diff $(git get-upstream-branch) $@'"
+  diff-with-tracking = "!cd \"$GIT_PREFIX\"; bash -c 'git diff $(git get-upstream-branch)...HEAD $@' -- "
   dump = cat-file -p
   fet = !git set-fetch";" git -c fetch.parallel=2 fetch --multiple --prune $(git remote | egrep -v ^all$)   # if this hadn't worked, then this may have: parallel \"git fetch {} --prune 'refs/heads/*:refs/remotes/{}/*'\" ::: $(git remote);
   # &>/dev/null in the "parallel" command apparently eats the exit code...
@@ -212,19 +215,14 @@
   get-local-brs-with-remote-config-without-remote-counterpart = !git br --format='%(if)%(upstream)%(then)%(if:equals=gone)%(push:track,nobracket)%(then)%(refname:short)%00%(end)%(end)' | tr -d '\n' | tr '\\0' '\n'
   get-main-branch = "!bash -c '\
      main_remote=\"$(git get-main-remote)\"; \
-     remote_file=\".git/refs/remotes/${main_remote}/HEAD\"; \
-     if [[ -s \"${remote_file}\" ]]; then \
-        egrep -q \".*${main_remote}/(.+)$\" \"${remote_file}\" 2>/dev/null || {\
-           echo \"using slower, more accurate method to determine the main branch\" >&2; \
-           echo \"setting head so this will be quicker next time\" >&2; \
-           git remote -v set-head origin -a >&2; \
-           sed -rne \"s;.*${main_remote}/(.*);\\1;p\" \"${remote_file}\" 2>/dev/null; \
-        } \
-     fi; \
-     main_branch=\"$(git rev-parse --abbrev-ref ${main_remote}/HEAD | sed \"s;^${main_remote}/;;\")\"; \
+     git rev-parse --abbrev-ref --verify --quiet --end-of-options ${main_remote}/HEAD &>/dev/null || {\
+        echo \"using slower, more accurate method to determine the main branch\" >&2; \
+        echo \"setting head so this will be quicker next time\" >&2; \
+        git refresh-main-branch; \
+     }; \
+     main_branch=\"$(git rev-parse --abbrev-ref --verify --end-of-options ${main_remote}/HEAD | sed \"s;^${main_remote}/;;\")\"; \
      [[ -n \"$main_branch\" ]] || { \
-        echo \"no remote exists with \\`git rev-parse --abbrev-ref ${main_remote}/HEAD\\` or at the file below; this may be a new, non-cloned repo\" >&2; \
-        echo \"${remote_file}\" >&2; \
+        echo \"no remote exists with \\`git rev-parse --abbrev-ref --verify --end-of-options ${main_remote}/HEAD \\` or at the file below; this may be a new, non-cloned repo\" >&2; \
         echo >&2; \
         echo \"in this case, you may need to first pull from the remote or set the tracking branch (e.g., \\`git push -u $(git get-main-remote) $(git current-branch)\\`)\" >&2; \
         exit 1; \
@@ -232,6 +230,17 @@
      echo \"${main_branch}\"; \
   '" # try a quick method first, but if that fails, try a slower though potentially more up-to-date method
      # old, slower method: git remote -v show $(git get-main-remote) | sed -rne \"s;.*HEAD branch: (.*)$;\\1;p\";\
+      # git symbolic-ref --short refs/remotes/${main_remote}/HEAD | egrep -q \"^${main_remote}/.+$\" 2>/dev/null || {\
+      # git for-each-ref --format=\"%(symref:lstrip=3)\" refs/remotes/${main_remote}/HEAD || {\
+  refresh-main-branch = "!bash -c '\
+     main_remote=\"$(git get-main-remote)\"; \
+     remote_main_branch=\"$(git for-each-ref --format=\"%(if)%(symref)%(then)%(symref:lstrip=3)%00%(end)\" --points-at=$(git ls-remote ${main_remote} HEAD | cut -f1) | tr -d \"\n\" | tr \"\\0\" \"\n\")\";  \
+     if [[ ${remote_main_branch} =~ ^$(git for-each-ref --format=\"%(symref:lstrip=3)\" refs/remotes/${main_remote}/HEAD)$ ]]; then \
+        echo \"no updates to remote main branch\"; \
+     else \
+        git remote -v set-head \"$(git get-main-remote)\" -a; \
+     fi; \
+  '"
   get-main-remote = config --default --get remote.pushdefault
 #  get-upstream-branch = "!bash -c 'git config --get branch.$(git current-branch).merge'"
   get-upstream-branch = "!bash -c 'git br --format=\"%(if:equals=$(git current-branch))%(refname:short)%(then)%(upstream:lstrip=2)%(end)\" | tr -d \"\n\"; echo'"

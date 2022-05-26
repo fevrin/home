@@ -242,6 +242,12 @@ augroup END
 
 
 " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+" COMMANDS
+" =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+:command! -nargs=1 -range SuperRetab <line1>,<line2>s/\v%(^ *)@<= {<args>}/\t/g | noh " from <https://vim.fandom.com/wiki/Super_retab#Super_retab>
+
+" =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 " MAPS
 " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 "imap '' <esc> " allows for an easier way to escape
@@ -353,7 +359,7 @@ let g:elm_format_autosave = 0
 
 " from <https://stackoverflow.com/questions/21708814/can-vim-diff-use-the-patience-algorithm/63079135#63079135>
 if has("patch-8.1.0360")
-   set diffopt+=internal,indent-heuristic,algorithm:patience
+   set diffopt+=indent-heuristic,algorithm:patience
 endif
 
 " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -378,5 +384,10 @@ endif
 " HANDY KEYSTROKES
 " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-" K " in normal mode, this displays the man page for the word under the cursor (programs other than `man` can be set in `keywordprg`)
-" viw " useful for selecting up until the next word, such as spaces; v_iw iw; "inner word", select [count] words (see |word|). White space between words is counted too. When used in Visual linewise mode "iw" switches to Visual characterwise mode.
+" K   " in normal mode, this displays the man page for the word under the cursor (programs other than `man` can be set in `keywordprg`)
+" viw   " useful for selecting up until the next word, such as spaces; v_iw iw; "inner word", select [count] words (see |word|). White space between words is counted too. When used in Visual linewise mode "iw" switches to Visual characterwise mode.
+
+" =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+" HANDY COMMANDS
+" =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+" :retab   " undoes expandtab; basically, converts spaces of the specified tabstop count (or expandtab, if not specified in the :retab command) back to tabs
