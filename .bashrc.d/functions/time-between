@@ -1,63 +1,85 @@
 #!/bin/bash
 
-time-between-now-and() {
-# determine the hours, minutes, and seconds since the specified time
+time-between() {
+# determine the hours, minutes, and seconds between the specified times
 
    _verify_reqs <<-EOF || return 1
    _print_var_vals
 	EOF
 
-   local pdate="$1";
-   local pdate_sec="$(date -d "$pdate" +%s)"
-   local now_sec="$(date +%s)"
+   local start_time="$1";
+   local start_time_sec="$(date -d "$start_time" +%s)"
+   local end_time="${2:-now}";
+   local end_time_sec="$(date -d "$end_time" +%s)"
    local timediff
    local newer
    local older
 
-   if [[ $now_sec -gt $pdate_sec ]]; then
-      newer=$now_sec
-      older=$pdate_sec
+   if [[ $end_time_sec -gt $start_time_sec ]]; then
+      newer=$end_time_sec
+      older=$start_time_sec
    else
-      newer=$pdate_sec
-      older=$now_sec
+      newer=$start_time_sec
+      older=$end_time_sec
    fi
 
    timediff="$((newer - older))"
    _print_var_vals older newer timediff
+   _calc_time_diff() {
+      local timediff="${1?you must provide a timediff to \`${FUNCNAME}()\`}"
+      local formula="${2?you must provide a formula to \`${FUNCNAME}()\`}"
+      local value="$(echo "scale=20; $timediff $formula" | bc | sed -rne 's;^\.;0.;; s;^([0-9]+)(\.[0-9]+);\1 \2;p')";
+      echo $value
+   }
 
-   local days=$(echo "scale=10; $timediff / 60 / 60 / 24" | bc);
+   local remainder
+   local years
+   local days
+   local hours
+   local minutes
+   local seconds
+
+   read years remainder < <(_calc_time_diff "$timediff" "/ 60 / 60 / 24 / 365");
+   _print_var_vals years remainder
+   verbose 8 "years = '$years'"
+   verbose 8 "\$remainder = '$remainder'"
+
+   read days remainder < <(_calc_time_diff "$remainder" "* 365");
+   _print_var_vals days remainder
    verbose 8 "days = '$days'"
-   verbose 8 "\${days%%.*} = '${days%%.*}'"
+   verbose 8 "\$remainder = '$remainder'"
 
    # take the remainder of time after whole days (which inherently will be a
    # fraction) and multiply it back by 24
    # this should result in a whole number with a fraction
-   local hours=$(echo "scale=10; ($days - ${days%%.*}) * 24" | bc);
+   read hours remainder < <(_calc_time_diff "${remainder}" "* 24")
    verbose 8 "hours = '$hours'"
-   verbose 8 "\${hours%%.*} = '${hours%%.*}'"
-   days="${days%%.*}"
+   verbose 8 "\$remainder = '$remainder'"
 
    # take the number of hours and multiply it by 60 to get the minutes
-   local mins=$(echo "scale=10; $hours * 60" | bc);
-   verbose 8 "mins = '$mins'"
-   verbose 8 "\${mins%%.*} = '${mins%%.*}'"
-   hours="${hours%%.*}"
+   read minutes remainder < <(_calc_time_diff "${remainder}" "* 60")
+   verbose 8 "minutes = '$minutes'"
+   verbose 8 "\$remainder = '$remainder'"
 
    # take the remainder of time after whole days (which inherently will be a
    # fraction) and multiply it back by 24
    # this should result in a whole number with a fraction
-   local seconds=$(echo "scale=10; ($mins - ${mins%%.*}) * 60" | bc);
+   read seconds remainder < <(_calc_time_diff "${remainder}" "* 60")
    verbose 8 "seconds = '$seconds'"
-   verbose 8 "\${seconds%%.*} = '${seconds%%.*}'"
-   mins="${mins%%.*}"
-   seconds="${seconds%%.*}"
+   verbose 8 "\$remainder = '$remainder'"
 
-   [[ $days -lt 10 ]] && days="0$hours"
-   [[ $hours -lt 10 ]] && hours="0$hours"
-   [[ $mins -lt 10 ]] && mins="0$mins"
-   [[ $seconds -lt 10 ]] && seconds="0$seconds"
 
-   _print_var_vals ${days} ${hours} ${mins} ${seconds}
+   _print_var_vals ${years} ${days} ${hours} ${minutes} ${seconds}
 
-   printf "%02dd %02dh %02dm %02ds\n" ${days} ${hours} ${mins} ${seconds}
+   local i
+   local print_format
+   local print_vars
+   for i in years days hours minutes seconds; do
+      [[ "${!i}" -gt 0 ]] && {
+         print_format+="%d${i:0:1} "
+         print_vars+="${!i} "
+      }
+   done
+   _print_var_vals print_format print_vars
+   printf "${print_format}\n" ${print_vars}
 }
