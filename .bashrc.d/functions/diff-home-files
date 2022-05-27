@@ -47,11 +47,12 @@ diff-home-files() {
       copy|cp|-a)
          ACTION="cp -aiv"
          shift
+         local file
          for file in $@; do
             file="${1##$HOME/}"
             $ACTION "$HOME/$file" "$HOME_DIR/$file"
-            return
          done
+         return
          ;;
       file)
          shift
@@ -74,10 +75,10 @@ diff-home-files() {
          ;;
    esac
 
-   [[ $ACTION || $ACTION =~ ^file$ ]] || ACTION="vimdiff"
-   [[ $ACTION =~ ^vimdiff$ ]] && ACTION_OPTIONS="$VIMDIFF_OPTIONS"
-   [[ $FILE_LIST ]] || FILE_LIST=$(find $HOME_DIR -type f ! -iregex '.*\/\.git\/.*')
-   _print_var_vals ACTION FILE_LIST
+   [[ "$ACTION" || "$ACTION" =~ ^file$ ]] || ACTION="vimdiff"
+   [[ "$ACTION" =~ ^vimdiff$ ]] && ACTION_OPTIONS="$VIMDIFF_OPTIONS"
+   [[ "$FILE_LIST" ]] || FILE_LIST=$(find "$HOME_DIR" -type f ! -iregex '.*\/\.git\/.*')
+   _print_var_vals ACTION ACTION_OPTIONS FILE_LIST
 
    for i in $FILE_LIST; do
       local file1="$(echo "$i" | sed -re "s;$HOME_DIR/(.*);$HOME/\1;")"
@@ -104,7 +105,12 @@ diff-home-files() {
          if [[ $REPLY =~ ^n$ ]]; then
             continue
          else
-            ${FUNCNAME[0]} cp "$file1" "$file2"
+            VERBOSE=${VERBOSE} ${FUNCNAME[0]} copy "$file1"
+
+            [[ -f "$file2" ]] || {
+               echo "could not copy successfully"
+               return 1
+            }
          fi
 #         echo "i = '$i'"
          }
@@ -116,20 +122,22 @@ diff-home-files() {
       ! "$i" =~ \.md &&
       ! "$i" =~ \.vim\/ ]] || continue
 
-      if [[ $(md5sum $file1 2>/dev/null | cut -d" " -f1) != $(md5sum $file2 2>/dev/null | cut -d" " -f1) ]]; then
+      if [[ $(md5sum "${file1}" 2>/dev/null | cut -d" " -f1) != $(md5sum "${file2}" 2>/dev/null | cut -d" " -f1) ]]; then
+         echo $ACTION "$ACTION_OPTIONS" $file1 $file2
          $ACTION "$ACTION_OPTIONS" $file1 $file2
          [[ $ACTION =~ ^vimdiff$ ]] && {
             echo "$file1"
             echo "$file2"
          }
       else
-         [[ "$FILE_LIST" = "$i" ]] && {
+#         [[ "$FILE_LIST" =~ ^"$i" ]] && {
             cat <<-EOF
+
 					no differences between these files:
 					$file1
 					$file2
 				EOF
-         }
+#         }
       fi
    done
 

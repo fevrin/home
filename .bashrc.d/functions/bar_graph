@@ -13,3 +13,4 @@
 #      echo;
 #   done
 #}
+#sudo journalctl --quiet --grep=': CTRL-EVENT-SIGNAL-CHANGE' -u wpa_supplicant | cut -d: -f1-2 | sort | sed -e 's;.$;0;' | uniq -c | sort -k3 -k4d -h | awk '{ printf("%s %s %s ",$2,$3,$4); for(i = 1; i <= $1; i++) printf("%s","="); printf(" (%s) \n",$1)}'; date

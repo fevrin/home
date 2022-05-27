@@ -31,10 +31,14 @@ export HISTFILESIZE=20000
 
 # ensure vim is the default editor of choice
 export EDITOR="vim"
-export LESS="-QFRX --no-histdups" # '-+i' resets search case sensitivity, which seems to be getting set somehow (formerly, this was '+-+i', as '-+i' alone didn't seem to work; that longer version executes when `less` opens and makes searches case sensitive and (with ) bypasses the message about that)
+export LESS="-QFRX --no-histdups -i" # '-+i' resets search case sensitivity to its default of being case sensitive (formerly, this was '+-+i', as '-+i' alone didn't seem to work; that longer version executes when `less` opens and makes searches case sensitive and (with ) bypasses the message about that)
+
+# make `less` the default pager
+export PAGER="less"
 
 # set default pager for manpages
-export MANPAGER="less $LESS"
+# set default pager for systemctl and have it chop lines so the display is cleaner
+export SYSTEMD_LESS="$LESS -S"
 
 # a further enhancement will be when you can conditionally use line numbers based on file size:
 # https://github.com/gwsw/less/issues/230

@@ -189,6 +189,36 @@
      git diff --staged $(if [[ '\\'$1\\'' && -e \"$GIT_PREFIX/'$1'\" && ! \"$GIT_PREFIX/'$1'\" =~ ^/$ ]]; then echo \"$GIT_PREFIX/'$1'\"; else echo \"'$1'\"; fi) && \
      git check-whitespace \
   '"
+   diff-between-chef-cookbook-versions = ! "bash -c '\
+      version1=\"$1\";\
+      version2=\"$2\";\
+      path=\"${3%/*}\";\
+      metadata_file=\"${path}/metadata.rb\";\
+      [[ -n \"$version1\" && -n \"$version2\" && -n \"$path\" ]] || {\
+         echo \"you must supply <version1>, <version2>, and <path>\";\
+         exit 1;\
+      };\
+      [[ -r ${metadata_file} ]] || {\
+         echo \"${metadata_file} must exist\";\
+         exit 2;\
+      }; \
+      possible_versions=$(git log --format=\"%h\" -L\"/^version \\+'\\''[0-9.]\\+'\\''$/\",+1:${metadata_file} | \
+         sed -rne \"s;^[-+]version +'\\''([0-9.]+)'\\''$;\\1;p\" | \
+         sort -Vu \
+      );\
+      for i in version1 version2; do\
+         echo \"${!i}\" | \
+         grep -qxf <(echo \"${possible_versions}\") || {\
+            echo \"${i} (${!i}) must be one of these versions:\";\
+            echo \"${possible_versions}\"; \
+            exit 3;\
+         };\
+      done; \
+      commit1=\"$(git log --format='\\''%h'\\'' -G\"^version +'\\''$version1'\\''$\" -- ${metadata_file} | tail -n1)\"; \
+      commit2=\"$(git log --format='\\''%h'\\'' -G\"^version +'\\''$version2'\\''$\" -- ${metadata_file} | tail -n1)\"; \
+      echo \"${version1} = ${commit1}\"; \
+      echo \"${version2} = ${commit2}\"; \
+      git diff ${commit1}...${commit2} -- $path' -- "
   diff-with = diff HEAD
 #  diff-with = "!cd \"$GIT_PREFIX\"; echo bash -c 'git diff --name-only HEAD $@'"
   diff-with-main = "!cd \"$GIT_PREFIX\"; git diff $(git get-main-branch)..."

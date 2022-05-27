@@ -24,6 +24,7 @@ set linebreak " lbr; break/wrap lines at a space (not in the middle of a word)
 "set list " ; show non-printable characters
 set listchars=eol:$,tab:^_,trail:_ " lcs; strings to use in 'list' mode
 set number " nu; enable line numbering
+au FileType help set nu " enable line number for :help windows, too, since that doesn't seem to happen automatically
 
 " 5 syntax, highlighting, and spelling
 set background=dark " bg; set the background to dark, so highlighting is adjusted appropriately
@@ -189,7 +190,12 @@ au FileType gitcommit setlocal spell
 autocmd FileType go,python,sh,vim,markdown,gitcommit setlocal tw=125
 
 
-autocmd BufReadPost,FileReadPost *.log AnsiEsc
+if exists(':AnsiEsc')
+   " color file contents if it has ANSI escape codes (though it doesn't cover all possible combinations)
+   " https://github.com/vim-scripts/AnsiEsc.vim/blob/d2bb7878622e4c16203acf1c92a0f4bc7ac58003/autoload/AnsiEsc.vim#L214
+   autocmd FileType systemd AnsiEsc
+   autocmd BufReadPost,FileReadPost *.log AnsiEsc
+endif
 
 "au BufNewFile,BufRead *.tsx setf typescript
 autocmd FileType typescriptreact setlocal ft=typescript
@@ -346,6 +352,9 @@ call plug#begin(s:vim_home_dir . '/plugged')
 "   Plug 'janko/vim-test'
 "   Plug 'vim-scripts/vcscommand.vim'
 "   Plug 'mhinz/vim-signify'
+"   Plug 'rickhowe/spotdiff.vim'
+"   Plug 'inkarkat/vim-AdvancedDiffOptions'
+"   Plug 'AndrewRadev/linediff.vim'
 call plug#end()
 let g:go_fmt_command = "goimports"
 let g:elm_format_autosave = 0
