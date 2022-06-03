@@ -400,3 +400,4 @@ endif
 " HANDY COMMANDS
 " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 " :retab   " undoes expandtab; basically, converts spaces of the specified tabstop count (or expandtab, if not specified in the :retab command) back to tabs
+" :exe "r !MANWIDTH=" . (winwidth(0) - 5) " command man bash" " you can use something like this to execute a combination of vim and shell commands; in this case, it reads a man page into the current buffer using the buffer's current width (important when buffers are split up)

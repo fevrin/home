@@ -29,22 +29,30 @@ else
       # append history commands to ~/.bash_history as they are executed;
       #from <http://www.ukuug.org/events/linux2003/papers/bash_tips/>.  also, read in latest bash history
       # inspired by <https://unix.stackexchange.com/questions/18212/bash-history-ignoredups-and-erasedups-setting-conflict-with-common-history/18443#18443>
-      # that recommends the following, which seems to just endlessly adding duplicate commands to individual entries:
+      # that recommends the following, which seems to just endlessly add duplicate commands to individual entries:
       # per the git-sh-prompt file notes, __git_ps1 automatically sets PS1 with the provided values
       # history -n;
       # history -w;
       # history -c;
       # history -r;
 
-      export PROMPT_COMMAND='
-      history -a;
-      history -c;
-      history -r;
-      history -w;
+      PROMPT_COMMAND='
       __git_ps1 \
       "\n$(colorize bold green "$USER" bold yellow "@$HOSTNAME" none ":" bold blue "\w")" \
       "\n\D{%F %T %Z}\n\[\033[01;34m\]\!\[\033[00m\]\$ "
       '
+      read -r -d '' PROMPT_COMMAND <<-EOF
+		   history -n; # Read the history lines not already read from the history file into the current history list. These are lines appended to the history file since the beginning of the current bash session.
+		   history -w; # Write the current history list to the history file, overwriting the history file's contents.
+		   history -c; # Clear the history list by deleting all the entries.
+		   history -r; # Read the contents of the history file and append them to the current history list.
+		   $PROMPT_COMMAND
+		EOF
+      # originally:
+      # history -a; # Append the 'new' history lines to the history file. These are history lines entered since the beginning of the current bash session, but not already appended to the history file.
+      # history -c; # Clear the history list by deleting all the entries.
+      # history -r; # Read the contents of the history file and append them to the current history list.
+      # history -w; # Write the current history list to the history file, overwriting the history file's contents.
       # something about this causes odd cursor placement when reviewing
       #bash history, so we have to use the old-fashioned color escapes
       #"\n$(colorize bold blue "\!" none "\$") "

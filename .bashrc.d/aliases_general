@@ -93,10 +93,12 @@ alias grep-config='grep -Ev "^(\s*|#.*|\s*#.*)$"'
 
 # easier editing of ~/.bash_history when it's chattr'ed to prevent anything but appending
 #actually, this may not work if there are changes to the live file when editing the temp copy :(
+# shopt -s histappend replaces the chattr modifications
+# "history -a; ... history -c; history -r should append to the history file the current shell's commands that haven't already been written to it, then once done editing, replace the current in-memory history list with what's in the file
 # add something like these lines to a file in /etc/sudoers.d/ if you want to avoid having to sudo every time (use a username instead of '%sudo' to enable just one user to do this, and replace $HOME with the hard-coded version since sudo doesn't support $HOME)
 # %sudo   ALL=(ALL:ALL)NOPASSWD: /usr/bin/chattr -a $HOME/.bash_history
 # %sudo   ALL=(ALL:ALL)NOPASSWD: /usr/bin/chattr +a $HOME/.bash_history
-alias edit-history='sudo chattr -a ~/.bash_history && vim ~/.bash_history && sudo chattr +a ~/.bash_history'
+alias edit-history='history -a; vim -c "+normal G" ~/.bash_history; history -c; history -r'
 alias eh='edit-history'
 
 # Add an "alert" alias for long running commands.  Use like so:

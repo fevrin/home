@@ -173,7 +173,7 @@
      git check-whitespace \
   '"
   dff = "!bash -c '\
-     git diff --word-diff-regex=\"(\\[[^]]+\\]|\\([^)]+\\)|\\w)+\" $([[ '\\'$1\\'' ]] && echo \"$GIT_PREFIX/'$1'\") && \
+     git diff --word-diff-regex=\"(\\[[^]]+\\]|\\([^)]+\\)|\\w)+\" $(if [[ '\\'$1\\'' && -e \"$GIT_PREFIX/'$1'\" && ! \"$GIT_PREFIX/'$1'\" =~ ^/$ ]]; then echo \"$GIT_PREFIX/'$1'\"; else echo \"'$1'\"; fi) && \
      git check-whitespace \
   '"
         # formerly used this, but it may not show changes in other directories: `git diff --staged --word-diff-regex=\".\" $(echo \"$GIT_PREFIX\")'$1' && \`
@@ -271,6 +271,7 @@
         git remote -v set-head \"$(git get-main-remote)\" -a; \
      fi; \
   '"
+  # name-rev returned unresolved names in some cases for unknown reasons   if [[ $(git name-rev --name-only $(git ls-remote ${main_remote} HEAD | cut -f1)) =~ ^$(git for-each-ref --format=\"%(symref:lstrip=3)\" refs/remotes/${main_remote}/HEAD)$ ]]; then \
   get-main-remote = config --default --get remote.pushdefault
 #  get-upstream-branch = "!bash -c 'git config --get branch.$(git current-branch).merge'"
   get-upstream-branch = "!bash -c 'git br --format=\"%(if:equals=$(git current-branch))%(refname:short)%(then)%(upstream:lstrip=2)%(end)\" | tr -d \"\n\"; echo'"

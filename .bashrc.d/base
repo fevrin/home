@@ -33,6 +33,7 @@ if [[ -z "$SSH_CLIENT" && -n "$DISPLAY" ]]; then
    [[ -x /usr/bin/xmodmap ]] && /usr/bin/xmodmap -e 'remove mod1 = Alt_R'
 
    #process the Apple keyboard mod if using an Apple keyboard
+   # this adds a noticeable lag time when sourcing in a new terminal
    . $HOME/.apple_keyboard_mod.rc force
 fi
 

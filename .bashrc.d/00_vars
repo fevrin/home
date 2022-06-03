@@ -37,8 +37,10 @@ export LESS="-QFRX --no-histdups -i" # '-+i' resets search case sensitivity to i
 export PAGER="less"
 
 # set default pager for manpages
+#export MANPAGER="less"
+
 # set default pager for systemctl and have it chop lines so the display is cleaner
-export SYSTEMD_LESS="$LESS -S"
+export SYSTEMD_LESS="$LESS"
 
 # a further enhancement will be when you can conditionally use line numbers based on file size:
 # https://github.com/gwsw/less/issues/230

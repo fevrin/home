@@ -1,6 +1,10 @@
 #!/bin/bash
 
 get_creds() {
+   # TODO:
+   # * refresh tokens periodically
+   # * shell autocomplete keys/templates
+
    # this function retrieves creds in a standardized format either retrieved from LastPass (as done initially)
    # or from a local file saved from a previous run of this function
 
@@ -283,6 +287,8 @@ get_creds() {
          entry_array[$i]="$(echo "$contents" | grep -ioP "^$pattern\K.*" | sed -e "s;[\"'];;g" | head -n1)"
 
          # attempt to retrieve the values from LastPass if the local cache is incomplete
+         # FIXME: find missing templates with this and automatically create those templates:
+         # for file in ~/digitalocean/.creds/keys/*; do orig_file="$file"; file="${file/keys/templates}"; [[ -f "$file" ]] || { echo "$file template missing"; sed -rne 's;^([^=]+\=["'\''])[^"'\'']+(["'\''])$;\1\2;p' "$orig_file"; echo; }; done
          if [[ $is_from_file -eq 1 && -z "${entry_array[$i]}" ]]; then
             # one of the cached entries is empty, and we cannot trust the
             # overall accuracy of the local cache, so re-run this after

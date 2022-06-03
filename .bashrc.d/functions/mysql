@@ -255,7 +255,7 @@ mysql() {
          [[ $REPLY =~ ^YES$ ]] || { echo "cancelling request"; return 1; }
       fi
 
-      verbose 8 mysql $flags -h "${db_creds[hostname]}" -u "${db_creds[username]}" -p"${db_creds[password]}" "${db_creds[database]}" -e "$query"
+      verbose 2 mysql $flags -h "${db_creds[hostname]}" -u "${db_creds[username]}" -p"${db_creds[password]}" "${db_creds[database]}" -e "${query@Q}"
       command mysql $flags -h "${db_creds[hostname]}" -u "${db_creds[username]}" -p"${db_creds[password]}" "${db_creds[database]}" -e "$query" 2>&1 | sed -e 's;.*Warning.*;;'
 
       # this ensures we get the exit code of the MySQL command, rather than the sed one
