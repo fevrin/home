@@ -138,6 +138,9 @@ set formatoptions=croqlt " fo; ensures any text width that's set will take effec
 "set foldmethod=indent " fdm; sets folding type
 
 " 18 mapping
+set ttimeout        " allow timing out halfway into a key code
+set timeoutlen=3000 " time in msec for 'timeout'; The time in milliseconds that is waited for a mapped key sequence to complete.
+set ttimeoutlen=100 " time in msec for 'ttimeout'; The time in milliseconds that is waited for a key code sequence to complete.
 let g:mapleader="," " changes the initial character that triggers execution of a map that uses <Leader>
 
 " 19 reading and writing files
@@ -322,10 +325,10 @@ endif
 call plug#begin(s:vim_home_dir . '/plugged')
    Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries', 'frozen': 'true' }
 "   Plug 'https://github.com/ElmCast/elm-vim'
-   Plug 'https://github.com/fevrin/AnsiEsc.vim', { 'branch': 'main', 'frozen': 'true' }
+   Plug 'https://github.com/fevrin/AnsiEsc.vim', { 'branch': 'main', 'frozen': 'true' } " converts ANSI escape codes to colors
    Plug 'pearofducks/ansible-vim', { 'branch': 'master', 'frozen': 'true' }
    Plug 'tpope/vim-eunuch'
-   Plug 'ekalinin/Dockerfile.vim'
+   Plug 'ekalinin/Dockerfile.vim'         " adds syntax highlighting for Dockerfiles
 "   Plug 'arp242/undofile_warn.vim'
 "   Plug 'airblade/vim-gitgutter'
 "   Plug 'vim-airline/vim-airline'
@@ -346,7 +349,7 @@ call plug#begin(s:vim_home_dir . '/plugged')
 "   Plug 'scrooloose/nerdcommenter'
 "   Plug 'sheerun/vim-polyglot'
 "   Plug 'yggdroot/indentline'
-"   Plug 'tpope/vim-surround'
+"   Plug 'tpope/vim-surround' " adds commands for surrounding arbitrary text with quotes, parentheses, etc.
 "   Plug 'kana/vim-textobj-user'
 "     \| Plug 'glts/vim-textobj-comment'
 "   Plug 'janko/vim-test'
@@ -355,7 +358,11 @@ call plug#begin(s:vim_home_dir . '/plugged')
 "   Plug 'rickhowe/spotdiff.vim'
 "   Plug 'inkarkat/vim-AdvancedDiffOptions'
 "   Plug 'AndrewRadev/linediff.vim'
+"   Plug 'mbbill/undotree'                   " lets you visualize a file's undo history
+"   Plug 'sjl/gundo.vim'                     " lets you visualize a file's undo history
+"   Plug 'powerline/powerline'               " power statusline
 call plug#end()
+
 let g:go_fmt_command = "goimports"
 let g:elm_format_autosave = 0
 
