@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # default keycode values
-ctrl_l=37
+#ctrl_l=37
 ctrl_r=105
-alt_l=64
+#alt_l=64
 alt_r=108
 super_l=133
-cmd_l=$super_l
+#cmd_l=$super_l
 cmd_r=134
 
 reset_keyboard() {
@@ -45,8 +45,8 @@ else
     keycode $alt_r = Control_R NoSymbol Control_R
     keycode $ctrl_r = Alt_R Meta_R"
 
-   { egrep -q "replace key <RALT>.*Control_R, Control_R" /usr/share/X11/xkb/symbols/ctrl &&
-      egrep -q "replace key <RCTL>.*Alt_R, Meta_R" /usr/share/X11/xkb/symbols/ctrl; } || {
+   { grep -E -q "replace key <RALT>.*Control_R, Control_R" /usr/share/X11/xkb/symbols/ctrl &&
+      grep -E -q "replace key <RCTL>.*Alt_R, Meta_R" /usr/share/X11/xkb/symbols/ctrl; } || {
 
       # restart sudo timeout timer
       sudo -v
@@ -96,12 +96,12 @@ else
 		EOF
    }
 
-   egrep -q "ctrl:swap_ralt_rctl	=	\+ctrl\(swap_ralt_rctl)" /usr/share/X11/xkb/rules/evdev || {
+   grep -E -q "ctrl:swap_ralt_rctl	=	\+ctrl\(swap_ralt_rctl)" /usr/share/X11/xkb/rules/evdev || {
       echo "adding config to '/usr/share/X11/xkb/rules/evdev'..."
       sudo sed -i.bak -re 's;! option	=	symbols$;&\n  ctrl:swap_ralt_rctl	=	+ctrl(swap_ralt_rctl);' /usr/share/X11/xkb/rules/evdev
    }
 
-   egrep -q "ctrl:swap_ralt_rctl  Swap right Alt and right Ctrl" /usr/share/X11/xkb/rules/evdev.lst || {
+   grep -E -q "ctrl:swap_ralt_rctl  Swap right Alt and right Ctrl" /usr/share/X11/xkb/rules/evdev.lst || {
       echo "adding config to '/usr/share/X11/xkb/rules/evdev.lst'..."
       sudo sed -i.bak -re 's;! option$;&\n  ctrl:swap_ralt_rctl  Swap right Alt and right Ctrl;' /usr/share/X11/xkb/rules/evdev.lst
    }

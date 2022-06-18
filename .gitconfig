@@ -370,7 +370,7 @@
 [branch "main"]
   pushremote = no_push
 #[user]
-#	email = 
-#	name = 
+#	email =
+#	name =
 #[url "git@website.com:"]
 #	insteadOf = https://website.com/

@@ -7,5 +7,5 @@ systemctl() {
    shift
 
    [[ "${subcommand}" =~ ^status$ ]] || PAGER_OPTS+=" -S"
-   SYSTEMD_LESS="${PAGER_OPTS}" command systemctl ${subcommand} "$@"
+   SYSTEMD_LESS="${PAGER_OPTS}" command systemctl "${subcommand}" "$@"
 }

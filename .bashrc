@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # ~/.bashrc: executed by bash(1) for non-login shells.
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
@@ -109,7 +111,7 @@ for completion_file in \
          [[ -f "${completion_link}" || -h "${completion_link}" ]] ||
             egrep -q "(\.|source) ${completion_file}" /etc/bash_completion.d/* || {
             # otherwise, symlink to it
-            echo -n "symlink "${completion_file}" "${completion_link}"? [Y/n] "; read
+            echo -n "symlink ${completion_file} ${completion_link}? [Y/n] "; read
             [[ $REPLY =~ ^n$ ]] ||
             sudo ln -s "${completion_file}" "${completion_link}" ||
             # or source it directly if that doesn't work
@@ -172,7 +174,7 @@ unset files_to_source file
 ###############################
 
 dirs_for_path+=(
-   $HOME/bin
+   "${HOME}"/bin
 )
 
 # add a GOPATH value if go's installed

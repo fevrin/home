@@ -73,7 +73,7 @@ colorize() {
 #         cyan) color="$(($color + 36))";;
 #         white) color="$(($color + 37))";;
 #
-#         *) 
+#         *)
 #            text="$word"
 #            output="\e[${style};${color}m${text}${color_off}"
 #

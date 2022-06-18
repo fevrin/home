@@ -1,0 +1,48 @@
+exclude: ^ansible/collections/
+# default_language_version:
+#   python: python3.8
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.3.0
+    hooks:
+       # to check the files types these support:
+       # https://github.com/pre-commit/pre-commit-hooks/blob/main/.pre-commit-hooks.yaml
+
+        # Python file tests
+#      - id: double-quote-string-fixer # only Python files
+
+       # text file tests
+      - id: check-json
+      - id: check-executables-have-shebangs
+      - id: check-merge-conflict
+      - id: check-yaml
+        args: [--unsafe]  # Instead of loading the files, simply parse them for syntax.
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: pretty-format-json
+        args:
+           - --indent=3
+      - id: trailing-whitespace
+        args:
+           - --markdown-linebreak-ext=md,tpl
+  - repo: https://github.com/koalaman/shellcheck-precommit
+    rev: v0.8.0
+    hooks:
+      - id: shellcheck
+        exclude_types:
+           - zsh
+        args:
+           # more args in .shellcheckrc
+           - --severity=warning
+           - --color=always
+#  - repo: https://github.com/psf/black # this is for python code
+#    rev: 22.3.0
+#    hooks:
+#      - id: black
+#  - repo: https://github.com/streetsidesoftware/cspell-cli
+#    rev: v6.0.0
+#    hooks:
+#      - id: cspell
+#        # entry: codespell --relative
+#        args: [--relative, --no-progress, --no-summary]
+#        name: Spell check with cspell

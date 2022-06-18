@@ -5,7 +5,7 @@ get-logs-for() {
 
    if [[ -n "$service" ]]; then
       if which gawk &>/dev/null; then
-         sudo journalctl -xf -t "$service" | tee >(awk 'm=gensub(/^.*\{.*timestamp":([0-9]+)[^0-9].*$/,"\\1","g",$0) { if (m != $0) print gensub(/^.*(\{.*timestamp":)([0-9]+)([^[0-9].*)$/,sprintf("%s\"%s\"%s","\\1",strftime("%Y-%m-%d %H:%M:%S",m),"\\3"),"g") }' | jq --unbuffered .) >(egrep -v '^$') >/dev/null 
+         sudo journalctl -xf -t "$service" | tee >(awk 'm=gensub(/^.*\{.*timestamp":([0-9]+)[^0-9].*$/,"\\1","g",$0) { if (m != $0) print gensub(/^.*(\{.*timestamp":)([0-9]+)([^[0-9].*)$/,sprintf("%s\"%s\"%s","\\1",strftime("%Y-%m-%d %H:%M:%S",m),"\\3"),"g") }' | jq --unbuffered .) >(egrep -v '^$') >/dev/null
       else
          sudo journalctl -xf -t "$service" | tee >(sed -urne 's;^.*(\{.*)$;\1;p' | jq --unbuffered '.timestamp |= strftime("%Y-%m-%d %H:%M:%S %Z")') >(egrep -v '^$') >/dev/null
       fi

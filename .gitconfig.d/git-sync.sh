@@ -12,7 +12,8 @@
 # you can get the custom color for a given item, if any, using something like:
 # `git config --get-color color.advice`
 
-export SSH_AUTH_SOCK=/run/user/$(id -u)/keyring/ssh
+SSH_AUTH_SOCK=/run/user/$(id -u)/keyring/ssh
+export SSH_AUTH_SOCK
 
 # we have to source these since this is a script and not an environmental function
 . $HOME/.bashrc.d/functions/verbose
@@ -45,8 +46,9 @@ log() {
    local IFS=$'\n'
    for message in $messages; do
    [[ "$INTERACTIVE" -eq 1 ]] && echo -e "$message" 2>&1
-   date "+%F %H:%M:%S %Z: ($$) $(basename "$REPO_ROOT"): $(echo -e "$message" 2>&1)" >> $HOME/$(basename "$REPO_ROOT")-git-pull-timestamps
+   date "+%F %H:%M:%S %Z: ($$) $(basename "$REPO_ROOT"): $(echo -e "$message" 2>&1)" >> "$HOME/$(basename "$REPO_ROOT")-git-pull-timestamps"
 done
+}
 
 branch_is_current() {
    # inspired by <https://stackoverflow.com/questions/3258243/check-if-pull-needed-in-git/3278427#3278427>
@@ -74,13 +76,13 @@ branch_is_current() {
    done
 
    _print_var_vals LOCAL LOCAL_HASH REMOTE REMOTE_HASH BASE_HASH
-   if [[ $LOCAL_HASH = $REMOTE_HASH ]]; then
+   if [[ $LOCAL_HASH = "$REMOTE_HASH" ]]; then
        log "'$LOCAL' and '$REMOTE' are: Up-to-date"
        return 0
-   elif [[ $LOCAL_HASH = $BASE_HASH ]]; then
+   elif [[ $LOCAL_HASH = "$BASE_HASH" ]]; then
        log "Need to pull from '$REMOTE'"
        return 1
-   elif [[ $REMOTE_HASH = $BASE_HASH ]]; then
+   elif [[ $REMOTE_HASH = "$BASE_HASH" ]]; then
        log "Need to push to '$REMOTE'"
        return 2
    else
@@ -111,9 +113,9 @@ local_changes_exist() {
 GITBIN="/usr/bin/git"
 
 for DIR in ${DIRS[*]}; do
-   cd "$DIR"
+   cd "$DIR" || exit 1
    REPO_ROOT="$($GITBIN rev-parse --show-toplevel)"
-   cd "$REPO_ROOT"
+   cd "$REPO_ROOT" || exit 1
 
    # check if the directory is a git repo
    $GITBIN rev-parse --is-inside-work-tree &>/dev/null || {
@@ -132,7 +134,7 @@ for DIR in ${DIRS[*]}; do
    MAIN_BRANCH="$($GITBIN get-main-branch)"
    MAIN_REMOTE="$($GITBIN get-main-remote)"
 #   git rev-parse --verify --quiet $MAIN_BRANCH || MAIN_BRANCH="main"
-   ORIGINAL_MAIN_BRANCH_REF="$($GITBIN rev-parse $MAIN_BRANCH)"
+#   ORIGINAL_MAIN_BRANCH_REF="$($GITBIN rev-parse $MAIN_BRANCH)"
 
    # fetch any upstream first
    UPSTREAM="upstream"
@@ -289,9 +291,9 @@ for DIR in ${DIRS[*]}; do
 #               verbose 8 $GITBIN stash pop --index stash@{/"$STASH_NAME"}
                log "$GITBIN stash pop --index stash@{/\"$STASH_NAME\"}"
                if [[ "$INTERACTIVE" -eq 1 ]]; then
-                  $GITBIN stash pop --index stash@{/"$STASH_NAME"}
+                  $GITBIN stash pop --index "stash@{/$STASH_NAME}"
                else
-                  pop_result="$($GITBIN stash pop --index stash@{/"$STASH_NAME"})"
+                  pop_result="$($GITBIN stash pop --index "stash@{/$STASH_NAME}")"
                fi
                POP_EXIT_CODE="$?"
                log "$pop_result"
