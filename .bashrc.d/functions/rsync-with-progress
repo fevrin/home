@@ -1,7 +1,7 @@
 #!/bin/bash
 
 rsync-with-progress() {
-   # this is just a wrapper that ensures the rsync output shows overall progress instead of per-file
+   # this is just a wrapper that ensures the rsync output shows overall progress instead of just per-file
 
    _verify_reqs <<-EOF || return 1
    base64
@@ -12,7 +12,7 @@ rsync-with-progress() {
 
    local SRC
    local DST
-   local NO_USE_LINK_DEST=0
+   local USE_LINK_DEST=1
    local rsync_only=0
    local DRY_RUN=0
    local LINK_DEST
@@ -91,7 +91,28 @@ rsync-with-progress() {
    for arg in "$@"; do
       case "$arg" in
          --no-*)
-               RSYNC_FLAGS_NEGATIONS+=("$arg")
+               if ([[ "${arg##--no}" =~ ^-([A-Za-z])$ ]]); then
+                  arg="${arg##--no}"
+#                  echo "${arg}"
+#                  echo "${#arg}"
+                  local flag
+                  # convert short options to their long variants here before adding them
+                  flag="${ALL_RSYNC_FLAGS[${arg}]}"
+#                  echo "flag = '$flag'" #&& echo "'${flag// /}' != '$flag'" && continue
+
+                  [[ "${flag// /}" != "$flag" ]] && {
+                     # the flag stands for multiple other flags, like -P = "--partial --progress", so we should add each individually
+                     for x in $flag; do
+                        RSYNC_FLAGS+=("--no-${x##--}")
+                     done
+                     continue
+                  }
+
+                  [[ -z "$flag" ]] && echo "unknown flag: '$flag'" && continue
+                  RSYNC_FLAGS_NEGATIONS+=("--no-${flag##--}")
+               else
+                  RSYNC_FLAGS_NEGATIONS+=("$arg")
+               fi
                continue
             ;;
          -[A-Za-z]*)
@@ -108,7 +129,7 @@ rsync-with-progress() {
 #                  echo "flag = '$flag'" && echo "'${flag// /}' != '$flag'" && continue
 
                   [[ "${flag// /}" != "$flag" ]] && {
-                     # the flag stands for multiple other flags, so we should see each individually
+                     # the flag stands for multiple other flags, like -P = "--partial --progress", so we should add each individually
                      for x in $flag; do
                         RSYNC_FLAGS+=("$x")
                      done
@@ -127,11 +148,12 @@ rsync-with-progress() {
                SRC="$arg"
             elif [[ -z "$DST" ]]; then
                DST="${arg%/}"
-               [[ -d "${DST%/*}" ]] || {
-                  echo "this directory doesn't exist; create this path? [Y/n] "
-                  echo "${DST%/*}"
-                  read
-                  ([[ $REPLY =~ ^n$ ]]) || mkdir -p "${DST%/*}"
+               [[ -d "${DST}" ]] || {
+                  echo
+                  echo "${DST}"
+                  echo
+                  echo -n "the above directory doesn't exist; create this path? [Y/n] "; read
+                  ([[ $REPLY =~ ^n$ ]]) || mkdir -p "${DST}"
                }
                LINK_DEST="${DST/drive_backups\/google\/drive\/}"
             fi
@@ -150,15 +172,19 @@ rsync-with-progress() {
    for i in "${RSYNC_FLAGS[@]}"; do
       ([[ "$i" =~ ^(-n|--dry-run)$ ]]) && DRY_RUN=1
    done
-   [[ $NO_USE_LINK_DEST -eq 1 && "$LINK_DEST" != "$DST" ]] && RSYNC_FLAGS+=(--link-dest="$LINK_DEST")
+   [[ $USE_LINK_DEST -eq 1 && "$LINK_DEST" != "$DST" ]] && RSYNC_FLAGS+=(--link-dest="$LINK_DEST")
    _clean_up_rsync_flags() {
       declare -a temparray
       # remove any options that the user overrode with the "--no-*" variant
+      local x
+      local y
+      local NEGATE_OPTION
+      NEGATE_OPTION=0
       for x in "${RSYNC_FLAGS[@]}"; do
          for y in "${RSYNC_FLAGS_NEGATIONS[@]}"; do
-            [[ "$x" =~ ^--${y/#--no-} ]] && break
+            [[ "${x/=*/}" =~ ^--${y/#--no-}$ ]] && NEGATE_OPTION=1 && break
          done
-         [[ "$x" =~ ^--${y/#--no-} ]] && continue
+         [[ "$NEGATE_OPTION" -eq 1 ]] && NEGATE_OPTION=0 && continue
          temparray+=("$x")
       done
       RSYNC_FLAGS=("${temparray[@]}")
@@ -171,14 +197,13 @@ rsync-with-progress() {
          --progress
          --info=progress2
       )
-      for i in  rsync "${RSYNC_FLAGS[@]}" "$SRC" "$DST"; do
-         echo "$i"
-      done
+#      for i in  rsync "${RSYNC_FLAGS[@]}" "$SRC" "$DST"; do
+#         echo "$i"
+#      done
       _clean_up_rsync_flags
       for i in  rsync "${RSYNC_FLAGS[@]}" "$SRC" "$DST"; do
          echo "$i"
       done
-      return
       echo
       if [[ $DRY_RUN -ne 1 ]]; then
          echo -n "proceed (y) or dry run (d) first? [y/d/N] "; read
@@ -197,10 +222,13 @@ rsync-with-progress() {
       fi
 
       echo
-      rsync "${RSYNC_FLAGS[@]}" "$SRC" "$DST"
+      echo rsync "${RSYNC_FLAGS[@]}" "$SRC" "$DST"
+      echo
+      time rsync "${RSYNC_FLAGS[@]}" "$SRC" "$DST"
    }
 
    _pv_method() {
+      verbose 8 "$FUNCNAME"
       for i in  rsync "${RSYNC_FLAGS[@]}" "$SRC" "$DST" \| pv --eta --line-mode --progress --size "$file_count"; do
          echo "$i"
       done
@@ -222,7 +250,9 @@ rsync-with-progress() {
       fi
 
       echo
-      rsync "${RSYNC_FLAGS[@]}" "$SRC" "$DST" | pv --eta --line-mode --progress --size "$file_count"
+      echo rsync "${RSYNC_FLAGS[@]}" "$SRC" "$DST" | pv --eta --line-mode --progress --size "$file_count"
+      echo
+      time rsync "${RSYNC_FLAGS[@]}" "$SRC" "$DST" | pv --eta --line-mode --progress --size "$file_count"
    }
 
 #   echo -n "do you want to skip updating times? [Y/n] "; read
