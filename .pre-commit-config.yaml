@@ -40,10 +40,16 @@ repos:
     hooks:
       # Choose one of:
       - id: shfmt         # native (requires Go to build)
-        #        args:
-        #          # more args in .editorconfig
-        #          - --list # List files whose formatting differs from shfmt's
-        #          - --diff # Error with a diff when the formatting differs
+        args:
+          # more args in .editorconfig (though it seems shftm doesn't actually honor those...)
+          - --indent=3         # 0 for tabs (default), >0 for number of spaces
+          - --binary-next-line # binary ops like && and | may start a line
+          - --case-indent      # switch cases will be indented
+          - --keep-padding     # keep column alignment paddings
+          - --list             # list files whose formatting differs from shfmt's
+            #          - --simplify         # simplify the code
+            #          - --minify           # minify the code to reduce its size (implies -s)
+            #          - --diff             # error with a diff when the formatting differs
         #    - id: shfmt-docker  # Docker image (requires Docker to run)
 #  - repo: https://github.com/psf/black # this is for python code
 #    rev: 22.3.0
