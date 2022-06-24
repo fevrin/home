@@ -2,6 +2,7 @@ name: pre-commit
 
 # Controls when the workflow will run
 on:
+  push:
   pull_request:
     paths:
        - '.github/workflows/pre-commit.yml'

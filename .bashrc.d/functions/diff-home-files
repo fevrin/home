@@ -118,9 +118,9 @@ diff-home-files() {
 
       # and it isn't .toprc, and it's not a vim swap file
       [[ ! "$i" =~ \.toprc &&
-      ! $(file $i) =~ "Vim swap file" &&
-      ! "$i" =~ \.md &&
-      ! "$i" =~ \.vim\/ ]] || continue
+      ! $(file $i) =~ "Vim swap file" ]] || continue
+#      ! "$i" =~ \.md &&
+#      ! "$i" =~ \.vim\/ ]]
 
       if [[ $(md5sum "${file1}" 2>/dev/null | cut -d" " -f1) != $(md5sum "${file2}" 2>/dev/null | cut -d" " -f1) ]]; then
          echo $ACTION "$ACTION_OPTIONS" $file1 $file2
