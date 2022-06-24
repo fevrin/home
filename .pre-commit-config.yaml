@@ -35,6 +35,16 @@ repos:
            # more args in .shellcheckrc
            - --severity=warning
            - --color=always
+  - repo: https://github.com/scop/pre-commit-shfmt
+    rev: v3.5.1-1
+    hooks:
+      # Choose one of:
+      - id: shfmt         # native (requires Go to build)
+        #        args:
+        #          # more args in .editorconfig
+        #          - --list # List files whose formatting differs from shfmt's
+        #          - --diff # Error with a diff when the formatting differs
+        #    - id: shfmt-docker  # Docker image (requires Docker to run)
 #  - repo: https://github.com/psf/black # this is for python code
 #    rev: 22.3.0
 #    hooks:

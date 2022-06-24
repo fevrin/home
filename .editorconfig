@@ -1,0 +1,22 @@
+[{*.sh,.bashrc**}]
+# like --indent=3
+indent_style = space
+indent_size = 3
+
+# Generic options
+# list = true # List files whose formatting differs from shfmt's
+# diff = true # Error with a diff when the formatting differs
+
+# Parser options
+#shell_variant      = posix # --language-variant # Language dialect (bash/posix/mksh/bats, default auto)
+
+# Printer options
+binary_next_line    = true  # Binary ops like && and | may start a line
+switch_case_indent  = true  # --switch-case-indent # Switch cases will be indented
+#space_redirects    = true  # Redirect operators will be followed by a space
+keep_padding        = true  # Keep column alignment paddings
+#function_next_line = true  # --func-next-line # Function opening braces are placed on a separate line
+
+## Ignore the entire "third_party" directory.
+#[third_party/**]
+#ignore = true

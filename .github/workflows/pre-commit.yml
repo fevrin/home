@@ -12,16 +12,13 @@ on:
   workflow_dispatch:
 
 jobs:
-
   pre-commit:
     runs-on: ubuntu-latest
     steps:
-
       - name: Check out repository code
         uses: actions/checkout@v3
         with:
           fetch-depth: 1
-
       - name: Lint the repository with pre-commit
         run: |
           python3 -V
