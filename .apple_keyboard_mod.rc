@@ -5,7 +5,7 @@
 ctrl_r=105
 #alt_l=64
 alt_r=108
-super_l=133
+#super_l=133
 #cmd_l=$super_l
 cmd_r=134
 

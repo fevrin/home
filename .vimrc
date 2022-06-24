@@ -89,8 +89,10 @@ set visualbell t_vb= "vb; sets the visual bell to nothing, so no audible or visi
 " 14 editing text
 "
 set omnifunc=syntaxcomplete#Complete "ofu; function for filetype-specific Insert mode completion; from
-"<http://vim.wikia.com/wiki/Omni_completion>,
-"<http://arstechnica.com/open-source/guides/2009/05/vim-made-easy-how-to-get-your-favorite-ide-features-in-vim.ars>
+" <http://vim.wikia.com/wiki/Omni_completion>
+" <http://arstechnica.com/open-source/guides/2009/05/vim-made-easy-how-to-get-your-favorite-ide-features-in-vim.ars>
+" https://vim.fandom.com/wiki/Smart_mapping_for_tab_completion
+imap <Leader><Tab> <C-X><C-O>
 
 "set digraph "dg; enables entering digraphs with c1 <BS> c2 instead of just Ctrl-K c1c2
 set matchpairs=(:),{:},[:],<:>,':',":" " mps; list of pairs that match for the "%" command
@@ -118,7 +120,7 @@ set copyindent " ci; new line indents use same characters (spaces, tabs, etc.) a
 "set textwidth=125 " tw; maximum formatted width before text starts wrapping around to the next line; 125, as that's the
 "maximum monospace width in GHE's editing window before a horizontal scroll bar appears
 
-set formatoptions=croqlt " fo; ensures any text width that's set will take effect
+set formatoptions=croqltj " fo; ensures any text width that's set will take effect
                          " c.......Auto-wrap comments using textwidth, inserting the current comment
                          "         leader automatically.
                          " r.......Automatically insert the current comment leader after hitting
@@ -133,6 +135,7 @@ set formatoptions=croqlt " fo; ensures any text width that's set will take effec
                          "         'textwidth' when the insert command started, Vim does not
                          "         automatically format it.
                          " t.......Auto-wrap text using textwidth
+                         " j  .....Where it makes sense, remove a comment leader when joining lines.
 
 " 16 folding
 "set foldmethod=indent " fdm; sets folding type
@@ -267,6 +270,11 @@ vmap "" c"<esc>pa"<esc> " wraps visual selection in double quotes
 " creates an XHTML image tag; help from <http://linuxgazette.net/148/misc/tag/vimrc>
 imap img<tab> <img src="" alt="" /><esc>10hi
 
+" open and close folds with <Space>
+" https://vim.fandom.com/wiki/Folding#Mappings_to_toggle_folds
+nnoremap <silent> <Space> @=(foldlevel('.')?'za':"\<Space>")<CR>
+vnoremap <Space> zf
+
 "https://stackoverflow.com/questions/597687/how-to-quickly-change-variable-names-in-vim/597932#597932
 
 "map <CR> o<Esc> " inserts a newline below current line from within normal mode; from
@@ -336,7 +344,8 @@ call plug#begin(s:vim_home_dir . '/plugged')
 "   Plug 'editorconfig/editorconfig-vim' " https://github.com/editorconfig/editorconfig/wiki/EditorConfig-Properties
 "   Plug 'tpope/vim-sensible'
 "   Plug 'tpope/vim-sleuth'
-"   Plug 'tpope/vim-unimpaired'
+   Plug 'tpope/vim-unimpaired'         " lets you quickly jump to and resolve conflicts diff'ed files, among other things
+   Plug 'vito/booklit.vim'             " syntax highlighting for Booklit files
 "   Plug 'preservim/nerdtree'
 "   Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 "   Plug 'junegunn/fzf.vim'
@@ -361,6 +370,9 @@ call plug#begin(s:vim_home_dir . '/plugged')
 "   Plug 'mbbill/undotree'                   " lets you visualize a file's undo history
 "   Plug 'sjl/gundo.vim'                     " lets you visualize a file's undo history
 "   Plug 'powerline/powerline'               " power statusline
+"   Plug 'rhysd/conflict-marker.vim'         " lets you quickly jump to and resolve conflicts diff'ed files and colors conflict areas
+"   Plug 'inkarkat/vim-ConflictMotions'      " older conflict marker jumper
+"   Plug 'ervandew/supertab'                 " smart tab completion (old)
 call plug#end()
 
 let g:go_fmt_command = "goimports"
@@ -383,8 +395,22 @@ endif
 " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 " use this to profile the performance when scrolling down a large file:
-" let g:profstart=reltime() | for i in range(1,50) | exec "normal \<C-E>" | redraw | endfor | echo reltimestr(reltime(g:profstart)) . ' seconds'
-" let g:profstart=reltime() | for i in range(1,50) | exec "normal j" | redraw | endfor | echo reltimestr(reltime(g:profstart)) . ' seconds'
+" :let g:profstart=reltime() | for i in range(1,50) | exec "normal \<C-E>" | redraw | endfor | echo reltimestr(reltime(g:profstart)) . ' seconds'
+" :let g:profstart=reltime() | for i in range(1,50) | exec "normal j" | redraw | endfor | echo reltimestr(reltime(g:profstart)) . ' seconds'
+
+" display current environment
+" :let
+" https://vim.fandom.com/wiki/Displaying_the_current_Vim_environment
+
+" determine what's causing slow startup times
+" $ vim --startuptime /dev/stdout -c q
+
+" determine in which order files are sourced
+" :verbose set runtimepath?
+
+" determine which cinoption is used for each line
+" https://gist.github.com/filbranden/5b92a445a09db86ba9681270fabcfe62
+" https://vi.stackexchange.com/questions/5853/is-it-possible-to-get-the-rule-cinoptions-that-govern-the-indentation-for-a-sp/25338#25338
 
 " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 " MISCELLANEOUS
@@ -393,18 +419,52 @@ endif
 " scripts:
 " <http://www.linux.com/articles/62139>
 
+" possible way to maintain window size of command output
+" https://vi.stackexchange.com/questions/31862/redirect-output-to-a-persistent-window-that-respect-window-layout
+
 " use ":verbose set xyz" to find out which file's settings are overriding ~/.vimrc
 " helpful article at <http://peox.net/articles/vimconfig.html>
+
+" suggestions for vim session usage
+" https://vim.fandom.com/wiki/Go_away_and_come_back
 
 " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 " HANDY KEYSTROKES
 " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-" K   " in normal mode, this displays the man page for the word under the cursor (programs other than `man` can be set in `keywordprg`)
-" viw   " useful for selecting up until the next word, such as spaces; v_iw iw; "inner word", select [count] words (see |word|). White space between words is counted too. When used in Visual linewise mode "iw" switches to Visual characterwise mode.
+" in normal mode, this displays the man page for the word under the cursor (programs other than `man` can be set in
+" `keywordprg`)
+" K
+
+" useful for selecting up until the next word, such as spaces; v_iw iw; "inner word", select [count] words (see |word|).
+" White space between words is counted too. When used in Visual linewise mode "iw" switches to Visual characterwise mode.
+" viw
 
 " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 " HANDY COMMANDS
 " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-" :retab   " undoes expandtab; basically, converts spaces of the specified tabstop count (or expandtab, if not specified in the :retab command) back to tabs
-" :exe "r !MANWIDTH=" . (winwidth(0) - 5) " command man bash" " you can use something like this to execute a combination of vim and shell commands; in this case, it reads a man page into the current buffer using the buffer's current width (important when buffers are split up)
+" undoes expandtab; basically, converts spaces of the specified tabstop count (or expandtab, if not specified in the :retab
+" command) back to tabs
+" :retab
+
+" you can use something like this to execute a combination of vim and shell commands; in this case, it reads a man page into
+" the current buffer using the buffer's current width (important when buffers are split up)
+" :exe "r !MANWIDTH=" . (winwidth(0) - 5) " command man bash"
+
+" issues a command to window viewports 1 and 2
+" :1,2windo :w
+
+" this prints the shell-filtered output of ':nmap'
+" :echo(system("echo " . shellescape(execute('nmap')) . " | grep -i space"))
+
+" this puts into the current buffer the shell-filtered output of ':nmap'; single quotes instead of double since 'put'
+" requires the latter be escaped
+" :put=(system('echo ' . shellescape(execute('nmap')) . ' \| grep -i space'))
+
+" List all sourced script names, in the order they were first sourced.
+" :scriptnames
+
+" commands to be used in a script for changing execution
+" :try
+" :finish
+" :finally
