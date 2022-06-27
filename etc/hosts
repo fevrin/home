@@ -1,30 +1,38 @@
-127.0.0.1	localhost
-127.0.1.1	cw-XPS-13-9380
+127.0.0.1     localhost
+127.0.1.1     laptop
 
 # basic measure against some common ads
-#0.0.0.0     demdex.net # needed for setting up home delivery on cvs.com
+0.0.0.0     demdex.net # needed for parts of cvs.com
 #0.0.0.0     tags.tiqcdn.com # needed for cvs.com
 #0.0.0.0     4ess7j1u2mby13zged3ijufo-wpengine.netdna-ssl.com # needed for https://www.financialplanningfortcollins.com/nso-iso-rsu-espp-esop-equity-compensation/
-0.0.0.0	    ads.stickyadstv.com
 0.0.0.0     0cf.io
 0.0.0.0     1040.com
+0.0.0.0     25.at.atwola.com
 0.0.0.0     2mdn.net
 0.0.0.0     33across.com
 0.0.0.0     3lift.com
 0.0.0.0     aax-us-east.amazon-adsystem.com
 0.0.0.0     acdn.adnxs.com
+0.0.0.0     ad.doubleclick.net
+0.0.0.0     adclick.g.doubleclick.net
+0.0.0.0     addtoany.com
 0.0.0.0     adnxs.com
+0.0.0.0     ads.pubmatic.com
+0.0.0.0     ads.stickyadstv.com
 0.0.0.0     adservice.google.com
 0.0.0.0     adsrvr.org
+0.0.0.0     aka-cdn.adtechus.com
 0.0.0.0     amazon-adsystem.com
 0.0.0.0     bam-x.com
 0.0.0.0     beintoo.com
 0.0.0.0     bounceexchange.com
+0.0.0.0     build.dev.polarmobile.com
 0.0.0.0     casalemedia.com
 0.0.0.0     cat.va.us.criteo.com
 0.0.0.0     cdn.iubenda.com
 0.0.0.0     cdn.tegna-media.com
 0.0.0.0     cdn01.basis.net
+0.0.0.0     cms.analytics.yahoo.com
 0.0.0.0     connectad.io
 0.0.0.0     content.flexlinks.com
 0.0.0.0     cootlogix.com
@@ -41,9 +49,12 @@
 0.0.0.0     g.doubleclick.net
 0.0.0.0     gce-or.bidswitch.net
 0.0.0.0     ghbtns.com
+0.0.0.0     go-s3-downloader.dev-openweb.com
 0.0.0.0     googleads.g.doubleclick.net
 0.0.0.0     gumgum.com
 0.0.0.0     hotjar.com
+0.0.0.0     hyvor.com
+0.0.0.0     ib.adnxs.com
 0.0.0.0     imasdk.googleapis.com
 0.0.0.0     img1.zergnet.com
 0.0.0.0     img2.zergnet.com
@@ -54,47 +65,67 @@
 0.0.0.0     indexww.com
 0.0.0.0     interactive.cbs8.com
 0.0.0.0     iubenda.com
+#0.0.0.0     jac.yahoosandbox.com # needed for comments on TC
+#0.0.0.0     jill.fc.yahoo.com    # needed for comments on TC
 0.0.0.0     jwpsrv.com
 0.0.0.0     keywords.mediavine.com
 0.0.0.0     kfmb-news-app.firebaseio.com
 0.0.0.0     krxd.net
+0.0.0.0     launcher.spot.im
+0.0.0.0     liadm.com
+0.0.0.0     mailerlite.com
+0.0.0.0     mathtag.com
 0.0.0.0     mcohandsanitizer.com
 0.0.0.0     media.cbs8.com
 0.0.0.0     media.net
 0.0.0.0     mediavine.com
 0.0.0.0     mookie1.com
+0.0.0.0     narrativ.com
 0.0.0.0     onetag-sys.com
 0.0.0.0     openx.net
+0.0.0.0     opus.analytics.yahoo.com
+0.0.0.0     outbrain.com
+0.0.0.0     pagead2.googlesyndication.com
+0.0.0.0     pix.spot.im
 0.0.0.0     pix.us.criteo.net
 0.0.0.0     platform.twitter.com
+0.0.0.0     polarcdn-terrax.com
+0.0.0.0     pr.ybp.yahoo.com
 0.0.0.0     pubmatic.com
+0.0.0.0     px.moatads.com
 0.0.0.0     rubiconproject.com
+0.0.0.0     s.yimg.com
 0.0.0.0     s0.2mdn.net
 0.0.0.0     scripts.mediavine.com
 0.0.0.0     securepubads.g.doubleclick.net
 0.0.0.0     servenobid.com
 0.0.0.0     simplereach.com
-0.0.0.0     static-v.tawk.to
+0.0.0.0     slgnt.eu
+#0.0.0.0     spotim.market      # needed for comments on TC
+#0.0.0.0     static-cdn.spot.im # needed for comments on TC
+#0.0.0.0     static-v.tawk.to   # needed for comments on TC
+0.0.0.0     sync.spotim.market # blocking this could cause issues
 0.0.0.0     taboola.com
+#0.0.0.0     tag.idsync.analytics.yahoo.com # needed for comments on TC
+0.0.0.0     tags.tiqcdn.com
+0.0.0.0     tinypass.com
 0.0.0.0     tpc.googlesyndication.com
+0.0.0.0     trustarc.com
 0.0.0.0     tynt.com
+0.0.0.0     ups.analytics.yahoo.com
+0.0.0.0     us-east-1-web-oao.ssp.yahoo.com
 0.0.0.0     video-assets.mathtag.com
 0.0.0.0     video.tegna-media.com
 0.0.0.0     w55c.net
 0.0.0.0     webengage.co
+0.0.0.0     wixapps.net
+0.0.0.0     wsodata.com
 0.0.0.0     www.1040.com
 0.0.0.0     www.google-analytics.com
+0.0.0.0     www.googletagservices.com
+0.0.0.0     www.npttech.com
+0.0.0.0     www.personalcapital.com
 0.0.0.0     z.moatads.com
-0.0.0.0     cdn.tegna-media.com
-0.0.0.0     cutwaterspirits.com
-0.0.0.0     interactive.cbs8.com
-0.0.0.0     kfmb-news-app.firebaseio.com
-0.0.0.0     mcohandsanitizer.com
-0.0.0.0     media.cbs8.com
-0.0.0.0     platform.twitter.com
-0.0.0.0     tags.tiqcdn.com
-0.0.0.0     video.tegna-media.com
-0.0.0.0     tpc.googlesyndication.com
 
 # The following lines are desirable for IPv6 capable hosts
 ::1     ip6-localhost ip6-loopback
