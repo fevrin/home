@@ -142,7 +142,7 @@ files_to_source=(
 
 # prep apple terminal, if we're using it
 MAC_OS_X=0
-if [[ "$TERM_PROGRAM" = "Apple_Terminal" || "$TERM_PROGRAM" =~ iTerm ]]; then
+if [[ "$TERM_PROGRAM" == "Apple_Terminal" || "$TERM_PROGRAM" =~ iTerm ]]; then
    MAC_OS_X=1
    files_to_source+=("$HOME/.macrc")
 fi

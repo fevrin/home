@@ -76,18 +76,18 @@ branch_is_current() {
    done
 
    _print_var_vals LOCAL LOCAL_HASH REMOTE REMOTE_HASH BASE_HASH
-   if [[ $LOCAL_HASH = "$REMOTE_HASH" ]]; then
-       log "'$LOCAL' and '$REMOTE' are: Up-to-date"
-       return 0
-   elif [[ $LOCAL_HASH = "$BASE_HASH" ]]; then
-       log "Need to pull from '$REMOTE'"
-       return 1
-   elif [[ $REMOTE_HASH = "$BASE_HASH" ]]; then
-       log "Need to push to '$REMOTE'"
-       return 2
+   if [[ $LOCAL_HASH == "$REMOTE_HASH" ]]; then
+      log "'$LOCAL' and '$REMOTE' are: Up-to-date"
+      return 0
+   elif [[ $LOCAL_HASH == "$BASE_HASH" ]]; then
+      log "Need to pull from '$REMOTE'"
+      return 1
+   elif [[ $REMOTE_HASH == "$BASE_HASH" ]]; then
+      log "Need to push to '$REMOTE'"
+      return 2
    else
-       log "'$LOCAL' and '$REMOTE': Diverged"
-       return 3
+      log "'$LOCAL' and '$REMOTE': Diverged"
+      return 3
    fi
 }
 
@@ -194,7 +194,7 @@ for DIR in ${DIRS[*]}; do
          $GITBIN push $MAIN_REMOTE $MAIN_BRANCH:$MAIN_BRANCH
       fi
    else
-      if [[ $(git rev-parse $MAIN_REMOTE/$MAIN_BRANCH) = $(git rev-parse $MAIN_BRANCH) ]]; then
+      if [[ $(git rev-parse $MAIN_REMOTE/$MAIN_BRANCH) == $(git rev-parse $MAIN_BRANCH) ]]; then
          log "main branch already up-to-date"
       else
          log "$(_print_var_vals -e GIT_BRANCH MAIN_BRANCH 2>&1)"
@@ -330,7 +330,7 @@ for DIR in ${DIRS[*]}; do
 
       log "success"
    else
-         log "skipping stashing; rebase NOT requested"
+      log "skipping stashing; rebase NOT requested"
    fi
 
 #   cd - &>/dev/null

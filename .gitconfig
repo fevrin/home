@@ -350,6 +350,12 @@
   ui = true
 [diff]
   algorithm = patience
+[filter "tabspace"]
+   # use by listing files in .git/info/attributes file like so:
+   # *.py  filter=tabspace
+   # from <https://stackoverflow.com/questions/2316677/can-git-automatically-switch-between-spaces-and-tabs/2318063#2318063>
+	smudge = unexpand --tabs=3 --first-only
+	clean = expand --tabs=3 --initial
 [init]
   defaultBranch = main
 [merge]

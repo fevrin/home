@@ -62,23 +62,39 @@ gen_pw() {
 
    -l             length of the password(s) generated. default is 12
    -n             number of passwords to generate. default is 1
+   -t             character set to include (as supported by 'tr')
+   -a             alphanumeric characters only
 
    EXAMPLE:
    $FUNCNAME 15 2
    "
 
-   while getopts l:n:h opt; do
+   while getopts l:n:t:h opt; do
       case "$opt" in
          l) local length="$OPTARG";;
          n) local number="$OPTARG";;
+         t) local type="$OPTARG";;
          h) echo "$help"; return;;
       esac
    done
 
    [[ $length =~ ^[0-9]{1,20}$ ]] || length=12
+   [[ $type =~ ^\[?:?[a-z]+:?\]?$ ]] || type="graph"
+#   alnum
+#   alpha
+#   blank
+#   cntrl
+#   digit
+#   graph
+#   lower
+#   print
+#   punct
+#   space
+#   upper
+#   xdigit
    number="${number:-1}"
 
-   echo "$(tr -cd '[:graph:]' </dev/urandom | fold -w $length | head -n$number)"
+   tr -cd "[:${type}:]" </dev/urandom | fold -w $length | head -n$number | tr -d '\n'
 }
 
 get_ssl_cert() {

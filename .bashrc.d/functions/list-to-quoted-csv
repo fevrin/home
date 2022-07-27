@@ -8,9 +8,19 @@ list-to-quoted-csv() {
 	EOF
 
    local input="$(_get_stdin "$1")"
-   local no_quotes="$2"
-   local quotes='"'
+   local start_quote="${2:-}"
+   [[ "${#start_quote}" -ne 1 ]] || {
+      echo "error: must be a single character (excluding an escape)"
+      return 1
+   }
+   [[ "${start_quote}" =~ []}\)] ]] && start_quote="$(echo "${start_quote}" | tr '}])' '{[(')"
+   local end_quote="${start_quote}"
+#   echo "input = '${input}'"
+#   echo "start_quote = '${start_quote}'"
+#   echo "end_quote = '${end_quote}'"
+   [[ "${start_quote}" =~ [[{\(] ]] && end_quote="$(echo "${start_quote}" | tr '{[(' '}])')"
 
-   [[ "$no_quotes" =~ nq ]] && quotes=""
-   echo "$input" | sed -rne "s;^.*$;${quotes}&${quotes}\,;gp" | tr -d '\n' | sed -re 's;(^,|,$);;g' -e 's;$;\n;'
+
+#   echo "$input" | sed -rne "s;^.*$;${quotes}&${quotes}\,;gp" | tr -d '\n' | sed -re 's;(^,|,$);;g' -e 's;$;\n;'
+   echo "$input" | sed -rne "s;^.*$;${start_quote}&${end_quote};gp" | paste -sd,
 }

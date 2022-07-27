@@ -32,9 +32,9 @@ export HISTFILESIZE=20000
 # ensure vim is the default editor of choice
 export EDITOR="vim"
 LESS="-QFRX"
-#LESS=" -i" # '-+i' resets search case sensitivity to its default of being case sensitive (formerly, this was '+-+i', as '-+i' alone didn't seem to work; that longer version executes when `less` opens and makes searches case sensitive and (with ) bypasses the message about that)
 # versions less than 551 did not support `--no-histdups`, though that option doesn't seem to remove duplicate search entries anyway...
 [[ $(less --version | sed -rne 's;^less ([0-9]+) .*;\1;p') -ge 551 ]] && LESS+=" --no-histdups"
+LESS+=" +-i" # '-+i' resets search case sensitivity to its default of being case sensitive (formerly, this was '+-+i', as '-+i' alone didn't seem to work; that longer version executes when `less` opens and makes searches case sensitive and (with ) bypasses the message about that)
 export LESS
 
 # make `less` the default pager

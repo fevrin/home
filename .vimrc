@@ -194,6 +194,7 @@ au FileType gitcommit setlocal spell
 " $HOME/.vim/ftdetect/python.vim
 " $HOME/.vim/ftdetect/golang.vim
 autocmd FileType go,python,sh,vim,markdown,gitcommit setlocal tw=125
+autocmd FileType gitcommit setlocal tw=72
 
 
 if exists(':AnsiEsc')
@@ -352,7 +353,8 @@ call plug#begin(s:vim_home_dir . '/plugged')
 "   for jump-to-definition functionality without ctags:
 "   https://stackoverflow.com/questions/635770/jump-to-function-definition/51195409#51195409
 "   Plug 'neoclide/coc.nvim', {'branch': 'release'}
-"   Plug 'dense-analysis/ale'
+"   Plug 'neoclide/coc-prettier' " prettier formatter for Coc
+"   Plug 'dense-analysis/ale'             " live linting
 "   Plug 'puremourning/vimspector'
 "   Plug 'scrooloose/nerdtree'
 "   Plug 'scrooloose/nerdcommenter'
@@ -373,6 +375,8 @@ call plug#begin(s:vim_home_dir . '/plugged')
 "   Plug 'rhysd/conflict-marker.vim'         " lets you quickly jump to and resolve conflicts diff'ed files and colors conflict areas
 "   Plug 'inkarkat/vim-ConflictMotions'      " older conflict marker jumper
 "   Plug 'ervandew/supertab'                 " smart tab completion (old)
+"   Plug 'prettier/vim-prettier'             " code formatter
+"   Plug 'vim-syntastic/syntastic'           " code syntax checker
 call plug#end()
 
 let g:go_fmt_command = "goimports"
