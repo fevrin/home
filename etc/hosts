@@ -65,8 +65,8 @@
 0.0.0.0     indexww.com
 0.0.0.0     interactive.cbs8.com
 0.0.0.0     iubenda.com
-#0.0.0.0     jac.yahoosandbox.com # needed for comments on TC
-#0.0.0.0     jill.fc.yahoo.com    # needed for comments on TC
+#0.0.0.0     jac.yahoosandbox.com # needed for comments on TechCrunch
+#0.0.0.0     jill.fc.yahoo.com    # needed for comments on TechCrunch
 0.0.0.0     jwpsrv.com
 0.0.0.0     keywords.mediavine.com
 0.0.0.0     kfmb-news-app.firebaseio.com
@@ -81,6 +81,7 @@
 0.0.0.0     mediavine.com
 0.0.0.0     mookie1.com
 0.0.0.0     narrativ.com
+0.0.0.0     oasc12.247realmedia.com
 0.0.0.0     onetag-sys.com
 0.0.0.0     openx.net
 0.0.0.0     opus.analytics.yahoo.com
@@ -101,12 +102,12 @@
 0.0.0.0     servenobid.com
 0.0.0.0     simplereach.com
 0.0.0.0     slgnt.eu
-#0.0.0.0     spotim.market      # needed for comments on TC
-#0.0.0.0     static-cdn.spot.im # needed for comments on TC
-#0.0.0.0     static-v.tawk.to   # needed for comments on TC
+#0.0.0.0     spotim.market      # needed for comments on TechCrunch
+#0.0.0.0     static-cdn.spot.im # needed for comments on TechCrunch
+#0.0.0.0     static-v.tawk.to   # needed for comments on TechCrunch
 0.0.0.0     sync.spotim.market # blocking this could cause issues
 0.0.0.0     taboola.com
-#0.0.0.0     tag.idsync.analytics.yahoo.com # needed for comments on TC
+#0.0.0.0     tag.idsync.analytics.yahoo.com # needed for comments on TechCrunch
 0.0.0.0     tags.tiqcdn.com
 0.0.0.0     tinypass.com
 0.0.0.0     tpc.googlesyndication.com
@@ -121,11 +122,16 @@
 0.0.0.0     wixapps.net
 0.0.0.0     wsodata.com
 0.0.0.0     www.1040.com
-0.0.0.0     www.google-analytics.com
+0.0.0.0     www.google-analytics.com # required for kencko.com billing page
 0.0.0.0     www.googletagservices.com
 0.0.0.0     www.npttech.com
 0.0.0.0     www.personalcapital.com
 0.0.0.0     z.moatads.com
+
+0.0.0.0     beap.gemini.yahoo.com # from Yahoo Mail
+0.0.0.0     consent.cmp.oath.com # from Yahoo Mail
+0.0.0.0     edgecast-vod.yimg.com # from Yahoo Mail
+0.0.0.0     edge-mcdn.secure.yahoo.com # from Yahoo Mail
 
 # The following lines are desirable for IPv6 capable hosts
 ::1     ip6-localhost ip6-loopback

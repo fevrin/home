@@ -45,9 +45,9 @@ log() {
    local messages="$@"
    local IFS=$'\n'
    for message in $messages; do
-   [[ "$INTERACTIVE" -eq 1 ]] && echo -e "$message" 2>&1
-   date "+%F %H:%M:%S %Z: ($$) $(basename "$REPO_ROOT"): $(echo -e "$message" 2>&1)" >> "$HOME/$(basename "$REPO_ROOT")-git-pull-timestamps"
-done
+      [[ "$INTERACTIVE" -eq 1 ]] && echo -e "$message" 2>&1
+      date "+%F %H:%M:%S %Z: ($$) $(basename "$REPO_ROOT"): $(echo -e "$message" 2>&1)" >>"$HOME/$(basename "$REPO_ROOT")-git-pull-timestamps"
+   done
 }
 
 branch_is_current() {
@@ -140,7 +140,8 @@ for DIR in ${DIRS[*]}; do
    UPSTREAM="upstream"
 #   [[ -n $(git branch --list $UPSTREAM) ]] && git ls-remote --heads $UPSTREAM &>/dev/null {
    MERGE_TYPE=
-   FETCH_LAST_REFRESH="$(echo "($(date +%s) - $(stat -c %Y .git/FETCH_HEAD))" | bc)"
+   FETCH_LAST_REFRESH="$(echo "($(date +%s) - $(stat -c %Y .git/FETCH_HEAD 2>&1))" | bc 2>&1)"
+   [[ "${FETCH_LAST_REFRESH}" =~ ^[0-9]+$ ]] || FETCH_LAST_REFRESH="$((FETCH_REFRESH_TIME + 1))"
 
    if [[ "$FETCH_LAST_REFRESH" -ge "$FETCH_REFRESH_TIME" || "$FORCE_FETCH" -eq 1 ]]; then
       if [[ "$FETCH_LAST_REFRESH" -ge "$FETCH_REFRESH_TIME" ]]; then

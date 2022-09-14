@@ -51,6 +51,10 @@ repos:
             #          - --minify           # minify the code to reduce its size (implies -s)
             #          - --diff             # error with a diff when the formatting differs
         #    - id: shfmt-docker  # Docker image (requires Docker to run)
+  - repo: https://github.com/hadolint/hadolint # for linting Dockerfiles
+    rev: master
+    hooks:
+      - id: hadolint
 #  - repo: https://github.com/psf/black # this is for python code
 #    rev: 22.3.0
 #    hooks:
@@ -62,3 +66,5 @@ repos:
 #        # entry: codespell --relative
 #        args: [--relative, --no-progress, --no-summary]
 #        name: Spell check with cspell
+
+#  - repo: https://github.com/adrienverge/yamllint
