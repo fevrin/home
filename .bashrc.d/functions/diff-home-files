@@ -97,7 +97,12 @@ diff-home-files() {
       }
 
       # the item is within the .bashrc.d directory
-      [[ -f "$file2" ]] || {
+      if [[ -f "$file2" ]]; then
+         [[ -f "${file1}" ]] || {
+            echo "${file1} doesn't exist; skipping..."
+            continue
+         }
+      else
          [[ -f "${file1}" ]] && {
          echo "you'll need to first copy the file to '$HOME_DIR'"
          echo
@@ -114,7 +119,7 @@ diff-home-files() {
          fi
 #         echo "i = '$i'"
          }
-      }
+      fi
 
       # and it isn't .toprc, and it's not a vim swap file
       [[ ! "$i" =~ \.toprc &&

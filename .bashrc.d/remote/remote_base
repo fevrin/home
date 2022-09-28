@@ -137,3 +137,5 @@ fi
 unset MOTD_RUN
 
 last -F | awk '/'$USER'/ {print "Last login: " $4 " " $5 " " $6 " " $7 " from " $3}' | head -n1
+
+ps -u $USER -o pid,args,etimes | awk '{ if ($NF >= 86400) { commands=sprintf("%s\n%s",commands,$0); }}; END { if (commands ~ /ELAPSED\n *[0-9]+/) { printf("long-running commands:%s\n",commands)}}'

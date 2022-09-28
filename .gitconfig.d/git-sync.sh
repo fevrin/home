@@ -131,8 +131,14 @@ for DIR in ${DIRS[*]}; do
    GIT_BRANCH="$($GITBIN branch --show-current)"
 
    echo
-   MAIN_BRANCH="$($GITBIN get-main-branch)"
-   MAIN_REMOTE="$($GITBIN get-main-remote)"
+   MAIN_BRANCH="$($GITBIN get-main-branch)" || {
+      echo "error: couldn't get main branch"
+      exit 1
+   }
+   MAIN_REMOTE="$($GITBIN get-main-remote)" || {
+      echo "error: couldn't get main remote"
+      exit 1
+   }
 #   git rev-parse --verify --quiet $MAIN_BRANCH || MAIN_BRANCH="main"
 #   ORIGINAL_MAIN_BRANCH_REF="$($GITBIN rev-parse $MAIN_BRANCH)"
 

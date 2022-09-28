@@ -347,6 +347,7 @@ call plug#begin(s:vim_home_dir . '/plugged')
 "   Plug 'tpope/vim-sleuth'
    Plug 'tpope/vim-unimpaired'         " lets you quickly jump to and resolve conflicts diff'ed files, among other things
    Plug 'vito/booklit.vim'             " syntax highlighting for Booklit files
+   Plug 'hashivim/vim-terraform'       " syntax highlighting for terraform
 "   Plug 'preservim/nerdtree'
 "   Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 "   Plug 'junegunn/fzf.vim'

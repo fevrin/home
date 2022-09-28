@@ -102,6 +102,7 @@
         echo -n \"run '\\''git gc'\\''? [y/N] \"; read; \
         [[ \"$REPLY\" =~ [Yy] ]] && git gc || exit 0 \
   '"
+  blame-color = blame --color-lines --color-by-age
   br = branch
   co = checkout
   ci = "!bash -c '\
