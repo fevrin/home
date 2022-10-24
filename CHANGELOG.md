@@ -2,6 +2,22 @@
 
 # CHANGELOG
 
+## v2.3.6
+
+### 2022-10-24 (Mon, Oct 24 2022)
+#### .bashrc.d/base
+* update command to use with a new tmux session (either `htop` or `top`)
+
+#### .bashrc.d/functions/compact_history
+* update a comment about permissions
+
+#### .gitconfig
+* added "core" and "color" directives
+
+#### .vimrc
+* join a couple of lines
+* fix the `curl` command used to install the plugin manager
+
 ## v2.3.5
 
 ### 2021-11-11 (Thu, Nov 11 2021)

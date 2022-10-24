@@ -102,7 +102,8 @@ if [[ -x $(which tmux) ]]; then
      else
         # there are no tmux sessions or at least no detached tmux sessions, so start tmux
         #tmux new-session 'tmux new-window top && tmux new-window'
-        tmux new-session -d -s default 'top' &&
+        TOP_CMD="$(which htop 2>/dev/null || which top)"
+        tmux new-session -d -s default "${TOP_CMD}" &&
         tmux new-window -t default -n work &&
         tmux attach -t default
 

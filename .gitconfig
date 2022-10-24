@@ -376,6 +376,15 @@
   pushremote = no_push
 [branch "main"]
   pushremote = no_push
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = false
+	logallrefupdates = true
+	editor = vim
+	excludesfile = ~/.gitignore_global
+[color]
+	ui = true
 #[user]
 #	email =
 #	name =

@@ -158,8 +158,7 @@ set history=4000 " hi; allow for ample command history
 set term=xterm " needed for the colorscheme to show as more bold and vibrant than 'screen.xterm-256color'
 colorscheme ron
 
-syntax sync minlines=50 " ensure vim doesn't keep changing syntax highlighting; from
-"<http://vim.wikia.com/wiki/Fix_Syntax_Highlighting>
+syntax sync minlines=50 " ensure vim doesn't keep changing syntax highlighting; from <http://vim.wikia.com/wiki/Fix_Syntax_Highlighting>
 
 
 " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -324,8 +323,8 @@ vnoremap <Space> zf
 " <https://github.com/junegunn/vim-plug/wiki/tips#automatic-installation>
 let data_dir = has('nvim') ? stdpath('data') . '/site' : s:vim_home_dir
 if empty(glob(data_dir . '/autoload/plug.vim'))
-   silent !curl -fLo s:vim_home_dir . "/autoload/plug.vim" --create-dirs
-    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+   exe system('curl -fLo "' . s:vim_home_dir . '/autoload/plug.vim"  --create-dirs
+    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim')
    autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
 
