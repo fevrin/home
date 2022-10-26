@@ -14,7 +14,7 @@
         );\
         \
         if [[ -n \"$affected_branches\" ]]; then\
-           echo -e \"these branches would be cleared:\\n$(echo \"${affected_branches}\" | sed -e \"s;^;- ;\")\"; \
+           echo -e \"\\nthese branches would be cleared:\\n$(echo \"${affected_branches}\" | sed -e \"s;^;- ;\")\"; \
            echo; \
            echo -n \"would you like to clear them? [y/N] \";\
            read;\
@@ -52,7 +52,7 @@
         fi;\
         brs_with_remote_configs_but_no_remote_counterpart=$(git get-local-brs-with-remote-config-without-remote-counterpart); \
         if [[ -n \"$brs_with_remote_configs_but_no_remote_counterpart\" ]]; then \
-           echo -e \"these branches have a remote config but no remote counterpart:\\n\"${brs_with_remote_configs_but_no_remote_counterpart}\"\"; \
+           echo -e \"\\nthese branches have a remote config but no remote counterpart:\\n\"${brs_with_remote_configs_but_no_remote_counterpart}\"\"; \
            echo; \
            echo -n \"would you like to clear them? [y/N] \";\
            read;\
@@ -138,7 +138,7 @@
      }; \
      echo \"compare = '\\''$compare'\\''\"; \
      echo \"head = '\\''$head'\\''\"; \
-     log_output=\"$(git log --date=format:\"%Y-%m-%d (%a, %b %d %Y)\" --format=\"### %ad%x02%n%B\" ${compare}..${head})\"; \
+     log_output=\"$(git log --date=format:\"%Y-%m-%d (%a, %b %d, %Y)\" --format=\"### %ad%x02%n%B\" ${compare}..${head})\"; \
      [[ \"$using_first_commit\" -eq 1 ]] && log_output+=\"\n\n$(git log --format=\"### %ad%x02%n%B\" ${compare})\"; \
      if [[ -n \"$log_output\" ]]; then \
         echo -e \"$log_output\" | \
@@ -362,6 +362,9 @@
 [merge]
   conflictstyle = diff3
   tool = vimdiff
+[pager]
+   # force `less` to show tabs and other special characters
+   diff = less -U
 [pull]
   ff = only
 [push]

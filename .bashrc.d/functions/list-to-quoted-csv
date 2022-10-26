@@ -9,7 +9,7 @@ list-to-quoted-csv() {
 
    local input="$(_get_stdin "$1")"
    local start_quote="${2:-}"
-   [[ "${#start_quote}" -ne 1 ]] || {
+   [[ "${#start_quote}" -ne 1 ]] && {
       echo "error: must be a single character (excluding an escape)"
       return 1
    }

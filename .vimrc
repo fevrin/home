@@ -49,7 +49,7 @@ if has("patch-8.2.3455")
    set cursorcolumn " cuc; highlight the screen column of the cursor
 
    " this can also cause degraded performance, so we'll want to gate it for now
-   set relativenumber " rnu; show the relative line number for each line
+   "set relativenumber " rnu; show the relative line number for each line
 endif
 set cursorline " cul; highlight the screen line of the cursor
 set nospell " automatically spell-check; okay, I give up: no spell-check by default!!!
@@ -121,21 +121,21 @@ set copyindent " ci; new line indents use same characters (spaces, tabs, etc.) a
 "maximum monospace width in GHE's editing window before a horizontal scroll bar appears
 
 set formatoptions=croqltj " fo; ensures any text width that's set will take effect
-                         " c.......Auto-wrap comments using textwidth, inserting the current comment
-                         "         leader automatically.
-                         " r.......Automatically insert the current comment leader after hitting
-                         "         <Enter> in Insert mode.
-                         " o.......Automatically insert the current comment leader after hitting 'o' or
-                         "         'O' in Normal mode.
-                         " q.......Allow formatting of comments with "gq".
-                         "         Note that formatting will not change blank lines or lines containing
-                         "         only the comment leader.  A new paragraph starts after such a line,
-                         "         or when the comment leader changes.
-                         " l.......Long lines are not broken in insert mode: When a line was longer than
-                         "         'textwidth' when the insert command started, Vim does not
-                         "         automatically format it.
-                         " t.......Auto-wrap text using textwidth
-                         " j  .....Where it makes sense, remove a comment leader when joining lines.
+                          " c.......Auto-wrap comments using textwidth, inserting the current comment
+                          "         leader automatically.
+                          " r.......Automatically insert the current comment leader after hitting
+                          "         <Enter> in Insert mode.
+                          " o.......Automatically insert the current comment leader after hitting 'o' or
+                          "         'O' in Normal mode.
+                          " q.......Allow formatting of comments with "gq".
+                          "         Note that formatting will not change blank lines or lines containing
+                          "         only the comment leader.  A new paragraph starts after such a line,
+                          "         or when the comment leader changes.
+                          " l.......Long lines are not broken in insert mode: When a line was longer than
+                          "         'textwidth' when the insert command started, Vim does not
+                          "         automatically format it.
+                          " t.......Auto-wrap text using textwidth
+                          " j  .....Where it makes sense, remove a comment leader when joining lines.
 
 " 16 folding
 "set foldmethod=indent " fdm; sets folding type
@@ -323,7 +323,7 @@ vnoremap <Space> zf
 " <https://github.com/junegunn/vim-plug/wiki/tips#automatic-installation>
 let data_dir = has('nvim') ? stdpath('data') . '/site' : s:vim_home_dir
 if empty(glob(data_dir . '/autoload/plug.vim'))
-   exe system('curl -fLo "' . s:vim_home_dir . '/autoload/plug.vim"  --create-dirs
+   exe system('curl -fLo "' . s:vim_home_dir . '/autoload/plug.vim" --create-dirs
     \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim')
    autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
@@ -331,52 +331,55 @@ endif
 " some plugins Red Hat suggests:
 " <https://www.redhat.com/sysadmin/five-vim-plugins>
 call plug#begin(s:vim_home_dir . '/plugged')
+"   Plug 'airblade/vim-gitgutter'
+"   Plug 'AndrewRadev/linediff.vim'
+"   Plug 'arp242/undofile_warn.vim'
+"   Plug 'dense-analysis/ale'             " live linting
+"   Plug 'editorconfig/editorconfig-vim' " https://github.com/editorconfig/editorconfig/wiki/EditorConfig-Properties
+   Plug 'ekalinin/Dockerfile.vim'         " adds syntax highlighting for Dockerfiles
+"   Plug 'ervandew/supertab'                 " smart tab completion (old)
    Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries', 'frozen': 'true' }
+   Plug 'hashivim/vim-terraform'       " syntax highlighting for terraform
 "   Plug 'https://github.com/ElmCast/elm-vim'
    Plug 'https://github.com/fevrin/AnsiEsc.vim', { 'branch': 'main', 'frozen': 'true' } " converts ANSI escape codes to colors
-   Plug 'pearofducks/ansible-vim', { 'branch': 'master', 'frozen': 'true' }
-   Plug 'tpope/vim-eunuch'
-   Plug 'ekalinin/Dockerfile.vim'         " adds syntax highlighting for Dockerfiles
-"   Plug 'arp242/undofile_warn.vim'
-"   Plug 'airblade/vim-gitgutter'
-"   Plug 'vim-airline/vim-airline'
-"   Plug 'tpope/vim-fugitive'
-"   Plug 'editorconfig/editorconfig-vim' " https://github.com/editorconfig/editorconfig/wiki/EditorConfig-Properties
-"   Plug 'tpope/vim-sensible'
-"   Plug 'tpope/vim-sleuth'
-   Plug 'tpope/vim-unimpaired'         " lets you quickly jump to and resolve conflicts diff'ed files, among other things
-   Plug 'vito/booklit.vim'             " syntax highlighting for Booklit files
-   Plug 'hashivim/vim-terraform'       " syntax highlighting for terraform
-"   Plug 'preservim/nerdtree'
+"   Plug 'inkarkat/vim-AdvancedDiffOptions'
+"   Plug 'inkarkat/vim-ConflictMotions'      " older conflict marker jumper
+"   Plug 'janko/vim-test'
 "   Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 "   Plug 'junegunn/fzf.vim'
+   Plug 'junegunn/vim-easy-align'     " easily align lines based on a common character expression
+"   Plug 'kana/vim-textobj-user'
+"     \| Plug 'glts/vim-textobj-comment'
+"   Plug 'mbbill/undotree'                   " lets you visualize a file's undo history
+"   Plug 'mhinz/vim-signify'
 "   for jump-to-definition functionality without ctags:
 "   https://stackoverflow.com/questions/635770/jump-to-function-definition/51195409#51195409
 "   Plug 'neoclide/coc.nvim', {'branch': 'release'}
 "   Plug 'neoclide/coc-prettier' " prettier formatter for Coc
-"   Plug 'dense-analysis/ale'             " live linting
-"   Plug 'puremourning/vimspector'
-"   Plug 'scrooloose/nerdtree'
-"   Plug 'scrooloose/nerdcommenter'
-"   Plug 'sheerun/vim-polyglot'
-"   Plug 'yggdroot/indentline'
-"   Plug 'tpope/vim-surround' " adds commands for surrounding arbitrary text with quotes, parentheses, etc.
-"   Plug 'kana/vim-textobj-user'
-"     \| Plug 'glts/vim-textobj-comment'
-"   Plug 'janko/vim-test'
-"   Plug 'vim-scripts/vcscommand.vim'
-"   Plug 'mhinz/vim-signify'
-"   Plug 'rickhowe/spotdiff.vim'
-"   Plug 'inkarkat/vim-AdvancedDiffOptions'
-"   Plug 'AndrewRadev/linediff.vim'
-"   Plug 'mbbill/undotree'                   " lets you visualize a file's undo history
-"   Plug 'sjl/gundo.vim'                     " lets you visualize a file's undo history
+   Plug 'pearofducks/ansible-vim', { 'branch': 'master', 'frozen': 'true' }
 "   Plug 'powerline/powerline'               " power statusline
-"   Plug 'rhysd/conflict-marker.vim'         " lets you quickly jump to and resolve conflicts diff'ed files and colors conflict areas
-"   Plug 'inkarkat/vim-ConflictMotions'      " older conflict marker jumper
-"   Plug 'ervandew/supertab'                 " smart tab completion (old)
+"   Plug 'preservim/nerdtree'
 "   Plug 'prettier/vim-prettier'             " code formatter
+"   Plug 'puremourning/vimspector'
+"   Plug 'rhysd/conflict-marker.vim'         " lets you quickly jump to and resolve conflicts diff'ed files and colors conflict areas
+"   Plug 'rickhowe/spotdiff.vim'
+"   Plug 'scrooloose/nerdcommenter'
+"   Plug 'scrooloose/nerdtree'
+"   Plug 'sheerun/vim-polyglot'
+"   Plug 'sjl/gundo.vim'                     " lets you visualize a file's undo history
+   Plug 'tpope/vim-commentary'         " adds commands to comment and uncomment lines
+   Plug 'tpope/vim-eunuch'             " filesystem commands within vim
+"   Plug 'tpope/vim-fugitive'           " git commands within vim
+"   Plug 'tpope/vim-repeat'             " repeat last map in whole
+"   Plug 'tpope/vim-sensible'           " sensible option defaults
+"   Plug 'tpope/vim-sleuth'             " automatically adjusts formatting and encoding options based on the current file
+"   Plug 'tpope/vim-surround'           " adds commands for surrounding arbitrary text with quotes, parentheses, etc.
+   Plug 'tpope/vim-unimpaired'         " lets you quickly jump to and resolve conflicts diff'ed files, among other things
+"   Plug 'vim-airline/vim-airline'
+"   Plug 'vim-scripts/vcscommand.vim'
 "   Plug 'vim-syntastic/syntastic'           " code syntax checker
+   Plug 'vito/booklit.vim'             " syntax highlighting for Booklit files
+"   Plug 'yggdroot/indentline'
 call plug#end()
 
 let g:go_fmt_command = "goimports"

@@ -2,6 +2,42 @@
 
 # CHANGELOG
 
+## v2.3.7
+
+### 2022-10-26 (Wed, Oct 26, 2022)
+#### .apple_keyboard_mod.rc
+* add new remapping technique that works with Ubuntu 22.04
+* reformat whitespace
+
+#### .bashrc
+* reformat whitespace
+
+#### .bashrc.d/00_vars
+* disable `less` resetting search case sensitivity
+
+#### .bashrc.d/base
+* change from sourcing a file to executing it directly
+* update some comments
+
+#### .bashrc.d/functions/list-to-quoted-csv
+* fix faulty logic
+
+#### .gitconfig
+* update message formatting
+* add pager default for `git diff` so it shows special characters (tabs, in particular)
+* minor update to `changelog` date format
+
+#### .gitconfig.d/git-sync.sh
+* format some subshells
+
+#### .tmux.conf
+* set width limit for `status-right` so the output isn't messed up if the weather script fails
+* copy `SESSION_MANAGER` environment variable so vim startup isn't delayed (tmux issue [#1494](https://github.com/tmux/tmux/issues/1494))
+
+#### .vimrc
+* disable `relativenumber` in all cases
+* alphabetize list of plugins
+
 ## v2.3.6
 
 ### 2022-10-24 (Mon, Oct 24 2022)

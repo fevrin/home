@@ -158,7 +158,10 @@ for DIR in ${DIRS[*]}; do
 
       log "FETCHING REMOTES..."
       # this expects the `git fet` alias to be set up in ~/.gitconfig
-      fetch_output=$($GITBIN fet; exit $?)
+      fetch_output=$(
+         $GITBIN fet
+         exit $?
+      )
       fetch_exit_code="$?"
       log "$fetch_output"
       [[ $fetch_exit_code -eq 0 ]] || {
@@ -234,7 +237,10 @@ for DIR in ${DIRS[*]}; do
 
    if [[ "$REBASE" -eq 1 ]]; then
 
-      branch_is_current_output="$(branch_is_current 2>&1; exit $?)"
+      branch_is_current_output="$(
+         branch_is_current 2>&1
+         exit $?
+      )"
       branch_is_current_exit="$?"
       log "$branch_is_current_output"
       if [[ "$branch_is_current_exit" -ne 1 && "$branch_is_current_exit" -ne 3 ]]; then
@@ -286,7 +292,10 @@ for DIR in ${DIRS[*]}; do
          echo
          echo
          log "ATTEMPTING TO GIT REBASE '$GIT_BRANCH' ONTO '$MAIN_BRANCH'"
-         rebase_result=$($GITBIN rebase $MAIN_BRANCH 2>&1; exit $?)
+         rebase_result=$(
+            $GITBIN rebase $MAIN_BRANCH 2>&1
+            exit $?
+         )
          rebase_exit_code="$?"
          #echo "rebase_result = '$rebase_result'"
          #echo "rebase_exit_code = '$rebase_exit_code'"

@@ -34,7 +34,7 @@ if [[ -z "$SSH_CLIENT" && -n "$DISPLAY" ]]; then
 
    #process the Apple keyboard mod if using an Apple keyboard
    # this adds a noticeable lag time when sourcing in a new terminal
-   . $HOME/.apple_keyboard_mod.rc force
+   $HOME/.apple_keyboard_mod.rc force
 fi
 
 # print out the todo list
@@ -79,11 +79,10 @@ fi
 # don't overwrite ~/.bash_history file upon logging out
 shopt -s histappend
 
-# start a terminal multiplexer upon login only if screen is not already opened and there are no detached sessions
+# start a terminal multiplexer upon login only if there isn't already one opened and there are no detached sessions
 SHLVL_threshold=1
 # always use just "screen" as the terminal so servers don't go ballistic
-# ugh, `export TERM=screen` causes weird stuff on the local machine, like italicizing text instead of highlighting it when
-# copying using screen's commands
+# ugh, `export TERM=screen` causes weird stuff on the local machine, like italicizing text instead of highlighting it when copying using screen's commands
 #export TERM=screen
 if [[ -x $(which tmux) ]]; then
    TMUX_LIST=$(tmux ls 2>/dev/null)

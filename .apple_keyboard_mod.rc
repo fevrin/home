@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# inspired by <https://linuxconfig.org/reprogram-keyboard-keys-with-xmodmap>
+xmodmap -pke |
+sed -re 's;^(keycode 105 = )Alt_R Meta_R Alt_R Meta_R;\1Control_R NoSymbol Control_R;g' -e 's;^(keycode 108 = )Control_R NoSymbol Control_R;\1Alt_R Meta_R Alt_R Meta_R;g' |
+xmodmap -
+
+echo "log out and log back in to effect keyboard key swaps"
+exit
+
 # default keycode values
 #ctrl_l=37
 ctrl_r=105
@@ -22,23 +30,23 @@ if [[ $(grep -qi 'apple keyboard' /proc/bus/input/devices; echo $?) -eq 0 ]]; th
     keycode $cmd_r = Control_R NoSymbol Control_R
     keycode $alt_r = Alt_R Meta_R"
 
-	if [[ ! $(grep -s 2 /sys/module/hid_apple/parameters/fnmode) ]]; then
-	   echo "try enforcing function key mode on the Apple keyboard permanently? [y/N] "; read
-	   if [[ $REPLY =~ [Yy] ]]; then
-	      if [[ $(grep -s 'fnmode = 2' /etc/sysfs.conf) ]]; then
-	            # from <https://help.ubuntu.com/community/AppleKeyboard#Change_Function_Key_behavior>
-	            echo 'options hid_apple fnmode=2' | sudo tee -a /etc/modprobe.d/hid_apple.conf &>/dev/null
-	            sudo update-initramfs -u -k all
+   if [[ ! $(grep -s 2 /sys/module/hid_apple/parameters/fnmode) ]]; then
+      echo "try enforcing function key mode on the Apple keyboard permanently? [y/N] "; read
+      if [[ $REPLY =~ [Yy] ]]; then
+         if [[ $(grep -s 'fnmode = 2' /etc/sysfs.conf) ]]; then
+            # from <https://help.ubuntu.com/community/AppleKeyboard#Change_Function_Key_behavior>
+            echo 'options hid_apple fnmode=2' | sudo tee -a /etc/modprobe.d/hid_apple.conf &>/dev/null
+            sudo update-initramfs -u -k all
          else
-	         echo 'module/hid_apple/parameters/fnmode = 2' | sudo tee -a /etc/sysfs.conf &>/dev/null
+            echo 'module/hid_apple/parameters/fnmode = 2' | sudo tee -a /etc/sysfs.conf &>/dev/null
 
-	      fi
-	   fi
+         fi
+      fi
 
-	   # either way, enable it without requiring a reboot
-	   echo "enforcing function key mode temporarily"
-	   echo 2 | sudo tee /sys/module/hid_apple/parameters/fnmode &>/dev/null
-	fi
+      # either way, enable it without requiring a reboot
+      echo "enforcing function key mode temporarily"
+      echo 2 | sudo tee /sys/module/hid_apple/parameters/fnmode &>/dev/null
+   fi
 else
    # swap Ctrl-R and Alt-R
    addtl_cmds="
@@ -83,7 +91,6 @@ else
       #     modifier_map Control { <LALT> };
       # };
 
-
       echo "adding config to '/usr/share/X11/xkb/symbols/ctrl'..."
       cat <<-EOF | sudo tee -a /usr/share/X11/xkb/symbols/ctrl &>/dev/null
 
@@ -117,34 +124,34 @@ if ! w | awk "/${USER}/ { print \$2 }" | grep -q 'pts/2' || [[ $FORCE -eq 1 ]]; 
    if [[ $REPLY =~ ^n$ ]]; then
       echo "ok, running alternative commands"
       xmodmap - <<-EOF
-   	! from <http://www.chrisamiller.com/blog/posts/remapping-your-macbooks-keyboard-in-ubuntu-1204>
-   	! help from <http://askubuntu.com/questions/131900/how-do-i-switch-the-command-key-and-control-key-on-a-macbook-pro>
-   	!
-   	! clean most of the modifiers
-   	clear control
-   	clear mod4
-   	clear mod1
+			! from <http://www.chrisamiller.com/blog/posts/remapping-your-macbooks-keyboard-in-ubuntu-1204>
+			! help from <http://askubuntu.com/questions/131900/how-do-i-switch-the-command-key-and-control-key-on-a-macbook-pro>
+			!
+			! clean most of the modifiers
+			clear control
+			clear mod4
+			clear mod1
 
-   	! -----------------
-   	! left side
-   	! ----------------
-   	! ensure Alt-L behaves like Alt-L
-   	!keycode 64 = Alt_L Meta_L
-   	! ensure Cmd-L behaves like Ctrl-L
-   	!keycode 133 = Control_L NoSymbol Control_L
+			! -----------------
+			! left side
+			! ----------------
+			! ensure Alt-L behaves like Alt-L
+			!keycode 64 = Alt_L Meta_L
+			! ensure Cmd-L behaves like Ctrl-L
+			!keycode 133 = Control_L NoSymbol Control_L
 
-   	! ------------------
-   	! right side
-   	! -------------------
-   	$addtl_cmds
+			! ------------------
+			! right side
+			! -------------------
+			$addtl_cmds
 
-		!add mod4 = Super_L
-		add mod1 = Alt_L Meta_L
-		add control = Control_L
-		add control = Control_R
-		!add mod1 = Alt_R Meta_R
-		!add control = Control_L
-		!add control = Control_R
+			!add mod4 = Super_L
+			add mod1 = Alt_L Meta_L
+			add control = Control_L
+			add control = Control_R
+			!add mod1 = Alt_R Meta_R
+			!add control = Control_L
+			!add control = Control_R
 		EOF
 
       unset addtl_cmds

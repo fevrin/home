@@ -16,7 +16,7 @@ shopt -s checkwinsize
 
 # set variable identifying the chroot you work in (used in the prompt below)
 if [ -z "$debian_chroot" ] && [ -r /etc/debian_chroot ]; then
-    debian_chroot=$(cat /etc/debian_chroot)
+   debian_chroot=$(cat /etc/debian_chroot)
 fi
 
 # Comment in the above and uncomment this below for a color prompt
@@ -44,11 +44,11 @@ else
       "\n\D{%F %T %Z}\n\[\033[01;34m\]\!\[\033[00m\]\$ "
       '
       read -r -d '' PROMPT_COMMAND <<-EOF
-		   history -n; # Read the history lines not already read from the history file into the current history list. These are lines appended to the history file since the beginning of the current bash session.
-		   history -w; # Write the current history list to the history file, overwriting the history file's contents.
-		   history -c; # Clear the history list by deleting all the entries.
-		   history -r; # Read the contents of the history file and append them to the current history list.
-		   $PROMPT_COMMAND
+			history -n; # Read the history lines not already read from the history file into the current history list. These are lines appended to the history file since the beginning of the current bash session.
+			history -w; # Write the current history list to the history file, overwriting the history file's contents.
+			history -c; # Clear the history list by deleting all the entries.
+			history -r; # Read the contents of the history file and append them to the current history list.
+			$PROMPT_COMMAND
 		EOF
       # originally:
       # history -a; # Append the 'new' history lines to the history file. These are history lines entered since the beginning of the current bash session, but not already appended to the history file.
