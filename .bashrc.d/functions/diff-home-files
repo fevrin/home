@@ -50,6 +50,10 @@ diff-home-files() {
          local file
          for file in $@; do
             file="${1##$HOME/}"
+            [[ -d "$(dirname "$HOME_DIR/$file")" ]] || {
+               echo "making parent directories..."
+               mkdir -p "$(dirname "$HOME_DIR/$file")"
+            }
             $ACTION "$HOME/$file" "$HOME_DIR/$file"
          done
          return

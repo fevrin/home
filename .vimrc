@@ -196,13 +196,6 @@ autocmd FileType go,python,sh,vim,markdown,gitcommit setlocal tw=125
 autocmd FileType gitcommit setlocal tw=72
 
 
-if exists(':AnsiEsc')
-   " color file contents if it has ANSI escape codes (though it doesn't cover all possible combinations)
-   " https://github.com/vim-scripts/AnsiEsc.vim/blob/d2bb7878622e4c16203acf1c92a0f4bc7ac58003/autoload/AnsiEsc.vim#L214
-   autocmd FileType systemd AnsiEsc
-   autocmd BufReadPost,FileReadPost *.log AnsiEsc
-endif
-
 "au BufNewFile,BufRead *.tsx setf typescript
 autocmd FileType typescriptreact setlocal ft=typescript
 "autocmd FileType python setlocal ts=4
@@ -274,6 +267,9 @@ imap img<tab> <img src="" alt="" /><esc>10hi
 " https://vim.fandom.com/wiki/Folding#Mappings_to_toggle_folds
 nnoremap <silent> <Space> @=(foldlevel('.')?'za':"\<Space>")<CR>
 vnoremap <Space> zf
+
+" set a mapping for EasyAlign plugin's visual-mode alignment
+vnoremap <Enter> <Plug>(EasyAlign1)
 
 "https://stackoverflow.com/questions/597687/how-to-quickly-change-variable-names-in-vim/597932#597932
 

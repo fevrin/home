@@ -2,6 +2,24 @@
 
 # CHANGELOG
 
+## v2.3.8
+
+### 2022-10-26 (Wed, Oct 26, 2022)
+#### .bashrc.d/functions/diff-home-files
+* create any parent directories when copying new files to the repo
+
+#### .gitconfig
+* add `ca` alias for amending commits
+* add `diff` configs
+* add a section for git tips
+
+#### .vim/after/plugin/ansi_esc.vim
+* automatically colorize ANSI escape codes in files that may have them
+
+#### .vimrc
+* remove ANSI config to the separate file
+* add mapping for EasyAlign plugin
+
 ## v2.3.7
 
 ### 2022-10-26 (Wed, Oct 26, 2022)

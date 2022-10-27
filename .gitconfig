@@ -104,6 +104,7 @@
   '"
   blame-color = blame --color-lines --color-by-age
   br = branch
+  ca = commit -v --amend
   co = checkout
   ci = "!bash -c '\
      if ! git diff --staged --quiet --exit-code || { ! git diff --quiet --exit-code && [[ \"'$@'\" =~ (^-a | -a | -a$|^-a$) ]]; } then\
@@ -351,6 +352,15 @@
   ui = true
 [diff]
   algorithm = patience
+  tool = vimdiff
+[difftool]
+   prompt = no
+[difftool "vimdiff"]
+   # inspired by <https://stackoverflow.com/questions/17639002/configure-git-difftool-to-edit-an-uncommited-file/17641901#17641901>
+   # vim won't show $BASE on the right side, even when $BASE in the command is...on the right side, like this:
+   #    cmd = "vimdiff -R $LOCAL -c ':set noreadonly' $BASE"
+   # so we have to add the 'execute' command...
+   cmd = vimdiff -R $BASE -c ':set noreadonly | :execute \"normal! \\<c-w>L\"' $LOCAL
 [filter "tabspace"]
    # use by listing files in .git/info/attributes file like so:
    # *.py  filter=tabspace
@@ -393,3 +403,10 @@
 #	name =
 #[url "git@website.com:"]
 #	insteadOf = https://website.com/
+
+##########################################
+#                TIPS                    #
+##########################################
+# exclude files from `git diff` by prefixing filenames with ':!<FULL_PATH_TO_FILENAME>' or ':(exclude)<FULL_PATH_TO_FILENAME>', like this:
+# git diff master... -- ':!docode/src/do/vendor'
+##########################################
