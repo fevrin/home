@@ -50,7 +50,7 @@
 0.0.0.0     gce-or.bidswitch.net
 0.0.0.0     ghbtns.com
 0.0.0.0     go-s3-downloader.dev-openweb.com
-0.0.0.0     googleads.g.doubleclick.net
+0.0.0.0     googleads.g.doubleclick.net # needed for seed.com billing page
 0.0.0.0     gumgum.com
 0.0.0.0     hotjar.com
 0.0.0.0     hyvor.com
@@ -108,7 +108,6 @@
 0.0.0.0     sync.spotim.market # blocking this could cause issues
 0.0.0.0     taboola.com
 #0.0.0.0     tag.idsync.analytics.yahoo.com # needed for comments on TechCrunch
-0.0.0.0     tags.tiqcdn.com
 0.0.0.0     tinypass.com
 0.0.0.0     tpc.googlesyndication.com
 0.0.0.0     trustarc.com
@@ -122,7 +121,7 @@
 0.0.0.0     wixapps.net
 0.0.0.0     wsodata.com
 0.0.0.0     www.1040.com
-0.0.0.0     www.google-analytics.com # required for kencko.com billing page
+0.0.0.0     www.google-analytics.com # required for kencko.com and seed.com billing pages
 0.0.0.0     www.googletagservices.com
 0.0.0.0     www.npttech.com
 0.0.0.0     www.personalcapital.com
@@ -132,6 +131,152 @@
 0.0.0.0     consent.cmp.oath.com # from Yahoo Mail
 0.0.0.0     edgecast-vod.yimg.com # from Yahoo Mail
 0.0.0.0     edge-mcdn.secure.yahoo.com # from Yahoo Mail
+
+# test ad blocking
+# https://adblock-tester.com/
+# https://d3ward.github.io/toolz/adblock.html
+
+# set up ad blocking:
+# https://my.nextdns.io/894afd/setup # 3rd-party service
+# https://github.com/jerryn70/GoodbyeAds
+# https://raw.githubusercontent.com/ookangzheng/blahdns/master/hosts/source.txt
+
+# secure DNS
+https://github.com/curl/curl/wiki/DNS-over-HTTPS
+
+
+# added 2022-11-11
+# from <https://github.com/d3ward/toolz/blob/master/resources/adblock/data.js>
+# curl -sL https://raw.githubusercontent.com/d3ward/toolz/master/resources/adblock/data.js | sed -e 's;,;\n;g' | sed -rne 's;.*https://([^/:"]+).*;\1;p' | sort -u
+0.0.0.0     ads.google.com
+0.0.0.0     adservetx.media.net
+0.0.0.0     adtago.s3.amazonaws.com
+0.0.0.0     advertising-api-eu.amazon.com
+0.0.0.0     advice-ads.s3.amazonaws.com
+0.0.0.0     affiliationjs.s3.amazonaws.com
+0.0.0.0     amazonaax.com
+0.0.0.0     amazonclix.com
+0.0.0.0     analyticsengine.s3.amazonaws.com
+0.0.0.0     assoc-amazon.com
+0.0.0.0     cdn.fastclick.net
+0.0.0.0     fastclick.com
+0.0.0.0     fastclick.net
+0.0.0.0     googleadservices.com
+0.0.0.0     m.doubleclick.net
+0.0.0.0     media.fastclick.net
+0.0.0.0     mediavisor.doubleclick.net
+0.0.0.0     pagead2.googleadservices.com
+0.0.0.0     static.doubleclick.net
+0.0.0.0     static.media.net
+
+0.0.0.0     ad.samsungadhub.com
+0.0.0.0     ads-api.twitter.com
+0.0.0.0     ads-dev.pinterest.com
+0.0.0.0     adsdk.yandex.ru
+0.0.0.0     ads.facebook.com
+0.0.0.0     ads.linkedin.com
+0.0.0.0     ads.pinterest.com
+0.0.0.0     ads.reddit.com
+0.0.0.0     ads-sg.tiktok.com
+0.0.0.0     ads.tiktok.com
+0.0.0.0     ads-twitter.com
+0.0.0.0     ads.yahoo.com
+0.0.0.0     ads.yap.yahoo.com
+0.0.0.0     ads.youtube.com
+0.0.0.0     advertising.twitter.com
+0.0.0.0     a.mouseflow.com
+0.0.0.0     analytics-api.samsunghealthcn.com
+0.0.0.0     analytics.facebook.com
+0.0.0.0     analytics.mobile.yandex.net
+0.0.0.0     analytics.oneplus.cn
+0.0.0.0     analytics.pinterest.com
+0.0.0.0     analytics.pointdrive.linkedin.com
+0.0.0.0     analytics.samsungknox.com
+0.0.0.0     analytics-sg.tiktok.com
+0.0.0.0     analytics.tiktok.com
+0.0.0.0     analytics.yahoo.com
+0.0.0.0     an.facebook.com
+0.0.0.0     api.ad.xiaomi.com
+0.0.0.0     api.bugsnag.com
+0.0.0.0     api-hotjar.com
+0.0.0.0     app.bugsnag.com
+0.0.0.0     app.chat.xiaomi.net
+0.0.0.0     app.getsentry.com
+0.0.0.0     appmetrica.yandex.com
+0.0.0.0     bigdata.ssp.samsung.com
+0.0.0.0     browser.sentry-cdn.com
+0.0.0.0     business.samsungusa.com
+0.0.0.0     cdn.luckyorange.com
+0.0.0.0     click.oneplus.cn
+0.0.0.0     click.oneplus.com
+0.0.0.0     config.samsungads.com
+0.0.0.0     cs.luckyorange.net
+0.0.0.0     data.mistat.india.xiaomi.com
+0.0.0.0     data.mistat.intl.xiaomi.com
+0.0.0.0     data.mistat.rus.xiaomi.com
+0.0.0.0     data.mistat.xiaomi.com
+0.0.0.0     d.reddit.com
+0.0.0.0     events.redditmedia.com
+0.0.0.0     extmaps-api.yandex.net
+0.0.0.0     freshmarketer.com
+0.0.0.0     global.adserver.yahoo.com
+0.0.0.0     globalapi.ad.xiaomi.com
+0.0.0.0     google-analytics.com
+0.0.0.0     hotjar-analytics.com
+0.0.0.0     logbak.hicloud.com
+0.0.0.0     log.pinterest.com
+0.0.0.0     logservice1.hicloud.com
+0.0.0.0     logservice.hicloud.com
+0.0.0.0     luckyorange.com
+0.0.0.0     metrics1.data.hicloud.com
+0.0.0.0     metrics2.data.hicloud.com
+0.0.0.0     metrics3.data.hicloud.com
+0.0.0.0     metrics4.data.hicloud.com
+0.0.0.0     metrics5.data.hicloud.com
+0.0.0.0     metrics.apple.com
+0.0.0.0     metrics.data.hicloud.com
+0.0.0.0     metrics-dra.dt.hicloud.com
+0.0.0.0     metrics.icloud.com
+0.0.0.0     metrics.mzstatic.com
+0.0.0.0     mouseflow.com
+0.0.0.0     nmetrics.samsung.com
+0.0.0.0     notify.bugsnag.com
+0.0.0.0     open.oneplus.net
+0.0.0.0     pixel.facebook.com
+0.0.0.0     rereddit.com
+0.0.0.0     sa.api.intl.miui.com
+0.0.0.0     samsungadhub.com
+0.0.0.0     samsungads.com
+0.0.0.0     samsung-com.112.2o7.net
+0.0.0.0     sdkconfig.ad.intl.xiaomi.com
+0.0.0.0     sdkconfig.ad.xiaomi.com
+0.0.0.0     securemetrics.apple.com
+0.0.0.0     sessions.bugsnag.com
+0.0.0.0     settings.luckyorange.net
+0.0.0.0     smetrics.samsung.com
+0.0.0.0     ssl.google-analytics.com
+0.0.0.0     static.ads-twitter.com
+0.0.0.0     static.hotjar.com
+0.0.0.0     stats.wp.com
+0.0.0.0     supportmetrics.apple.com
+0.0.0.0     tracking.india.miui.com
+0.0.0.0     tracking.intl.miui.com
+0.0.0.0     tracking.miui.com
+0.0.0.0     tracking.rus.miui.com
+0.0.0.0     trk.pinterest.com
+0.0.0.0     upload.luckyorange.net
+0.0.0.0     w1.luckyorange.com
+0.0.0.0     widgets.pinterest.com
+0.0.0.0     www.cdn.ad.xiaomi.com
+0.0.0.0     yandexadexchange.net
+0.0.0.0     youtube.cleverads.vn
+
+
+0.0.0.0     an.yandex.ru
+0.0.0.0     mc.yandex.ru
+0.0.0.0     yastatic.net
+
+
 
 # The following lines are desirable for IPv6 capable hosts
 ::1     ip6-localhost ip6-loopback

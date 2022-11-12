@@ -290,6 +290,13 @@ vnoremap <Enter> <Plug>(EasyAlign1)
 :let g:netrw_altv = 1 " set netrw's default window split
 
 
+"split navigations
+nnoremap <C-J> <C-W><C-J>
+nnoremap <C-K> <C-W><C-K>
+nnoremap <C-L> <C-W><C-L>
+nnoremap <C-H> <C-W><C-H>
+
+
 " some good resources on:
 " general info:
 " <http://vimdoc.sourceforge.net/htmldoc/intro.html#5707237730256408377>
@@ -326,56 +333,65 @@ endif
 
 " some plugins Red Hat suggests:
 " <https://www.redhat.com/sysadmin/five-vim-plugins>
+
+" plugins:
+" https://vimawesome.com/
 call plug#begin(s:vim_home_dir . '/plugged')
-"   Plug 'airblade/vim-gitgutter'
-"   Plug 'AndrewRadev/linediff.vim'
-"   Plug 'arp242/undofile_warn.vim'
-"   Plug 'dense-analysis/ale'             " live linting
-"   Plug 'editorconfig/editorconfig-vim' " https://github.com/editorconfig/editorconfig/wiki/EditorConfig-Properties
-   Plug 'ekalinin/Dockerfile.vim'         " adds syntax highlighting for Dockerfiles
-"   Plug 'ervandew/supertab'                 " smart tab completion (old)
-   Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries', 'frozen': 'true' }
-   Plug 'hashivim/vim-terraform'       " syntax highlighting for terraform
-"   Plug 'https://github.com/ElmCast/elm-vim'
+"   Plug 'airblade/vim-gitgutter'                                                       "
+"   Plug 'AndrewRadev/linediff.vim'                                                     "
+"   Plug 'arp242/undofile_warn.vim'                                                     "
+"   Plug 'dense-analysis/ale'                                                           " live linting
+"   Plug 'editorconfig/editorconfig-vim'                                                " https://github.com/editorconfig/editorconfig/wiki/EditorConfig-Properties
+   Plug 'ekalinin/Dockerfile.vim'                                                       " adds syntax highlighting for Dockerfiles
+"   Plug 'ervandew/supertab'                                                            " smart tab completion (old)
+   Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries', 'frozen': 'true' }                "
+   Plug 'hashivim/vim-terraform'                                                        " syntax highlighting for terraform
+"   Plug 'https://github.com/ElmCast/elm-vim'                                           "
    Plug 'https://github.com/fevrin/AnsiEsc.vim', { 'branch': 'main', 'frozen': 'true' } " converts ANSI escape codes to colors
-"   Plug 'inkarkat/vim-AdvancedDiffOptions'
-"   Plug 'inkarkat/vim-ConflictMotions'      " older conflict marker jumper
-"   Plug 'janko/vim-test'
-"   Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
-"   Plug 'junegunn/fzf.vim'
-   Plug 'junegunn/vim-easy-align'     " easily align lines based on a common character expression
-"   Plug 'kana/vim-textobj-user'
-"     \| Plug 'glts/vim-textobj-comment'
-"   Plug 'mbbill/undotree'                   " lets you visualize a file's undo history
-"   Plug 'mhinz/vim-signify'
+"   Plug 'inkarkat/vim-AdvancedDiffOptions'                                             "
+"   Plug 'inkarkat/vim-ConflictMotions'                                                 " older conflict marker jumper
+"   Plug 'janko/vim-test'                                                               "
+"   Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }                                 "
+"   Plug 'junegunn/fzf.vim'                                                             "
+   Plug 'junegunn/vim-easy-align'                                                       " easily align lines based on a common character expression
+"   Plug 'kana/vim-textobj-user'                                                        "
+"   Plug 'glts/vim-textobj-comment'                                                     "
+"   Plug 'Konfekt/FastFold'                                                             " fixes slow folding
+"   Plug 'mbbill/undotree'                                                              " lets you visualize a file's undo history
+"   Plug 'mhinz/vim-signify'                                                            "
 "   for jump-to-definition functionality without ctags:
 "   https://stackoverflow.com/questions/635770/jump-to-function-definition/51195409#51195409
-"   Plug 'neoclide/coc.nvim', {'branch': 'release'}
-"   Plug 'neoclide/coc-prettier' " prettier formatter for Coc
+"   Plug 'neoclide/coc.nvim', {'branch': 'release'}                                     "
+"   Plug 'neoclide/coc-prettier'                                                        " prettier formatter for Coc
    Plug 'pearofducks/ansible-vim', { 'branch': 'master', 'frozen': 'true' }
-"   Plug 'powerline/powerline'               " power statusline
-"   Plug 'preservim/nerdtree'
-"   Plug 'prettier/vim-prettier'             " code formatter
-"   Plug 'puremourning/vimspector'
-"   Plug 'rhysd/conflict-marker.vim'         " lets you quickly jump to and resolve conflicts diff'ed files and colors conflict areas
-"   Plug 'rickhowe/spotdiff.vim'
-"   Plug 'scrooloose/nerdcommenter'
-"   Plug 'scrooloose/nerdtree'
-"   Plug 'sheerun/vim-polyglot'
-"   Plug 'sjl/gundo.vim'                     " lets you visualize a file's undo history
-   Plug 'tpope/vim-commentary'         " adds commands to comment and uncomment lines
-   Plug 'tpope/vim-eunuch'             " filesystem commands within vim
-"   Plug 'tpope/vim-fugitive'           " git commands within vim
-"   Plug 'tpope/vim-repeat'             " repeat last map in whole
-"   Plug 'tpope/vim-sensible'           " sensible option defaults
-"   Plug 'tpope/vim-sleuth'             " automatically adjusts formatting and encoding options based on the current file
-"   Plug 'tpope/vim-surround'           " adds commands for surrounding arbitrary text with quotes, parentheses, etc.
-   Plug 'tpope/vim-unimpaired'         " lets you quickly jump to and resolve conflicts diff'ed files, among other things
-"   Plug 'vim-airline/vim-airline'
-"   Plug 'vim-scripts/vcscommand.vim'
-"   Plug 'vim-syntastic/syntastic'           " code syntax checker
-   Plug 'vito/booklit.vim'             " syntax highlighting for Booklit files
-"   Plug 'yggdroot/indentline'
+"   Plug 'powerline/powerline'                                                          " power statusline
+"   Plug 'preservim/nerdtree'                                                           "
+"   Plug 'prettier/vim-prettier'                                                        " code formatter
+"   Plug 'puremourning/vimspector'                                                      "
+"   Plug 'python-mode/python-mode', { 'for': 'python', 'branch': 'develop' }            "
+"   Plug 'rhysd/conflict-marker.vim'                                                    " lets you quickly jump to and resolve conflicts diff'ed files and colors conflict areas
+"   Plug 'rickhowe/spotdiff.vim'                                                        "
+"   Plug 'scrooloose/nerdcommenter'                                                     "
+"   Plug 'scrooloose/nerdtree'                                                          "
+"   Plug 'sheerun/vim-polyglot'                                                         "
+"   Plug 'sjl/gundo.vim'                                                                " lets you visualize a file's undo history
+"   Plug 'tmhedberg/SimpylFold'                                                         " python code folding
+"   let g:SimpylFold_docstring_preview=1
+   Plug 'tpope/vim-commentary'                                                          " adds commands to comment and uncomment lines
+   Plug 'tpope/vim-eunuch'                                                              " filesystem commands within vim
+"   Plug 'tpope/vim-fugitive'                                                           " git commands within vim
+"   Plug 'tpope/vim-repeat'                                                             " repeat last map in whole
+"   Plug 'tpope/vim-sensible'                                                           " sensible option defaults
+"   Plug 'tpope/vim-sleuth'                                                             " automatically adjusts formatting and encoding options based on the current file
+"   Plug 'tpope/vim-surround'                                                           " adds commands for surrounding arbitrary text with quotes, parentheses, etc.
+   Plug 'tpope/vim-unimpaired'                                                          " lets you quickly jump to and resolve conflicts diff'ed files, among other things
+"   Plug 'vim-airline/vim-airline'                                                      "
+"   Plug 'vim-scripts/vcscommand.vim'                                                   "
+"   Plug 'vim-syntastic/syntastic'                                                      " code syntax checker
+   Plug 'vito/booklit.vim'                                                              " syntax highlighting for Booklit files
+"   Plug 'ycm-core/YouCompleteMe'                                                       " fast, as-you-type, fuzzy-search code completion, comprehension and refactoring engine
+"   Plug 'yggdroot/indentline'                                                          "
+"   Plug 'zhimsel/vim-stay'                                                             " (old) automated view session creation and restoration
 call plug#end()
 
 let g:go_fmt_command = "goimports"

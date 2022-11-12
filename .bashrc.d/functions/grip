@@ -1,0 +1,15 @@
+#!/bin/bash
+
+grip() {
+
+   local file="${1}"
+
+   cd ~/home
+   pipenv graph | grep -qE '^grip(==[0-9.]+)?' || {
+      echo "grip isn't installed at ~/home"
+      cd -
+      return 1
+   }
+   pipenv run grip -b "${file}"
+   cd -
+}
