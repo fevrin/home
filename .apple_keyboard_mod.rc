@@ -1,12 +1,14 @@
 #!/bin/bash
 
-# inspired by <https://linuxconfig.org/reprogram-keyboard-keys-with-xmodmap>
-xmodmap -pke |
-sed -re 's;^(keycode 105 = )Alt_R Meta_R Alt_R Meta_R;\1Control_R NoSymbol Control_R;g' -e 's;^(keycode 108 = )Control_R NoSymbol Control_R;\1Alt_R Meta_R Alt_R Meta_R;g' |
-xmodmap -
+[[ $(lsb_release -rs) >= 22.04 ]] && {
+   # inspired by <https://linuxconfig.org/reprogram-keyboard-keys-with-xmodmap>
+   xmodmap -pke |
+   sed -re 's;^(keycode 105 = )Alt_R Meta_R Alt_R Meta_R;\1Control_R NoSymbol Control_R;g' -e 's;^(keycode 108 = )Control_R NoSymbol Control_R;\1Alt_R Meta_R Alt_R Meta_R;g' |
+   xmodmap -
 
-echo "log out and log back in to effect keyboard key swaps"
-exit
+   echo "log out and log back in to effect keyboard key swaps"
+   exit
+}
 
 # default keycode values
 #ctrl_l=37

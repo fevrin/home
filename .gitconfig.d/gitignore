@@ -2,4 +2,6 @@
 config
 *.pem
 .idea
+.lesshst
 *.un~
+*.orig

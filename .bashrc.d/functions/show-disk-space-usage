@@ -34,7 +34,7 @@ show-disk-space-usage() {
 #      echo "possible_dirs = '${possible_dirs[*]}'"
       for i in ${possible_dirs[*]}; do
 #         echo "i = '$i'"
-         file -L --mime-type "$i" | grep -q 'inode/directory' && dirs_array+=("$i/*")
+         sudo file -L --mime-type "$i" | grep -q 'inode/directory' && dirs_array+=("$i/*")
       done
 #      echo "length = '${#dirs_array[*]}'"
       local dirs_array_length="${#dirs_array[*]}"
