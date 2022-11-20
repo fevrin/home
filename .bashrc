@@ -38,11 +38,17 @@ else
       # history -c;
       # history -r;
 
+      hostname_color="yellow"
+      [[ -n $SSH_CONNECTION ]] && hostname_color="red"
+
       PROMPT_COMMAND='
       __git_ps1 \
-      "\n$(colorize bold green "$USER" bold yellow "@$HOSTNAME" none ":" bold blue "\w")" \
+      "\n$(colorize bold green "$USER" bold '"${hostname_color}"' "@$HOSTNAME" none ":" bold blue "\w")" \
       "\n\D{%F %T %Z}\n\[\033[01;34m\]\!\[\033[00m\]\$ "
       '
+
+      unset hostname_color
+
       read -r -d '' PROMPT_COMMAND <<-EOF
 			history -n; # Read the history lines not already read from the history file into the current history list. These are lines appended to the history file since the beginning of the current bash session.
 			history -w; # Write the current history list to the history file, overwriting the history file's contents.

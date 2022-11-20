@@ -269,7 +269,13 @@ nnoremap <silent> <Space> @=(foldlevel('.')?'za':"\<Space>")<CR>
 vnoremap <Space> zf
 
 " set a mapping for EasyAlign plugin's visual-mode alignment
-vnoremap <Enter> <Plug>(EasyAlign1)
+vnoremap <Enter> <Plug>(EasyAlign)
+
+" Start interactive EasyAlign in visual mode (e.g. vipga)
+xmap ga <Plug>(EasyAlign)
+
+" Start interactive EasyAlign for a motion/text object (e.g. gaip)
+nmap ga <Plug>(EasyAlign)
 
 "https://stackoverflow.com/questions/597687/how-to-quickly-change-variable-names-in-vim/597932#597932
 

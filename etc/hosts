@@ -142,7 +142,7 @@
 # https://raw.githubusercontent.com/ookangzheng/blahdns/master/hosts/source.txt
 
 # secure DNS
-https://github.com/curl/curl/wiki/DNS-over-HTTPS
+# https://github.com/curl/curl/wiki/DNS-over-HTTPS
 
 
 # added 2022-11-11
