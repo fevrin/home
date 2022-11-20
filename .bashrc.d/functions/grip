@@ -2,7 +2,7 @@
 
 grip() {
 
-   local file="${1}"
+   local file="$(readlink -f "${1}")"
 
    cd ~/home
    pipenv graph | grep -qE '^grip(==[0-9.]+)?' || {

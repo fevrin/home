@@ -74,7 +74,7 @@ yessh() {
                ;;
             *)
                if [[ -z "$hostname" ]]; then
-                  [[ "$arg" =~ $DOMAIN_REGEX$ ]] && hostname="$arg"
+                  [[ "$arg" =~ $DOMAIN_REGEX$ || "$arg" =~ $IP_REGEX$ ]] && hostname="$arg"
                else
                   # the last argument(s) should be the command, like with the ssh client
                   orig_command="$@"
