@@ -52,7 +52,7 @@
         fi;\
         brs_with_remote_configs_but_no_remote_counterpart=$(git get-local-brs-with-remote-config-without-remote-counterpart); \
         if [[ -n \"$brs_with_remote_configs_but_no_remote_counterpart\" ]]; then \
-           echo -e \"\\nthese branches have a remote config but no remote counterpart:\\n\"${brs_with_remote_configs_but_no_remote_counterpart}\"\"; \
+           echo -e \"\\nthese branches have a remote config but no remote counterpart:\\n$(echo \"${brs_with_remote_configs_but_no_remote_counterpart}\" | sed -e \"s;^;- ;\")\"; \
            echo; \
            echo -n \"would you like to clear them? [y/N] \";\
            read;\
@@ -279,6 +279,11 @@
   get-upstream-branch = "!bash -c 'git br --format=\"%(if:equals=$(git current-branch))%(refname:short)%(then)%(upstream:lstrip=2)%(end)\" | tr -d \"\n\"; echo'"
   list-tracked-files="!git ls-tree -r $(git current-branch) --name-only"
   trunk = "!git co $(git get-main-branch)"
+   rf = "!f() { \
+             git restore --source=$1 --worktree $2; \
+          }; \
+          f \
+        "
   root-branch = trunk
   rbr = root-branch
   hist = log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short
@@ -292,9 +297,11 @@
      done; \
   '"
   root-dir = rev-parse --show-toplevel
+  save = !git add -A && git commit -m 'chore: commit save point' # from https://snyk.io/blog/10-git-aliases-for-faster-and-productive-git-workflow/
   st = status
   sync = "!$HOME/.gitconfig.d/git-sync.sh $@"
   type = cat-file -t
+  undo = reset HEAD~1 --mixed # from https://snyk.io/blog/10-git-aliases-for-faster-and-productive-git-workflow/
   ver = "!bash -c 'version='$1'; [[ -n \"$version\" ]] && git tag -am \"version $version\" v$version'"
   who = shortlog -n -s --no-merges # from <https://thoughtbot.com/blog/streamline-your-git-workflow-with-aliases>
 
@@ -338,6 +345,7 @@
   lg2 = log --graph -30 --abbrev-commit --decorate --simplify-by-decoration --date=relative --format=format:'%C(bold blue)%h%C(reset) - %C(bold yellow)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(auto)%d%C(reset)' --all
   lg3 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold yellow)(%ar)%C(reset)%C(auto)%d%C(reset)%n''          %C(white)%s%C(reset) %C(dim white)- %an%C(reset)' --all
   lg4 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset) %C(bold cyan)(committed: %cD)%C(reset) %C(auto)%d%C(reset)%n''          %C(white)%s%C(reset)%n''          %C(dim white)- %an <%ae> %C(reset) %C(dim white)(committer: %cn <%ce>)%C(reset)'
+  ss = stash show
 [checkout]
   defaultRemote = origin
 [core]

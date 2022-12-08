@@ -83,8 +83,8 @@ map <a-v> "+gP
 set showcmd " sc; show commands in the lower-right as they are typed
 set ruler " ru; show cursor position below each window
 
-set visualbell t_vb= "vb; sets the visual bell to nothing, so no audible or visible bells are rung after an error (like
-"Backspacing when you're at the beginning of a line)
+set novisualbell "vb; sets the visual bell to nothing, so no audible or visible bells are rung after an error (like Backspacing when you're at the beginning of a line)
+"set t_vb=        " sets the visual bell to nothing, but needs to be in a '~/.vim/after' file
 
 " 14 editing text
 "
@@ -346,6 +346,7 @@ call plug#begin(s:vim_home_dir . '/plugged')
 "   Plug 'airblade/vim-gitgutter'                                                       "
 "   Plug 'AndrewRadev/linediff.vim'                                                     "
 "   Plug 'arp242/undofile_warn.vim'                                                     "
+"   Plug 'catppuccin/vim', { 'as': 'catppuccin' }                                       " pastel themes
 "   Plug 'dense-analysis/ale'                                                           " live linting
 "   Plug 'editorconfig/editorconfig-vim'                                                " https://github.com/editorconfig/editorconfig/wiki/EditorConfig-Properties
    Plug 'ekalinin/Dockerfile.vim'                                                       " adds syntax highlighting for Dockerfiles
