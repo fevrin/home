@@ -1,0 +1,22 @@
+# from https://www.reddit.com/r/archlinux/comments/mn0nie/comment/gtv12gq/?utm_source=share&utm_medium=web2x&context=3
+# be sure to run these commands:
+# $ sudo cp $thisfile /etc/systemd/system/
+# $ sudo systemctl daemon-reload
+# $ sudo systemctl enable --now /etc/systemd/system/$thisfile
+
+[Unit]
+Description=Restarts powertop.service after wake
+After=hibernate.target
+After=hybrid-sleep.target
+After=suspend.target
+After=suspend-then-hibernate.target
+
+[Service]
+Type=simple
+ExecStart=/bin/systemctl --no-block restart powertop.service
+
+[Install]
+WantedBy=hibernate.target
+WantedBy=hybrid-sleep.target
+WantedBy=suspend.target
+WantedBy=suspend-then-hibernate.target
