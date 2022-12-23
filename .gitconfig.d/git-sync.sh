@@ -307,7 +307,9 @@ for DIR in ${DIRS[*]}; do
 #               verbose 8 $GITBIN stash pop --index stash@{/"$STASH_NAME"}
                log "$GITBIN stash pop --index stash@{/\"$STASH_NAME\"}"
                if [[ "$INTERACTIVE" -eq 1 ]]; then
-                  $GITBIN stash pop --index "stash@{/$STASH_NAME}"
+                  # we can't pop using a regex, apparently, so we have to use the index instead
+                  STASH_INDEX="$(git stash list | sed -rne "s;^(stash@\{[0-9]+\}): [^:]+: ${STASH_NAME}$;\1;p")"
+                  $GITBIN stash pop --index "${STASH_INDEX}"
                else
                   pop_result="$($GITBIN stash pop --index "stash@{/$STASH_NAME}")"
                fi
