@@ -194,27 +194,41 @@ format_external_luks_lvm() {
       echo -n "which name would you like to use instead? "; read
       keyfile_name="$REPLY"
    }
+   fs_label="${keyfile_name}"
+   [[ ${#fs_label} -gt 16 ]] && fs_label="${drive_info[vendor],,}_${drive_info[size],,}"
    _print_var_vals drive_info[device] drive_info[vendor] drive_info[model] drive_info[size] keyfile_name
+   echo "'${drive_info[device]}' '${drive_info[path]}''${drive_info[vendor]}' '${drive_info[model]}' '${drive_info[size]}' '$keyfile_name'"
 
    # ensure sudo privileges are active
    sudo -v
 
    # unmount the drive if it's mounted
-   grep -qs "${drive_info[path]}" /proc/mounts && sudo umount "${drive_info[path]}"
+   grep -qs "${drive_info[path]}" /proc/mounts &&
+      echo sudo umount "${drive_info[path]}"
+   grep -qs "${drive_info[path]}" /proc/mounts &&
+      sudo umount "${drive_info[path]}"
 
    # close the mount if it's already encrypted
-   sudo cryptsetup isLuks "${drive_info[path]}" &>/dev/null && sudo cryptsetup status "${keyfile_name}" &>/dev/null && sudo cryptsetup close "${keyfile_name}"
+   local existing_map="$(sudo lsblk -lo NAME,PATH,PKNAME | awk "{ if (\$3 ~ /${drive_info[path]##*/}/) {print \$2} }")"
+   echo sudo cryptsetup isLuks "${drive_info[path]}" &&
+      echo sudo cryptsetup status "${existing_map}" &&
+      echo sudo cryptsetup close "${existing_map}" &&
+      echo sudo umount "${existing_map}"
+   sudo cryptsetup isLuks "${drive_info[path]}" &>/dev/null &&
+      sudo cryptsetup status "${existing_map}" &>/dev/null &&
+      sudo cryptsetup close "${existing_map}" &&
+      sudo umount "${existing_map}"
 
    # print the current partition table
    sudo sgdisk --print "${drive_info[device]}"
    echo
    echo -n "would you like to reformat the drive? [y/N] "; read
    [[ $REPLY =~ [Yy] ]] && {
-      sudo sgdisk --zap-all "${drive_info[device]}"
-      sudo sgdisk --new=1:0:0 "${drive_info[device]}"
-      sudo sgdisk --typecode=1:8301 "${drive_info[device]}"
-      sudo sgdisk --change-name=1:"${keyfile_name}" "${drive_info[device]}"
-      sudo sgdisk --print "${drive_info[device]}"
+      echo sudo sgdisk --zap-all "${drive_info[device]}" &&
+      echo sudo sgdisk --new=1:0:0 "${drive_info[device]}" &&
+      echo sudo sgdisk --typecode=1:8301 "${drive_info[device]}" &&
+      echo sudo sgdisk --change-name=1:"${keyfile_name}" "${drive_info[device]}" &&
+      echo sudo sgdisk --print "${drive_info[device]}"
       echo
       echo -n "does the new partition table look correct? [y/N] "; read
       [[ $REPLY =~ [Yy] ]] || {
@@ -228,10 +242,10 @@ format_external_luks_lvm() {
    [[ $REPLY =~ [Yy] ]] && {
       echo sudo cryptsetup luksFormat --verbose --verify-passphrase --type=luks2 "${drive_info[path]}" &&
       sudo cryptsetup luksFormat --verbose --verify-passphrase --type=luks2 "${drive_info[path]}" &&
-      echo sudo cryptsetup open --verbose --type=luks2 "${drive_info[path]}" "${keyfile_name}" &&
-      sudo cryptsetup open --verbose --type=luks2 "${drive_info[path]}" "${keyfile_name}" &&
-      echo sudo cryptsetup luksDump "${drive_info[path]}" &&
-      sudo cryptsetup luksDump "${drive_info[path]}" &&
+      echo cryptsetup open --verbose --type=luks2 "${drive_info[path]}" "${keyfile_name}" &&
+      cryptsetup open --verbose --type=luks2 "${drive_info[path]}" "${keyfile_name}" &&
+      echo cryptsetup luksDump "${drive_info[path]}" &&
+      cryptsetup luksDump "${drive_info[path]}" &&
       #   sudo cryptsetup luksAddKey "${drive_info[path]}" /etc/crypt."${keyfile_name}"
       #   sudo chown "${USER}" /etc/crypt."${keyfile_name}"
       #   sudo cryptsetup luksHeaderBackup "${drive_info[path]}" --header-backup-file=/etc/crypt."${keyfile_name}".header
@@ -239,8 +253,8 @@ format_external_luks_lvm() {
       #   echo pvcreate /dev/mapper/"${keyfile_name}"
       #   echo vgcreate "${keyfile_name}-vg" /dev/mapper/"${keyfile_name}"
       #   echo lvcreate -L 100%FREE -n "${keyfile_name}-lv" "${keyfile_name}-vg"
-      echo sudo mkfs.ext4 -vL "${fs_label}" /dev/mapper/"${keyfile_name}" &&
-      sudo mkfs.ext4 -vL "${fs_label}" /dev/mapper/"${keyfile_name}" &&
+      echo mkfs.ext4 -vL "${fs_label}" /dev/mapper/"${keyfile_name}" &&
+      mkfs.ext4 -vL "${fs_label}" /dev/mapper/"${keyfile_name}" &&
       echo udisksctl mount -b /dev/mapper/"${keyfile_name}" /media/$USER/"${keyfile_name}" &&
       udisksctl mount -b /dev/mapper/"${keyfile_name}" /media/$USER/"${keyfile_name}"
 #      sudo cryptsetup close --verbose "${keyfile_name}"
