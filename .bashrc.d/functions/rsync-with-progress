@@ -83,6 +83,7 @@ rsync-with-progress() {
       --itemize-changes
       --stats
       --min-size=1
+      --hard-links
       --exclude='.trashed-*'
    )
    declare -a RSYNC_FLAGS_NEGATIONS=(
@@ -148,6 +149,7 @@ rsync-with-progress() {
                SRC="$arg"
             elif [[ -z "$DST" ]]; then
                DST="${arg%/}"
+               [[ -f "${DST}" ]] && continue
                [[ -d "${DST}" ]] || {
                   echo
                   echo "${DST}"
@@ -172,7 +174,7 @@ rsync-with-progress() {
    for i in "${RSYNC_FLAGS[@]}"; do
       ([[ "$i" =~ ^(-n|--dry-run)$ ]]) && DRY_RUN=1
    done
-   [[ $USE_LINK_DEST -eq 1 && "$LINK_DEST" != "$DST" ]] && RSYNC_FLAGS+=(--link-dest="$LINK_DEST")
+   [[ $USE_LINK_DEST -eq 1 && -n "$LINK_DEST" && "$LINK_DEST" != "$DST" ]] && RSYNC_FLAGS+=(--link-dest="$LINK_DEST")
    _clean_up_rsync_flags() {
       declare -a temparray
       # remove any options that the user overrode with the "--no-*" variant

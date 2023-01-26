@@ -1,6 +1,6 @@
 #!/bin/bash
 
-[[ $(lsb_release -rs) >= 22.04 ]] && {
+[[ $(lsb_release -rs | tr -d '.') -ge 2204 ]] && {
    # inspired by <https://linuxconfig.org/reprogram-keyboard-keys-with-xmodmap>
    xmodmap -pke |
    sed -re 's;^(keycode 105 = )Alt_R Meta_R Alt_R Meta_R;\1Control_R NoSymbol Control_R;g' -e 's;^(keycode 108 = )Control_R NoSymbol Control_R;\1Alt_R Meta_R Alt_R Meta_R;g' |
@@ -115,7 +115,8 @@ else
       sudo sed -i.bak -re 's;! option$;&\n  ctrl:swap_ralt_rctl  Swap right Alt and right Ctrl;' /usr/share/X11/xkb/rules/evdev.lst
    }
 
-   dconf write "/org/gnome/desktop/input-sources/xkb-options" "['ctrl:swap_lalt_lctl','ctrl:swap_ralt_rctl']"
+   #dconf write "/org/gnome/desktop/input-sources/xkb-options" "['ctrl:swap_lalt_lctl','ctrl:swap_ralt_rctl']"
+   dconf write "/org/gnome/desktop/input-sources/xkb-options" "['ctrl:swap_ralt_rctl']"
 fi
 
 if ! w | awk "/${USER}/ { print \$2 }" | grep -q 'pts/2' || [[ $FORCE -eq 1 ]]; then
