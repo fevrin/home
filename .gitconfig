@@ -1,106 +1,121 @@
 [alias]
   # inspired by <https://www.atlassian.com/blog/git/advanced-git-aliases>
 #  bclean = "!git branch --merged HEAD | sed -re 's;^\\*?\\s+;;' | egrep -v \"^($(git rev-parse --abbrev-ref HEAD)|master)$\" -Z | xargs -0 -I{} echo -e 'these branches would be cleared:\n{}'"
+  # somewhat obviated by 'seachicken/gh-poi' or 'davidraviv/gh-clean-branches'
   bclean = "!\
      bash -c '\
-        main_remote=\"$(git get-main-remote)\"; \
-        main_branch=\"$(git get-main-branch)\"; \
-        current_branch=$(git current-branch); \
-        git sync --no-rebase; \
-        affected_branches=$(\
-           git branch --merged $main_remote/$main_branch | \
-           sed -re \"s;^\\*?\\s+;;\" | \
-           egrep -v \"^$main_branch$\" -Z \
-        );\
-        \
-        if [[ -n \"$affected_branches\" ]]; then\
-           echo -e \"\\nthese branches would be cleared:\\n$(echo \"${affected_branches}\" | sed -e \"s;^;- ;\")\"; \
-           echo; \
-           echo -n \"would you like to clear them? [y/N] \";\
-           read;\
-           echo;\
-           if [[ $REPLY =~ [Yy] ]]; then \
-              for branch in $affected_branches; do \
-                 if [[ $branch = $current_branch ]]; then \
-                    echo -n \"delete current branch '\\''\"$current_branch\"'\\''? [y/N] \" && \
-                    read && \
-                    echo && \
-                    [[ $REPLY =~ [Yy] ]] || { \
-                       echo \"skipping '\\''\"$current_branch\"'\\''\"; \
-                       continue; \
-                    }; \
-                    git trunk; \
-                 fi; \
-                 git branch -d $branch;\
-                 if [[ $? -ne 0 ]]; then \
-                    echo && \
-                    echo -n \"try force deleting '\\''\"$branch\"'\\''? [y/N] \" && \
-                    read && \
-                    echo && \
-                    [[ $REPLY =~ [Yy] ]] || { \
-                       echo \"skipping '\\''\"$branch\"'\\''\"; \
-                       continue; \
-                    }; \
-                    git branch -D $branch;\
-                 fi; \
-              done; \
-           else \
-              echo \"cancelling branch clearing\"; \
-           fi;\
-        else\
-           echo \"no branches to clean!\";\
-        fi;\
-        brs_with_remote_configs_but_no_remote_counterpart=$(git get-local-brs-with-remote-config-without-remote-counterpart); \
-        if [[ -n \"$brs_with_remote_configs_but_no_remote_counterpart\" ]]; then \
-           echo -e \"\\nthese branches have a remote config but no remote counterpart:\\n$(echo \"${brs_with_remote_configs_but_no_remote_counterpart}\" | sed -e \"s;^;- ;\")\"; \
-           echo; \
-           echo -n \"would you like to clear them? [y/N] \";\
-           read;\
-           echo;\
-           if [[ $REPLY =~ [Yy] ]]; then \
-              for branch in $brs_with_remote_configs_but_no_remote_counterpart; do \
-                 if [[ $branch = $current_branch ]]; then \
-                    echo -n \"delete current branch '\\''\"$current_branch\"'\\''? [y/N] \" && \
-                    read && \
-                    echo && \
-                    [[ $REPLY =~ [Yy] ]] || { \
-                       echo \"skipping '\\''\"$current_branch\"'\\''\"; \
-                       continue; \
-                    }; \
-                    git trunk; \
-                 fi; \
-                 git branch -d $branch;\
-                 if [[ $? -ne 0 ]]; then \
-                    echo && \
-                    echo -n \"try force deleting '\\''\"$branch\"'\\''? [y/N] \" && \
-                    read && \
-                    echo && \
-                    [[ $REPLY =~ [Yy] ]] || { \
-                       echo \"skipping '\\''\"$branch\"'\\''\"; \
-                       continue; \
-                    }; \
-                    git branch -D $branch;\
-                 fi; \
-              done; \
-           else \
-              echo \"cancelling branch clearing\"; \
+        if which gh &>/dev/null && gh poi -h &>/dev/null; then \
+           gh poi --dry-run && { \
+             echo -n \"re-run? [y/N] \"; read; \
+             [[ \"${REPLY}\" =~ ^y$ ]] && gh poi; \
+           }; \
+        fi; \
+        if [[ $? != 0 ]] || !gh poi -h &>/dev/null; then \
+           if which gh &>/dev/null && !gh poi -h &>/dev/null; then \
+              echo \"you can install 'poi' with:\"; \
+              echo; \
+              echo \"   gh extension install seachicken/gh-poi\"; \
+              echo; \
            fi; \
+           main_remote=\"$(git get-main-remote)\"; \
+           main_branch=\"$(git get-main-branch)\"; \
+           current_branch=$(git current-branch); \
+           git sync --no-rebase; \
+           affected_branches=$(\
+              git branch --merged $main_remote/$main_branch | \
+              sed -re \"s;^\\*?\\s+;;\" | \
+              egrep -v \"^$main_branch$\" -Z \
+           );\
+           \
+           if [[ -n \"$affected_branches\" ]]; then\
+              echo -e \"\\nthese branches would be cleared:\\n$(echo \"${affected_branches}\" | sed -e \"s;^;- ;\")\"; \
+              echo; \
+              echo -n \"would you like to clear them? [y/N] \";\
+              read;\
+              echo;\
+              if [[ $REPLY =~ [Yy] ]]; then \
+                 for branch in $affected_branches; do \
+                    if [[ $branch = $current_branch ]]; then \
+                       echo -n \"delete current branch '\\''\"$current_branch\"'\\''? [y/N] \" && \
+                       read && \
+                       echo && \
+                       [[ $REPLY =~ [Yy] ]] || { \
+                          echo \"skipping '\\''\"$current_branch\"'\\''\"; \
+                          continue; \
+                       }; \
+                       git trunk; \
+                    fi; \
+                    git branch -d $branch;\
+                    if [[ $? -ne 0 ]]; then \
+                       echo && \
+                       echo -n \"try force deleting '\\''\"$branch\"'\\''? [y/N] \" && \
+                       read && \
+                       echo && \
+                       [[ $REPLY =~ [Yy] ]] || { \
+                          echo \"skipping '\\''\"$branch\"'\\''\"; \
+                          continue; \
+                       }; \
+                       git branch -D $branch;\
+                    fi; \
+                 done; \
+              else \
+                 echo \"cancelling branch clearing\"; \
+              fi;\
+           else\
+              echo \"no branches to clean!\";\
+           fi;\
+           brs_with_remote_configs_but_no_remote_counterpart=$(git get-local-brs-with-remote-config-without-remote-counterpart); \
+           if [[ -n \"$brs_with_remote_configs_but_no_remote_counterpart\" ]]; then \
+              echo -e \"\\nthese branches have a remote config but no remote counterpart:\\n$(echo \"${brs_with_remote_configs_but_no_remote_counterpart}\" | sed -e \"s;^;- ;\")\"; \
+              echo; \
+              echo -n \"would you like to clear them? [y/N] \";\
+              read;\
+              echo;\
+              if [[ $REPLY =~ [Yy] ]]; then \
+                 for branch in $brs_with_remote_configs_but_no_remote_counterpart; do \
+                    if [[ $branch = $current_branch ]]; then \
+                       echo -n \"delete current branch '\\''\"$current_branch\"'\\''? [y/N] \" && \
+                       read && \
+                       echo && \
+                       [[ $REPLY =~ [Yy] ]] || { \
+                          echo \"skipping '\\''\"$current_branch\"'\\''\"; \
+                          continue; \
+                       }; \
+                       git trunk; \
+                    fi; \
+                    git branch -d $branch;\
+                    if [[ $? -ne 0 ]]; then \
+                       echo && \
+                       echo -n \"try force deleting '\\''\"$branch\"'\\''? [y/N] \" && \
+                       read && \
+                       echo && \
+                       [[ $REPLY =~ [Yy] ]] || { \
+                          echo \"skipping '\\''\"$branch\"'\\''\"; \
+                          continue; \
+                       }; \
+                       git branch -D $branch;\
+                    fi; \
+                 done; \
+              else \
+                 echo \"cancelling branch clearing\"; \
+              fi; \
+           fi; \
+           echo; \
+           echo \"running '\\''git clean'...\\''\"; \
+           git_clean=\"$(git clean -ndf)\"; \
+           echo \"$git_clean\" | sed -re \"s;^Would remove ;;\"; \
+           if [[ \"$git_clean\" ]]; then \
+              echo && \
+              echo -n \"remove the above files? [y/N] \" && \
+              read; \
+              [[ \"$REPLY\" =~ [Yy] ]] && git clean -df && unset REPLY; \
+           else \
+              echo \"no files to clean\"; \
+           fi; \
+           echo; \
+           echo -n \"run '\\''git gc'\\''? [y/N] \"; read; \
+           [[ \"$REPLY\" =~ [Yy] ]] && git gc || exit 0; \
         fi; \
-        echo; \
-        echo \"running '\\''git clean'...\\''\"; \
-        git_clean=\"$(git clean -ndf)\"; \
-        echo \"$git_clean\" | sed -re \"s;^Would remove ;;\"; \
-        if [[ \"$git_clean\" ]]; then \
-           echo && \
-           echo -n \"remove the above files? [y/N] \" && \
-           read; \
-           [[ \"$REPLY\" =~ [Yy] ]] && git clean -df && unset REPLY; \
-        else \
-           echo \"no files to clean\"; \
-        fi; \
-        echo; \
-        echo -n \"run '\\''git gc'\\''? [y/N] \"; read; \
-        [[ \"$REPLY\" =~ [Yy] ]] && git gc || exit 0 \
   '"
   blame-color = blame --color-lines --color-by-age
   br = branch
