@@ -178,6 +178,18 @@
         git diff --check; \
      } \
   '"
+   cl = "!f() { \
+                source=\"$1\"; \
+                repo_name=\"${source##*:}\"; \
+                repo_name=\"${repo_name%.git}\"; \
+                repo_dir=\"${HOME}/repos\"; \
+                destination=\"${repo_dir}/${repo_name}\"; \
+                git clone \"${source}\" \"${destination}\" && \
+                echo && \
+                echo \"cloned into ${destination}\"; \
+             }; \
+             f \
+  "
   com = commit -v
   current-branch = symbolic-ref --short HEAD # alternatives: '$(git rev-parse --abbrev-ref HEAD)' and '$(git branch --show-current)'
   df-alt = "!bash -c '\
@@ -238,9 +250,9 @@
       git diff ${commit1}...${commit2} -- $path' -- "
   diff-with = diff HEAD
 #  diff-with = "!cd \"$GIT_PREFIX\"; echo bash -c 'git diff --name-only HEAD $@'"
-  diff-with-main = "!cd \"$GIT_PREFIX\"; git diff $(git get-main-branch)..."
+  diff-main = "!cd \"$GIT_PREFIX\"; git diff $(git get-main-branch)..."
 #  diff-with-tracking = "!cd \"$GIT_PREFIX\"; bash -c 'git diff-with $(git get-main-remote)/$(git current-branch) $@'"
-  diff-with-tracking = "!cd \"$GIT_PREFIX\"; bash -c 'git diff $(git get-upstream-branch)...HEAD $@' -- "
+  diff-tracking = "!cd \"$GIT_PREFIX\"; bash -c 'git diff $(git get-upstream-branch)...HEAD $@' -- "
   dump = cat-file -p
   fet = !git set-fetch";" git -c fetch.parallel=2 fetch --multiple --prune $(git remote | egrep -v ^all$)   # if this hadn't worked, then this may have: parallel \"git fetch {} --prune 'refs/heads/*:refs/remotes/{}/*'\" ::: $(git remote);
   # &>/dev/null in the "parallel" command apparently eats the exit code...
@@ -412,9 +424,14 @@
   pushremote = no_push
 [branch "main"]
   pushremote = no_push
+[include]
+   path = ~/.gitconfig.d/user
+   path = ~/.gitconfig.d/work
 #[user]
-#	email =
-#	name =
+#	name = username
+#	email = email_addy@users.noreply.github.com
+#[includeIf "gitdir:~/other/path/repos/"]
+#   path = ~/path/to/other/user_file
 #[url "git@website.com:"]
 #	insteadOf = https://website.com/
 
