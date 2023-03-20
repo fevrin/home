@@ -197,7 +197,6 @@ rsync-with-progress() {
          --compress
          --partial
          --progress
-         --info=progress2
       )
 #      for i in  rsync "${RSYNC_FLAGS[@]}" "$SRC" "$DST"; do
 #         echo "$i"
@@ -223,6 +222,12 @@ rsync-with-progress() {
          ([[ $REPLY =~ ^y$ ]]) || return 1
       fi
 
+      # add --info=progress2 after if no dry runs remain
+      [[ "${DRY_RUN}" -eq 1 ]] || {
+         RSYNC_FLAGS+=(
+            --info=progress2
+         )
+      }
       echo
       echo rsync "${RSYNC_FLAGS[@]}" "$SRC" "$DST"
       echo

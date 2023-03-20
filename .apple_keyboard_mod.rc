@@ -25,7 +25,7 @@ reset_keyboard() {
 
 [[ $1 =~ (-f|--force) ]] && FORCE=1
 # alternate behavior depending on if an Apple keyboard is plugged in
-if [[ $(grep -qi 'apple keyboard' /proc/bus/input/devices; echo $?) -eq 0 ]]; then
+if grep -qi 'apple keyboard' /proc/bus/input/devices; then
    # make Cmd-R behave like Ctrl-R
    # and make Alt-R actually behave like Alt-R
    addtl_cmds="

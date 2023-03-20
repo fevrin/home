@@ -24,7 +24,6 @@ diff-home-files() {
    # list files that should be ignored
    # filenames relative to $HOME_DIR
    declare -a skip_files=(
-   ".bashrc"
    ".bashrc.d/functions/_verify_reqs"
    ".bashrc.d/functions/yessh"
    ".githooks/pre-commit"

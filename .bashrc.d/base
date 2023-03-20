@@ -120,6 +120,12 @@ else
    [[ $(echo "$SCREEN_LIST" | grep -i detached) ]] && echo "$SCREEN_LIST"
 fi
 
+[[ "${TERM_PROGRAM}" =~ ^tmux ]] && {
+   # FIXME: fix for slow vim startup in tmux
+   SESSION_PID=$(ls -1tr /tmp/.ICE-unix/ | tail -n1)
+   export SESSION_MANAGER="local/${HOSTNAME}:@/tmp/.ICE-unix/${SESSION_PID},unix/${HOSTNAME}:/tmp/.ICE-unix/${SESSION_PID}"
+}
+
 # read in latest bash history.  for some reason, this must come last (or at least after the "shopt" line);
 # otherwise, the timestamps in ~/.bash_history are also considered commands
 #history -n

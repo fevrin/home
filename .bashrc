@@ -28,6 +28,27 @@ else
       export GIT_PS1_SHOWUNTRACKEDFILES=true
       export GIT_PS1_SHOWCOLORHINTS=true
 
+      if which direnv &>/dev/null && [[ -r .envrc ]]; then
+         DIRENV_ALLOWED="$(direnv status | sed -rne "/^Found RC path ${PWD//\//\\/}\/\.envrc/,/Found RC allowed/s;Found RC allowed (.+)$;\1;p")"
+         if [[ $(egrep -c '(^|[^#]+)\b(export|unset) GIT_PS1_SHOWUNTRACKEDFILES\b' .envrc) -lt 1 ]]; then
+            # the variable isn't already explicitly set or unset
+            if [[ $(du -s --block-size=1M $PWD 2>/dev/null | egrep -o '^[0-9]+') -lt 100 ]]; then
+               # GIT_PS1_SHOWUNTRACKEDFILES adds some load time to each bash prompt when within large git repos
+               # we'll export it only if we use `direnv` and the repo is less than 100MB
+               # this is so we run `du` just once, when either setting or unsetting the variable,
+               # then let `direnv` do its thing on all subsequent `cd`'s into the directory
+               export GIT_PS1_SHOWUNTRACKEDFILES=true
+               echo 'export GIT_PS1_SHOWUNTRACKEDFILES=true' >>.envrc
+            else
+               # repo is bigger than 100MB and doesn't already handle the `GIT_PS1_SHOWUNTRACKEDFILES` variable
+               echo 'unset GIT_PS1_SHOWUNTRACKEDFILES' >>.envrc
+            fi
+            # run `direnv allow` if it was already allowed before the above change
+            [[ $DIRENV_ALLOWED =~ ^true$ ]] && direnv allow
+         fi
+         unset DIRENV_ALLOWED
+      fi
+
       # append history commands to ~/.bash_history as they are executed;
       #from <http://www.ukuug.org/events/linux2003/papers/bash_tips/>.  also, read in latest bash history
       # inspired by <https://unix.stackexchange.com/questions/18212/bash-history-ignoredups-and-erasedups-setting-conflict-with-common-history/18443#18443>
