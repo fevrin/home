@@ -1,25 +1,27 @@
 #!/bin/bash
 
-if ! (grep -q '\[deep\]' /sys/power/mem_sleep); then
-   echo deep | sudo tee /sys/power/mem_sleep
-fi
+if grep -q deep /sys/power/mem_sleep; then
+   if ! (grep -q '\[deep\]' /sys/power/mem_sleep); then
+      echo deep | sudo tee /sys/power/mem_sleep
+   fi
 
-if ! (grep -q '\[deep\]' /sys/power/mem_sleep); then
-   cat <<-EOF
-	deep sleep not currently configured!
+   if ! (grep -q '\[deep\]' /sys/power/mem_sleep); then
+      cat <<-EOF
+		deep sleep not currently configured!
 
-	configure deep sleep by adding this line to the kernel command in the grub configuration:
-	mem_sleep_default=deep
+		configure deep sleep by adding this line to the kernel command in the grub configuration:
+		mem_sleep_default=deep
 
-	you can run this command to set it until the next boot:
+		you can run this command to set it until the next boot:
 
-	   echo deep | sudo tee /sys/power/mem_sleep
+		   echo deep | sudo tee /sys/power/mem_sleep
 
-	for convenience, you can also set this in /etc/sudoers to be able to run the above without needing a password:
+		for convenience, you can also set this in /etc/sudoers to be able to run the above without needing a password:
 
-	   %sudo ALL=NOPASSWD: /usr/bin/tee /sys/power/mem_sleep
+		   %sudo ALL=NOPASSWD: /usr/bin/tee /sys/power/mem_sleep
 
-	EOF
+		EOF
+   fi
 fi
 
 # output the following messages only on my local computer, not on servers

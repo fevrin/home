@@ -46,7 +46,7 @@ if has("patch-8.2.3455")
    " <https://github.com/vim/vim/issues/8908>
    " it could possibly due to a clock issue:
    " <https://github.com/vim/vim/issues/2712#issuecomment-537690095>
-   set cursorcolumn " cuc; highlight the screen column of the cursor
+   "set cursorcolumn " cuc; highlight the screen column of the cursor
 
    " this can also cause degraded performance, so we'll want to gate it for now
    "set relativenumber " rnu; show the relative line number for each line

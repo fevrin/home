@@ -1,12 +1,15 @@
 #!/bin/bash
 
 fix-session-manager() {
-   echo "SESSION_MANAGER = '$SESSION_MANAGER'"
-   [[ "${TERM_PROGRAM}" =~ ^tmux ]] && {
-      # FIXME: fix for slow vim startup in tmux
-      SESSION_PID=$(ls -1tr /tmp/.ICE-unix/ | tail -n1)
-      echo "SESSION_MANAGER = '$SESSION_MANAGER'"
-      export SESSION_MANAGER="local/${HOSTNAME}:@/tmp/.ICE-unix/${SESSION_PID},unix/${HOSTNAME}:/tmp/.ICE-unix/${SESSION_PID}"
-      echo "SESSION_MANAGER = '$SESSION_MANAGER'"
-   }
+   SESSION_PID=$(ls -1tr /tmp/.ICE-unix/ | tail -n1)
+   if [[ "${TERM_PROGRAM}" =~ ^tmux ]]; then
+      if [[ "${SESSION_MANAGER}" =~ "${SESSION_PID}"$ ]]; then
+         echo "the variable is already correct:"
+         echo "SESSION_MANAGER = '$SESSION_MANAGER'"
+      else
+         # FIXME: fix for slow vim startup in tmux
+         export SESSION_MANAGER="local/${HOSTNAME}:@/tmp/.ICE-unix/${SESSION_PID},unix/${HOSTNAME}:/tmp/.ICE-unix/${SESSION_PID}"
+         echo "fixed SESSION_MANAGER = '$SESSION_MANAGER'"
+      fi
+   fi
 }

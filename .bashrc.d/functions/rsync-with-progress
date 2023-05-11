@@ -85,12 +85,22 @@ rsync-with-progress() {
       --min-size=1
       --hard-links
       --exclude='.trashed-*'
+      --sparse
+      --no-times
+      --size-only
    )
    declare -a RSYNC_FLAGS_NEGATIONS=(
    )
+   local SUDO
 
    for arg in "$@"; do
       case "$arg" in
+         sudo)
+            SUDO="sudo"
+            ;;
+         --pv)
+            PV_METHOD=1
+            ;;
          --no-*)
                if ([[ "${arg##--no}" =~ ^-([A-Za-z])$ ]]); then
                   arg="${arg##--no}"
@@ -169,12 +179,11 @@ rsync-with-progress() {
    }
 #   VERBOSE=8 _print_var_vals RSYNC_FLAGS[@]
 
-   local file_count="$(find "$SRC" | wc --lines)"
-
    for i in "${RSYNC_FLAGS[@]}"; do
       ([[ "$i" =~ ^(-n|--dry-run)$ ]]) && DRY_RUN=1
    done
    [[ $USE_LINK_DEST -eq 1 && -n "$LINK_DEST" && "$LINK_DEST" != "$DST" ]] && RSYNC_FLAGS+=(--link-dest="$LINK_DEST")
+
    _clean_up_rsync_flags() {
       declare -a temparray
       # remove any options that the user overrode with the "--no-*" variant
@@ -202,7 +211,7 @@ rsync-with-progress() {
 #         echo "$i"
 #      done
       _clean_up_rsync_flags
-      for i in  rsync "${RSYNC_FLAGS[@]}" "$SRC" "$DST"; do
+      for i in "${SUDO}" rsync "${RSYNC_FLAGS[@]}" "$SRC" "$DST"; do
          echo "$i"
       done
       echo
@@ -213,7 +222,7 @@ rsync-with-progress() {
             echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
             echo "DRY RUN"
             echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-            rsync --dry-run "${RSYNC_FLAGS[@]}" "$SRC" "$DST"
+            ${SUDO} rsync --dry-run "${RSYNC_FLAGS[@]}" "$SRC" "$DST"
             echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
             echo
             echo -n "proceed? [y/N] "
@@ -229,14 +238,14 @@ rsync-with-progress() {
          )
       }
       echo
-      echo rsync "${RSYNC_FLAGS[@]}" "$SRC" "$DST"
+      echo "${SUDO}" rsync "${RSYNC_FLAGS[@]}" "$SRC" "$DST"
       echo
-      time rsync "${RSYNC_FLAGS[@]}" "$SRC" "$DST"
+      time ${SUDO} rsync "${RSYNC_FLAGS[@]}" "$SRC" "$DST"
    }
 
    _pv_method() {
       verbose 8 "$FUNCNAME"
-      for i in  rsync "${RSYNC_FLAGS[@]}" "$SRC" "$DST" \| pv --eta --line-mode --progress --size "$file_count"; do
+      for i in "${SUDO}" rsync "${RSYNC_FLAGS[@]}" "$SRC" "$DST" \| pv --eta --line-mode --progress --size "$file_count"; do
          echo "$i"
       done
       echo
@@ -247,7 +256,7 @@ rsync-with-progress() {
             echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
             echo "DRY RUN"
             echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-            rsync --dry-run "${RSYNC_FLAGS[@]}" "$SRC" "$DST" | pv --eta --line-mode --progress --size "$file_count"
+            ${SUDO} rsync --dry-run "${RSYNC_FLAGS[@]}" "$SRC" "$DST" | pv --eta --line-mode --progress --size "$file_count"
             echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
             echo
             echo -n "proceed? [y/N] "
@@ -257,21 +266,20 @@ rsync-with-progress() {
       fi
 
       echo
-      echo rsync "${RSYNC_FLAGS[@]}" "$SRC" "$DST" | pv --eta --line-mode --progress --size "$file_count"
+      echo "${SUDO}" rsync "${RSYNC_FLAGS[@]}" "$SRC" "$DST" \| pv --eta --line-mode --progress --size "$file_count"
       echo
-      time rsync "${RSYNC_FLAGS[@]}" "$SRC" "$DST" | pv --eta --line-mode --progress --size "$file_count"
+      time ${SUDO} rsync "${RSYNC_FLAGS[@]}" "$SRC" "$DST" | pv --eta --line-mode --progress --size "$file_count"
    }
 
 #   echo -n "do you want to skip updating times? [Y/n] "; read
 #   [[ $REPLY =~ ^n$ ]] || rsync_flags+=" --size-only"
 
 
-   if [[ $(which pv &>/dev/null) ]]; then
-      if [[ $rsync_only -eq 1 || "$file_count" -gt 100 ]]; then
-         _rsync_only_method
-      else
-         _pv_method
-      fi
+   if [[ $(which pv &>/dev/null) && $PV_METHOD -eq 1 && "$file_count" -le 100 ]]; then
+      local file_count
+      echo "calculating file count for 'pv'..."
+      file_count="$("${SUDO}" find "$SRC" | wc --lines)"
+      _pv_method
    else
       _rsync_only_method
    fi
