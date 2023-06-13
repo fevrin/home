@@ -132,19 +132,22 @@ for completion_file in \
    /usr/share/bash-completion/completions/git \
 ; do
    completion_link="/etc/bash_completion.d/${completion_file##*/}-completion"
-      # the source completion file exists
-      [[ -f "${completion_file}" ]] && {
-         # and it's either copied to, symlinked to, or sourced from a file in /etc/bash_completion
-         [[ -f "${completion_link}" || -h "${completion_link}" ]] ||
-            egrep -q "(\.|source) ${completion_file}" /etc/bash_completion.d/* || {
+   # the source completion file exists
+   if [[ -f "${completion_file}" ]]; then
+      # and it's either copied to, symlinked to, or sourced from a file in /etc/bash_completion
+      [[ -f "${completion_link}" || -h "${completion_link}" ]] || {
+         egrep -q "(\.|source) ${completion_file}" /etc/bash_completion.d/* || {
             # otherwise, symlink to it
             echo -n "symlink ${completion_file} ${completion_link}? [Y/n] "; read
-            [[ $REPLY =~ ^n$ ]] ||
-            sudo ln -s "${completion_file}" "${completion_link}" ||
-            # or source it directly if that doesn't work
-            . "${completion_file}"
+            [[ $REPLY =~ ^n$ ]] || {
+               sudo ln -s "${completion_file}" "${completion_link}" || {
+                  # or source it directly if that doesn't work
+                  . "${completion_file}"
+               }
+            }
          }
       }
+   fi
 done
 unset completion_file
 unset completion_link

@@ -39,5 +39,5 @@ endif
 "au BufWritePre /tmp/pentadactyl.txt write! $HOME/documents/work-related/tmp/pentadactyl-lastedit " from <https://code.google.com/p/dactyl/issues/detail?id=435> so that computer freezes do not permanently lose pentadactyl drafts.  this is a work-around for changing pentadactyl's tmp directory since I haven't found a way to do so yet.  TODO: update this so multiple drafts can be saved in separate files
 
 " set window size since the default is woefully small
-set lines=60
-set columns=200
+let &lines = 60
+let &columns = float2nr(ceil(&lines * 3.33))
