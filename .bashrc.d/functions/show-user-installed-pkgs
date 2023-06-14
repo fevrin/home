@@ -1,0 +1,7 @@
+#!/bin/bash
+
+show-user-installed-pkgs() {
+   # from:
+   # https://askubuntu.com/questions/2389/how-to-list-manually-installed-packages/492343#492343
+   comm -23 <(apt-mark showmanual | sort -u) <(gzip -dc /var/log/installer/initial-status.gz | sed -n 's/^Package: //p' | sort -u)
+}
