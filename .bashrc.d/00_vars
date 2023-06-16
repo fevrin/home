@@ -45,7 +45,10 @@ export PAGER="less"
 #export MANPAGER="less"
 
 # set default pager for systemctl and have it chop lines so the display is cleaner
-export SYSTEMD_LESS="$LESS"
+export SYSTEMD_LESS="-QRX --no-histdups +-i"
+
+## actually, it uses the whole screen for small bits of text due to the `-F` option, so let's just not use a pager by default
+#export SYSTEMD_PAGER=""
 
 # a further enhancement will be when you can conditionally use line numbers based on file size:
 # https://github.com/gwsw/less/issues/230

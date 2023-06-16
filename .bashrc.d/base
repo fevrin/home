@@ -94,25 +94,30 @@ if has tmux; then
       $(env | sed -n "s;SHLVL=\([0-9][0-9]*\);\1;p") -le $SHLVL_threshold # we're in the main bash instance (not nested)
    ]]; then
 
-     if [[ -n "$TMUX_LIST" && $(echo "$TMUX_LIST" | grep -cvi attached) -ne 0 ]]; then
-        # list detached tmux instances, if any, to explain why tmux wasn't started
-        cat <<-EOF
-			can't start tmux due to these detached sessions:
-			$(echo "$TMUX_LIST" | grep -vi attached)
-			EOF
-     else
-        # there are no tmux sessions or at least no detached tmux sessions, so start tmux
-        #tmux new-session 'tmux new-window top && tmux new-window'
-        TOP_CMD="$(has htop || has top)"
-        tmux new-session -d -s default "${TOP_CMD}" &&
-        tmux new-window -t default -n work &&
-        tmux attach -t default
+      if [[ -n "$TMUX_LIST" && $(echo "$TMUX_LIST" | grep -cvi attached) -ne 0 ]]; then
+         if [[ $(echo "$TMUX_LIST" | grep -cvi attached) -eq 1 ]]; then
+            # there's just one session, so attach to it
+            tmux attach
+         else
+            # list detached tmux instances, if any, to explain why tmux wasn't started
+            cat <<-EOF
+					can't start tmux due to these detached sessions:
+					$(echo "$TMUX_LIST" | grep -vi attached)
+				EOF
+         fi
+      else
+         # there are no tmux sessions or at least no detached tmux sessions, so start tmux
+         #tmux new-session 'tmux new-window top && tmux new-window'
+         TOP_CMD="$(has htop || has top)"
+         tmux new-session -d -s default "${TOP_CMD}" &&
+         tmux new-window -t default -n work &&
+         tmux attach -t default
 
 #        # this command would otherwise result in the following error if in ~/.tmux.conf since tmux seems to read and execute the conf file in full before creating a session:
 #        # .tmux.conf:117: no current target
 #        # more info at <https://superuser.com/questions/1413870/tmux-conf-doesnt-work-when-starting-but-does-with-source-file/1414127#1414127>
 #        tmux new-window top
-     fi
+      fi
    fi
 else
    SCREEN_LIST=$(screen -ls)

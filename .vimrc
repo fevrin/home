@@ -22,7 +22,7 @@ set incsearch " is; enable incremental searching
 " 4 displaying text
 set linebreak " lbr; break/wrap lines at a space (not in the middle of a word)
 "set list " ; show non-printable characters
-set listchars=eol:$,tab:^_,trail:_ " lcs; strings to use in 'list' mode
+set listchars=eol:$,tab:^_,trail:_,multispace:\┊\ \  " lcs; strings to use in 'list' mode; 'multispace' acts as a built-in indentation guide when ':set list' is used (assuming shiftwidth=3); from <https://www.baeldung.com/linux/vim-indentation-guides>
 set number " nu; enable line numbering
 au FileType help set nu " enable line number for :help windows, too, since that doesn't seem to happen automatically
 
@@ -347,7 +347,7 @@ call plug#begin(s:vim_home_dir . '/plugged')
 "   Plug 'AndrewRadev/linediff.vim'                                                     "
 "   Plug 'arp242/undofile_warn.vim'                                                     "
 "   Plug 'catppuccin/vim', { 'as': 'catppuccin' }                                       " pastel themes
-"   Plug 'dense-analysis/ale'                                                           " live linting
+"   Plug 'dense-analysis/ale'                                                           " live linting; possibly slows vim down
 "   Plug 'editorconfig/editorconfig-vim'                                                " https://github.com/editorconfig/editorconfig/wiki/EditorConfig-Properties
    Plug 'ekalinin/Dockerfile.vim'                                                       " adds syntax highlighting for Dockerfiles
 "   Plug 'ervandew/supertab'                                                            " smart tab completion (old)
@@ -395,6 +395,7 @@ call plug#begin(s:vim_home_dir . '/plugged')
 "   Plug 'vim-airline/vim-airline'                                                      "
 "   Plug 'vim-scripts/vcscommand.vim'                                                   "
 "   Plug 'vim-syntastic/syntastic'                                                      " code syntax checker
+"   Plug 'Vimjas/vim-python-pep8-indent'                                                 " make python code comply with PEP8 recommendation
    Plug 'vito/booklit.vim'                                                              " syntax highlighting for Booklit files
 "   Plug 'ycm-core/YouCompleteMe'                                                       " fast, as-you-type, fuzzy-search code completion, comprehension and refactoring engine
 "   Plug 'yggdroot/indentline'                                                          "
