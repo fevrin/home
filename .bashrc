@@ -19,6 +19,10 @@ if [ -z "$debian_chroot" ] && [ -r /etc/debian_chroot ]; then
    debian_chroot=$(cat /etc/debian_chroot)
 fi
 
+has() {
+   command -v -- "${1}" &>/dev/null
+}
+
 # Comment in the above and uncomment this below for a color prompt
 if [[ $(id -u) -eq 0 ]]; then
    PS1='\n${debian_chroot:+($debian_chroot)}\033[00;00m\[\033[01;31m\]\u\[\033[01;33m\]@\H\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\n\[\033[01;34m\]\!\[\033[00m\]\$ '
@@ -28,7 +32,7 @@ else
       export GIT_PS1_SHOWUNTRACKEDFILES=true
       export GIT_PS1_SHOWCOLORHINTS=true
 
-      if which direnv &>/dev/null && [[ -r .envrc ]]; then
+      if has direnv && [[ -r .envrc ]]; then
          DIRENV_ALLOWED="$(direnv status | sed -rne "/^Found RC path ${PWD//\//\\/}\/\.envrc/,/Found RC allowed/s;Found RC allowed (.+)$;\1;p")"
          if [[ $(egrep -c '(^|[^#]+)\b(export|unset) GIT_PS1_SHOWUNTRACKEDFILES\b' .envrc) -lt 1 ]]; then
             # the variable isn't already explicitly set or unset
@@ -209,7 +213,7 @@ dirs_for_path+=(
 
 # add a GOPATH value if go's installed
 # and add it to the general PATH, as well
-if which go &>/dev/null; then
+if has go; then
    dirs_for_gopath+=(
       "$HOME/go"
    )
