@@ -261,3 +261,5 @@ GOPATH="${GOPATH##:}"
 GOPATH="${GOPATH%%:}"
 
 ##########################################################
+
+has starship && eval "$(starship init ${SHELL_TYPE})"

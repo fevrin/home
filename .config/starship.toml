@@ -1,0 +1,84 @@
+# https://starship.rs/migrating-to-0.45.0/
+
+add_newline = true
+
+format = """\
+   $username\
+   $hostname\
+   $directory\
+   $container\
+   $kubernetes\
+   $git_branch\
+   $git_commit\
+   $git_state\
+   $git_status\
+   $cmd_duration\
+   $line_break\
+   $time\
+   $line_break\
+   $character
+"""
+
+[username]
+style_user = "green bold"
+style_root = "red bold"
+format = "[$user]($style)[@](yellow bold)"
+disabled = false
+show_always = true
+
+[hostname]
+ssh_only = false
+format =  "[$hostname](yellow bold)"
+disabled = false
+
+[directory]
+format = ":[$home_symbol$path]($style bold blue) [$read_only]($read_only_style)"
+truncation_length = 8
+truncate_to_repo = false
+truncation_symbol = '…/'
+
+# \uFE0E forces character to display as unicode glyph not emoji
+read_only = "🔒\uFE0E"
+
+[kubernetes]
+# #ffc266 is orange
+format = "[☸\uFE0E](blue bold) [$context \\(cx\\)](#8c66ff bold): [$cluster \\(cl\\)](#b366ff bold) —> [$namespace \\(ns\\)](#d966ff bold) "
+disabled = false
+
+[git_branch]
+style = 'green'
+symbol = '🌴 '
+format = '\([$branch(:$remote_branch)]($style) '
+
+[git_commit]
+tag_disabled = false
+
+[git_status]
+# some inspiration from
+# <https://github.com/spaceship-prompt/spaceship-prompt/issues/397>
+# <https://gist.github.com/ryo-ARAKI/48a11585299f9032fa4bda60c9bba593>
+ahead = ' ⇡${count}'
+behind = ' ⇣${count}'
+#ahead_behind
+conflicted = "[=](yellow bold) "
+deleted = "🗑️  ×${count} "
+diverged = '⇕⇡${ahead_count}⇣${behind_count}'
+modified = "[*](red)"
+renamed = "📛 ×${count} "
+staged = "[+](green)"
+stashed = "[\\$ ](yellow bold)"
+untracked = "[%](red)"
+format = '[$conflicted$stashed$deleted$renamed$modified$staged$untracked$ahead_behind](red)\) '
+
+# chrono has a bug in which it doesn't properly display the timezone with %Z
+# <https://github.com/starship/starship/discussions/2360>
+# from <https://www.codependentcodr.com/using-starship-for-terminal-prompt-goodness.html>
+[time]
+format = "$time($style)"
+time_format = '%F %T %Z'
+disabled = false
+
+[character]
+success_symbol = "[»](bold green)"
+error_symbol = "[✗](bold red)"
+vicmd_symbol = "[«](bold green)"
