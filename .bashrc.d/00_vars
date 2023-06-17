@@ -4,7 +4,11 @@
 ######Global Variables#######
 #############################
 
-export FUNCNEST=11 # for safety against fork bombs :3
+if [[ "${SHELL_TYPE}" =~ ^zsh$ ]]; then
+   export FUNCNEST=20 # for safety against fork bombs :3
+else
+   export FUNCNEST=11 # for safety against fork bombs :3
+fi
 
 export DOMAIN_REGEX='([a-zA-Z0-9]+[-a-zA-Z0-9@]+\.)+[-a-zA-Z0-9]{2,4}'
 export HTTP_REGEX="https?(:|%3A)(/|%2F){2}$DOMAIN_REGEX(:[0-9]+|\/[^ \/;,\)\"\'\`|]+[^\.,: \(\)\"]?)*"
