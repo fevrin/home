@@ -46,9 +46,9 @@ format = "[☸\uFE0E](blue bold) [$context \\(cx\\)](#8c66ff bold): [$cluster \\
 disabled = false
 
 [git_branch]
-style = 'green'
+style = '#ffc266 bold'
 symbol = '🌴 '
-format = '\([$branch(:$remote_branch)]($style) '
+format = '\(on [$symbol$branch(:$remote_branch)]($style) '
 
 [git_commit]
 tag_disabled = false
@@ -61,14 +61,18 @@ ahead = ' ⇡${count}'
 behind = ' ⇣${count}'
 #ahead_behind
 conflicted = "[=](yellow bold) "
-deleted = "🗑️  ×${count} "
+deleted = "🗑️ ×${count} "
 diverged = '⇕⇡${ahead_count}⇣${behind_count}'
-modified = "[*](red)"
+modified = "*×${count} "
 renamed = "📛 ×${count} "
-staged = "[+](green)"
+staged = "[+:${count}](green bold) "
 stashed = "[\\$ ](yellow bold)"
-untracked = "[%](red)"
-format = '[$conflicted$stashed$deleted$renamed$modified$staged$untracked$ahead_behind](red)\) '
+untracked = "%×${count} "
+format = '[\[$conflicted$stashed$deleted$renamed$modified$staged$untracked$ahead_behind\]](red bold)\) '
+
+
+[cmd_duration]
+min_time = 0
 
 # chrono has a bug in which it doesn't properly display the timezone with %Z
 # <https://github.com/starship/starship/discussions/2360>
