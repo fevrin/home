@@ -15,7 +15,9 @@ format = """\
    $cmd_duration\
    $line_break\
    $time\
+   ${custom.timezone}\
    $line_break\
+   ${custom.cmd_hist_num}\
    $character
 """
 
@@ -79,10 +81,22 @@ min_time = 0
 # from <https://www.codependentcodr.com/using-starship-for-terminal-prompt-goodness.html>
 [time]
 format = "$time($style)"
-time_format = '%F %T %Z'
+time_format = '%F %T '
 disabled = false
 
+# this is a workaround for chrono's bug ^^^
+[custom.timezone]
+command = 'date +%Z'
+when = '[[ -x $(command -v -- date) ]]'
+style = 'bright white'
+
+[custom.cmd_hist_num]
+command = 'echo "\$HISTCMD"'
+when = "[[ $STARSHIP_SHELL =~ ^(bash|zsh)$ ]]"
+style = "blue bold"
+
 [character]
+#success_symbol = "[\b\\$](bright white)" # this would set the prompt like the traditional $PROMPT_STRING in the repo
 success_symbol = "[»](bold green)"
 error_symbol = "[✗](bold red)"
 vicmd_symbol = "[«](bold green)"
