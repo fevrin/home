@@ -49,7 +49,7 @@ export PAGER="less"
 #export MANPAGER="less"
 
 # set default pager for systemctl and have it chop lines so the display is cleaner
-export SYSTEMD_LESS="-QRX --no-histdups +-i"
+export SYSTEMD_LESS="$LESS"
 
 ## actually, it uses the whole screen for small bits of text due to the `-F` option, so let's just not use a pager by default
 #export SYSTEMD_PAGER=""
