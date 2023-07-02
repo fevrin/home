@@ -119,7 +119,7 @@ elif has code; then
 elif has nano; then
   export EDITOR=nano
 elif has emacs; then
-  printf "${RED}WARNING:${NO_COLOR} setting nano as the fallback editor.\n"
+  printf "${RED}WARNING:${END_COLOR} setting nano as the fallback editor.\n"
   export EDITOR=emacs
 fi
 

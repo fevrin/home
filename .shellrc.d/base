@@ -1,4 +1,12 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+has() {
+   command -v -- "${1}" &>/dev/null
+}
+
+is_zsh() {
+   command -p \ps -ocomm= -p $$ | grep -qE '^zsh$'
+}
 
 if grep -q deep /sys/power/mem_sleep; then
    if ! (grep -q '\[deep\]' /sys/power/mem_sleep); then
@@ -114,8 +122,10 @@ set -o vi
 
 grep -q 10 /proc/sys/vm/swappiness || {
    sudo sysctl vm.swappiness=10
+   SOURCE="${BASH_SOURCE}"
+   is_zsh && SOURCE="${(%):-%x}"
    cat <<-EOF | sudo tee /etc/sysctl.d/local-swappiness.conf &>/dev/null
-		# set via $([[ -L "$BASH_SOURCE" ]] && readlink "$BASH_SOURCE" || echo "$BASH_SOURCE")
+		# set via $([[ -L "$SOURCE" ]] && readlink "$SOURCE" || echo "$SOURCE")
 		vm.swappiness = 10
 	EOF
 }

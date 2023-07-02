@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+
+# 1password
+has op && . <(op completion ${SHELL_TYPE})
+is_zsh && compdef _op op
+
+# dotfile manager
+has chezmoi && . <(chezmoi completion ${SHELL_TYPE})
+is_zsh && compdef _chezmoi chezmoi
+
+# github-cli
+has gh && . <(gh completion -s ${SHELL_TYPE})
+is_zsh && compdef _gh gh
+
+# gitlab-cli
+has glab && . <(glab completion -s ${SHELL_TYPE})
+is_zsh && compdef _glab glab
+
+# helm
+has helm && . <(helm completion ${SHELL_TYPE})
+
+# k8s
+has kubectl && {
+   if has kubecolor; then
+      alias k='kubecolor'
+   else
+      alias k='kubectl'
+   fi
+   . <(kubectl completion ${SHELL_TYPE})
+   if is_zsh; then
+      # k alias hack TODO: remember compdef load order
+      compdef k=kubectl
+   else
+      complete -o default -F __start_kubectl k
+   fi
+}
+
+# minikube
+has minikube && {
+   . <(minikube completion ${SHELL_TYPE})
+   alias mk='minikube kubectl --'
+}
+
+# starship
+has starship && . <(starship completions ${SHELL_TYPE})
