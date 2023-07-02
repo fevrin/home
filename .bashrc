@@ -25,9 +25,6 @@ has() {
 
 export SHELL_TYPE="$(command -p \ps -ocomm= -p $$)"
 
-# don't overwrite ~/.bash_history file upon logging out
-shopt -s histappend
-
 # Comment in the above and uncomment this below for a color prompt
 if [[ $(id -u) -eq 0 ]]; then
    PS1='\n${debian_chroot:+($debian_chroot)}\033[00;00m\[\033[01;31m\]\u\[\033[01;33m\]@\H\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\n\[\033[01;34m\]\!\[\033[00m\]\$ '
@@ -204,7 +201,8 @@ for file in ${files_to_source[*]}; do
 #   time . "$file"
    . "$file"
 done
-unset files_to_source file
+unset files_to_source
+unset file
 
 ##########################################################
 
@@ -252,7 +250,8 @@ for dir in ${dirs_for_path[*]}; do
       fi
    fi
 done
-unset dirs_for_path dir
+unset dirs_for_path
+unset dir
 
 # remove all trailing slashes from PATH
 PATH="${PATH//\/:/:}"
@@ -266,6 +265,9 @@ GOPATH="${GOPATH%%:}"
 ##########################################################
 ######## History Control ######
 ###############################
+
+# don't overwrite ~/.bash_history file upon logging out
+shopt -s histappend
 
 # ensure ~/.bash_history is in append-only mode since there's craziness with it being inappropriately truncated
 # the `ls -lO` part is a Mac OS X compatibility crutch
@@ -352,6 +354,5 @@ export HISTIGNORE
 ##########################################################
 
 has starship && {
-   #export STARSHIP_CONFIG="${HOME}/.config/starship-main.toml"
    eval "$(starship init ${SHELL_TYPE})"
 }

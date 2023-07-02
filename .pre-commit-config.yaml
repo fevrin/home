@@ -52,7 +52,7 @@ repos:
             #          - --diff             # error with a diff when the formatting differs
         #    - id: shfmt-docker  # Docker image (requires Docker to run)
   - repo: https://github.com/hadolint/hadolint # for linting Dockerfiles
-    rev: master
+    rev: v2.12.0
     hooks:
       - id: hadolint
   - repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook

@@ -89,12 +89,14 @@ if has tmux; then
 #        tmux new-window top
       fi
    fi
+   unset TMUX_LIST
 else
    SCREEN_LIST=$(screen -ls)
    [[ ! $TERM =~ screen && $(env | sed -n "s;SHLVL=\([1-9][1-9]*\);\1;p") = $SHLVL_threshold && ! $(echo "$SCREEN_LIST" | grep -i detached) ]] && screen
 
    # list detached screens, if any, to explain why screen wasn't started
    [[ $(echo "$SCREEN_LIST" | grep -i detached) ]] && echo "$SCREEN_LIST"
+   unset SCREEN_LIST
 fi
 
 [[ "${TERM_PROGRAM}" =~ ^tmux ]] && {
