@@ -26,16 +26,10 @@ else
    PS1=$'\n'"%B%{$fg[green]%}%n%{$fg[yellow]%}@%M$reset_color%}:%B%{$fg[blue]%}%~"$'\n'"%!%{$reset_color%}\$ "
 fi
 
-export FUNCNEST=30
-
-export SHELL_TYPE="$(command -p \ps -ocomm= -p $$)"
-
 export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
 
+. ${HOME}/.shellrc.d/base
 
-has() {
-   command -v -- "${1}" &>/dev/null
-}
 #plugins+=(
 #    asdf-vm/asdf.plugin.zsh                    # runtime version manager
 #    romkatv/zsh-defer                          # this defers the remaining plugins to background async execution
@@ -129,17 +123,28 @@ elif has emacs; then
   export EDITOR=emacs
 fi
 
-# github-cli
-has gh && . <(gh completion -s zsh) && compdef _gh gh
-
-. ~/.bashrc.d/aliases_general
-
 autoload -U +X bashcompinit && bashcompinit
 complete -o nospace -C ${BIN_DIR}/vault vault
 
 complete -o nospace -C /home/cweeks/go/bin/gocomplete go
 
 complete -o nospace -C /usr/bin/vault vault
+
+for file in \
+   ${HOME}/.shellrc.d/00_vars \
+   ${HOME}/.shellrc.d/aliases_general \
+   ${HOME}/.shellrc.d/functions \
+   ${HOME}/.shellrc.d/completions \
+   ; do
+   [[ -r "$file" ]] &&
+   [[ ! "$file" =~ python ]] &&
+   file -L --mime-type "$file" | egrep -q '(text/x-shellscript|bash_completion)' && # git-sh-prompt shows as 'text/plain'
+   zsh -n "$file" 2>/dev/null &&
+#   echo "sourcing '$file'..." >&2 &&
+#   TIMEFORMAT='%R' &&
+#   time . "$file"
+   . "$file"
+done
 
 # this has to be at the end
 has starship && {

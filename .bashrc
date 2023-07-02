@@ -7,6 +7,8 @@
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
 
+. ${HOME}/.shellrc.d/base
+
 # check the window size after each command and, if necessary,
 # update the values of LINES and COLUMNS.
 shopt -s checkwinsize
@@ -129,6 +131,9 @@ fi
 ##########################################################
 ######## Bash Completions #####
 ###############################
+
+# the default per-user bash completion files go in ~/.local/share/bash-completions/
+# https://github.com/scop/bash-completion/blob/master/README.md#faq
 
 # it seems the `git` package sets up only /etc/bash_completion.d/git-prompt (which sources /usr/lib/git-core/git-sh-prompt), but not an equivalent for git-completion.bash, which is needed for additional completions, like branch names
 for completion_file in \
