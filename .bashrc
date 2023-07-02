@@ -25,6 +25,9 @@ has() {
 
 export SHELL_TYPE="$(command -p \ps -ocomm= -p $$)"
 
+# don't overwrite ~/.bash_history file upon logging out
+shopt -s histappend
+
 # Comment in the above and uncomment this below for a color prompt
 if [[ $(id -u) -eq 0 ]]; then
    PS1='\n${debian_chroot:+($debian_chroot)}\033[00;00m\[\033[01;31m\]\u\[\033[01;33m\]@\H\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\n\[\033[01;34m\]\!\[\033[00m\]\$ '
@@ -261,5 +264,94 @@ GOPATH="${GOPATH##:}"
 GOPATH="${GOPATH%%:}"
 
 ##########################################################
+######## History Control ######
+###############################
 
-has starship && eval "$(starship init ${SHELL_TYPE})"
+# ensure ~/.bash_history is in append-only mode since there's craziness with it being inappropriately truncated
+# the `ls -lO` part is a Mac OS X compatibility crutch
+if [[ $MAC_OS_X -eq 0 ]]; then
+   [[ $(has lsattr) && $(lsattr $HOME/.bash_history) =~ ^.....a.*$ ]] ||
+      cat <<-EOF
+		warning: $HOME/.bash_history is not in append-only mode!
+
+		enable that with this command:
+
+		   sudo chattr +a $HOME/.bash_history
+
+		EOF
+else
+   [[ ! $(ls -lO "$HOME"/.bash_history) =~ uappnd ]] ||
+      cat <<-EOF
+		warning: $HOME/.bash_history is not in append-only mode!
+
+		enable that with this command:
+
+		   sudo chflags uappend $HOME/.bash_history
+
+		EOF
+fi
+
+# inform the user if the ~/.bash_history file is greater than or equal to the $HISTFILESIZE value for rotation
+[[ $(wc -l $HOME/.bash_history | cut -d' ' -f1) -ge $HISTFILESIZE ]] && echo "consider making a new $HOME/.bash_history file, as it's >= to $HISTFILESIZE lines"
+
+# don't remember basic/common commands, including all bash aliases
+# i really need to make a level 0/level 6 script using perl or something to have greater control over regexes; plus, it can be annoying to have the commands immediately removed; lastly, duplicates aren't always removed like they should be
+HISTIGNORE="bg:cd *:crontab -?:df -h:echo:edit-history:fg*:git co master:jobs:kill*:ls:list -tr:ping 8.8.8.8:popd:pushd:pwd:screen -r:screen -t *:vim:vim nodes:w"
+
+# add git aliases
+HISTIGNORE+=":$(
+   has git && {
+      for i in $(git config -l | sed -rne 's;^alias\.([^=]+)=.*;\1;p'); do
+         # git config --get-regexp alias | sed -rne 's;^alias\.([^ ]+) .*;\1;p'
+         value+="git $i:";
+      done;
+      echo "${value%:}";
+   }
+)"
+# add main aliases
+HISTIGNORE+=":$(
+   # list aliases to include in HISTIGNORE
+   includes=(
+   eh
+   )
+   includes="$(
+   for i in ${!includes[*]}; do
+      [[ $i -eq 0 ]] && echo -n "(${includes[$i]}" && continue
+      echo -n "|${includes[$i]}"
+   done
+   echo -n ")"
+   )"
+   trailing_char="*" # ignore all aliases
+   alias |
+    # list aliases to exclude from HISTIGNORE
+    grep -vf <(cat <<-EOF | xargs -I{} echo ^alias {}
+		aptinstall
+		aptsearch
+		aptshow
+		cp
+		dir
+		egrep
+		grep
+		list
+		mtr
+		mv
+		nmap
+		EOF
+    ) |
+    egrep -o "^alias (([^=]{3,})|$includes)=.*" |
+    sed -re "s;^alias $includes=.*;:\1;" |
+    sed -re "s;^alias ([^=]{3,})=.*;:\1$trailing_char;" |
+    sort |
+    tr -d '\n' |
+    sed -e 's;^:;;'
+)"
+
+export HISTIGNORE
+#export HISTIGNORE="bg:cd *:crontab -?:df -h:echo:edit-history:fg*:$([[ -x $(which git) ]] && { for i in $(git config -l | sed -rne 's;^alias\.([^=]+)=.*;\1;p'); do value+="git $i:"; done; echo "${value%:}"; }):git co master:jobs:kill*:ls:list -tr:ping 8.8.8.8:popd:pushd:pwd:screen -r:screen -t *:vim:vim nodes:w:$(alias | sed -rne 's;^alias ([^=]*)=.*;:\1?;p' | sort | tr -d '\n' | sed -e 's;^:;;')"
+
+##########################################################
+
+has starship && {
+   #export STARSHIP_CONFIG="${HOME}/.config/starship-main.toml"
+   eval "$(starship init ${SHELL_TYPE})"
+}

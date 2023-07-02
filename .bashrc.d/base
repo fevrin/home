@@ -46,40 +46,10 @@ if [[ -f ~/.todo && -s ~/.todo ]]; then
    cat ~/.todo
 fi
 
-# ensure ~/.bash_history is in append-only mode since there's craziness with it being inappropriately truncated
-# the `ls -lO` part is a Mac OS X compatibility crutch
-if [[ $MAC_OS_X -eq 0 ]]; then
-   [[ $(has lsattr) && $(lsattr $HOME/.bash_history) =~ ^.....a.*$ ]] ||
-      cat <<-EOF
-		warning: $HOME/.bash_history is not in append-only mode!
-
-		enable that with this command:
-
-		   sudo chattr +a $HOME/.bash_history
-
-		EOF
-else
-   [[ ! $(ls -lO "$HOME"/.bash_history) =~ uappnd ]] ||
-      cat <<-EOF
-		warning: $HOME/.bash_history is not in append-only mode!
-
-		enable that with this command:
-
-		   sudo chflags uappend $HOME/.bash_history
-
-		EOF
-fi
-
-# inform the user if the ~/.bash_history file is greater than or equal to the $HISTFILESIZE value for rotation
-[[ $(wc -l $HOME/.bash_history | cut -d' ' -f1) -ge $HISTFILESIZE ]] && echo "consider making a new $HOME/.bash_history file, as it's >= to $HISTFILESIZE lines"
-
 # enable color support of ls and also add handy aliases
 if [[ "$TERM" != "dumb" && "$TERM_PROGRAM" != "Apple_Terminal" && ! "$TERM_PROGRAM" =~ iTerm ]]; then
    eval "`dircolors -b`"
 fi
-
-# don't overwrite ~/.bash_history file upon logging out
-shopt -s histappend
 
 # start a terminal multiplexer upon login only if there isn't already one opened and there are no detached sessions
 SHLVL_threshold=1
@@ -137,61 +107,7 @@ fi
 # otherwise, the timestamps in ~/.bash_history are also considered commands
 #history -n
 
-# don't remember basic/common commands, including all bash aliases
-# i really need to make a level 0/level 6 script using perl or something to have greater control over regexes; plus, it can be annoying to have the commands immediately removed; lastly, duplicates aren't always removed like they should be
-HISTIGNORE="bg:cd *:crontab -?:df -h:echo:edit-history:fg*:git co master:jobs:kill*:ls:list -tr:ping 8.8.8.8:popd:pushd:pwd:screen -r:screen -t *:vim:vim nodes:w"
-
-# add git aliases
-HISTIGNORE+=":$(
-   has git && {
-      for i in $(git config -l | sed -rne 's;^alias\.([^=]+)=.*;\1;p'); do
-         # git config --get-regexp alias | sed -rne 's;^alias\.([^ ]+) .*;\1;p'
-         value+="git $i:";
-      done;
-      echo "${value%:}";
-   }
-)"
-# add main aliases
-HISTIGNORE+=":$(
-   # list aliases to include in HISTIGNORE
-   includes=(
-   eh
-   )
-   includes="$(
-   for i in ${!includes[*]}; do
-      [[ $i -eq 0 ]] && echo -n "(${includes[$i]}" && continue
-      echo -n "|${includes[$i]}"
-   done
-   echo -n ")"
-   )"
-   trailing_char="*" # ignore all aliases
-   alias |
-    # list aliases to exclude from HISTIGNORE
-    grep -vf <(cat <<-EOF | xargs -I{} echo ^alias {}
-		aptinstall
-		aptsearch
-		aptshow
-		cp
-		dir
-		egrep
-		grep
-		list
-		mtr
-		mv
-		nmap
-		EOF
-    ) |
-    egrep -o "^alias (([^=]{3,})|$includes)=.*" |
-    sed -re "s;^alias $includes=.*;:\1;" |
-    sed -re "s;^alias ([^=]{3,})=.*;:\1$trailing_char;" |
-    sort |
-    tr -d '\n' |
-    sed -e 's;^:;;'
-)"
-
-export HISTIGNORE
-#export HISTIGNORE="bg:cd *:crontab -?:df -h:echo:edit-history:fg*:$([[ -x $(which git) ]] && { for i in $(git config -l | sed -rne 's;^alias\.([^=]+)=.*;\1;p'); do value+="git $i:"; done; echo "${value%:}"; }):git co master:jobs:kill*:ls:list -tr:ping 8.8.8.8:popd:pushd:pwd:screen -r:screen -t *:vim:vim nodes:w:$(alias | sed -rne 's;^alias ([^=]*)=.*;:\1?;p' | sort | tr -d '\n' | sed -e 's;^:;;')"
-
+# use vi-keybindings
 set -o vi
 
 grep -q 10 /proc/sys/vm/swappiness || {

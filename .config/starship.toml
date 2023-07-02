@@ -92,7 +92,7 @@ style = 'bright white'
 
 [custom.cmd_hist_num]
 command = 'echo "\$HISTCMD"'
-when = "[[ $STARSHIP_SHELL =~ ^(bash|zsh)$ ]]"
+when = "[[ $STARSHIP_SHELL =~ ^(bash)$ ]]"
 style = "blue bold"
 
 [character]
