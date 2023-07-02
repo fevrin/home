@@ -21,10 +21,6 @@ if [ -z "$debian_chroot" ] && [ -r /etc/debian_chroot ]; then
    debian_chroot=$(cat /etc/debian_chroot)
 fi
 
-has() {
-   command -v -- "${1}" &>/dev/null
-}
-
 # Comment in the above and uncomment this below for a color prompt
 if [[ $(id -u) -eq 0 ]]; then
    PS1='\n${debian_chroot:+($debian_chroot)}\033[00;00m\[\033[01;31m\]\u\[\033[01;33m\]@\H\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\n\[\033[01;34m\]\!\[\033[00m\]\$ '
@@ -174,7 +170,7 @@ declare -a dirs_for_gopath
 # to add more files, just either add them here or in any sourced directories
 # note that they are sourced in alphanumeric order, which you can use to source in a particular order, based on dependencies
 files_to_source=(
-   ~/.bashrc.d/*
+   ~/.shellrc.d/*
    ~/bin/lib/lib_all
    /etc/bash_completion
 )

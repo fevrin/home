@@ -5,7 +5,7 @@ has() {
 }
 
 is_zsh() {
-   command -p \ps -ocomm= -p $$ | grep -qE '^zsh$'
+   [[ "${SHELL_TYPE}" =~ ^zsh$ ]]
 }
 
 if grep -q deep /sys/power/mem_sleep; then
