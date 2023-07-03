@@ -80,7 +80,7 @@ plugin-update() {
 }
 
 plugins+=(
-    asdf-vm/asdf.plugin.zsh                    # runtime version manager
+    asdf-vm/asdf.git                           # runtime version manager
     romkatv/zsh-defer                          # this defers the remaining plugins to background async execution
     Aloxaf/fzf-tab                             # this adds fuzzy finder tab completion (interactive completion list)
     zsh-users/zsh-autosuggestions              # this shows you auto-suggested completions; complete with Esc > Space
@@ -149,13 +149,20 @@ bindkey -a v edit-command-line
 autoload -Uz zmv
 
 # Interactive Shell Environment Variables:
-export SAVEHIST=20000
-export HISTFILE=$XDG_CACHE_HOME/zsh-history
+export SAVEHIST="${HISTSIZE}"
+export HISTFILE=${HOME}/.zsh-history
 
 # referenced here:
 # https://www.johnhawthorn.com/2012/09/vi-escape-delays/
 export KEYTIMEOUT=1
 
+
+# have the redirect operator '>' null a file instead of act as catting into it
+# from:
+# <https://zsh.sourceforge.io/Doc/Release/Redirection.html#Redirection:~:text=7.3%20Redirections%20with%20no%20command>
+# <https://zsh.sourceforge.io/Doc/Release/Options.html#Description-of-Options:~:text=%E2%80%99%20will%20work.-,SH_NULLCMD%20%3CK%3E%20%3CS%3E,-Do%20not%20use>
+set -o shnullcmd
+#export NULLCMD=:
 if has vim; then
   export EDITOR=vim
   export GIT_EDITOR="${EDITOR}"

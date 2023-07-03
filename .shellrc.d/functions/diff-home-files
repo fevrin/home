@@ -99,7 +99,7 @@ diff-home-files() {
          continue
       }
 
-      # the item is within the .bashrc.d directory
+      # the item is within the .shellrc.d directory
       if [[ -f "$file2" ]]; then
          [[ -f "${file1}" ]] || {
             echo "${file1} doesn't exist; skipping..."
@@ -150,7 +150,7 @@ diff-home-files() {
    done
 
    local missed_files
-   for i in $HOME/.bashrc.d/*/*; do
+   for i in $HOME/.shellrc.d/*/*; do
       [[ -h "$i" ]] && continue
       [[ -f ${i/$HOME\//$HOME_DIR/} ]] || missed_files+=$'\1'"$i"
    done
