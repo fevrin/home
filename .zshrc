@@ -27,6 +27,7 @@ else
 fi
 
 export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 
 . ${HOME}/.shellrc.d/base
 
@@ -52,7 +53,7 @@ done
 ##? Clone a plugin, identify its init file, source it, and add it to your fpath.
 plugin-load() {
   local repo plugdir initfile initfiles=()
-  : ${ZPLUGINDIR:=${ZDOTDIR:-~/.config/zsh}/plugins}
+  : ${ZPLUGINDIR:=${ZDOTDIR:-$XDG_CONFIG_HOME/zsh}/plugins}
   for repo in $@; do
     plugdir=$ZPLUGINDIR/${repo:t}
     initfile=$plugdir/${repo:t}.plugin.zsh

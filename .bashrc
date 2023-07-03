@@ -166,6 +166,15 @@ GOPATH="${GOPATH%%:}"
 
 # don't overwrite ~/.bash_history file upon logging out
 shopt -s histappend
+#
+# this must be set really high or not set at all; it seems as of bash version 4.4.19(1)-release, having the history file larger than this size causes a segfault
+export HISTFILESIZE="${HISTSIZE}"
+
+# ignore same successive entries and delete duplicate lines in history.
+export HISTCONTROL="erasedups:ignoreboth"
+
+# include timestamps for all commands
+export HISTTIMEFORMAT="%Y-%m-%d %H:%M:%S "
 
 # ensure ~/.bash_history is in append-only mode since there's craziness with it being inappropriately truncated
 # the `ls -lO` part is a Mac OS X compatibility crutch
