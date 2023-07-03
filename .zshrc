@@ -94,23 +94,21 @@ export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=248'
 
 # Set shell options
 # http://zsh.sourceforge.net/Doc/Release/Options.html
-setopt glob_dots     # no special treatment for file names with a leading dot
-setopt no_auto_menu  # require an extra TAB press to open the completion menu
-setopt no_beep
-setopt prompt_subst
-setopt inc_append_history
-setopt share_history
-setopt hist_ignore_space
-setopt no_nomatch
-setopt interactive_comments
-setopt hash_list_all
-setopt complete_in_word
-setopt noflowcontrol
-setopt appendhistory
-
-# put timestamps in command history
-setopt extendedhistory
-setopt histignorealldups
+setopt glob_dots            # no special treatment for file names with a leading dot
+setopt no_auto_menu         # require an extra TAB press to open the completion menu
+setopt no_beep              #
+setopt prompt_subst         #
+setopt inc_append_history   #
+setopt share_history        #
+setopt hist_ignore_space    #
+setopt no_nomatch           #
+setopt interactive_comments #
+setopt hash_list_all        #
+setopt complete_in_word     #
+setopt noflowcontrol        #
+setopt appendhistory        #
+setopt extendedhistory      # put timestamps in command history
+setopt histignorealldups    # ignore dups in history
 
 # keep completions listed on screen after executing command
 # this doesn't seem to make a diff, as-is
