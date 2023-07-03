@@ -30,16 +30,66 @@ export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
 
 . ${HOME}/.shellrc.d/base
 
-#plugins+=(
-#    asdf-vm/asdf.plugin.zsh                    # runtime version manager
-#    romkatv/zsh-defer                          # this defers the remaining plugins to background async execution
-#    Aloxaf/fzf-tab                             # this adds fuzzy finder tab completion (interactive completion list)
-#    zsh-users/zsh-autosuggestions              # this shows you auto-suggested completions; complete with Esc > Space
-#    zdharma-continuum/fast-syntax-highlighting # feature-rich syntax highlighting for zsh
-#)
+for file in \
+   ${HOME}/.shellrc.d/00_vars \
+   ${HOME}/.shellrc.d/aliases_general \
+   ${HOME}/.shellrc.d/functions \
+   ${HOME}/.shellrc.d/completions \
+   ; do
+   [[ -r "$file" ]] &&
+   [[ ! "$file" =~ python ]] &&
+   file -L --mime-type "$file" | egrep -q '(text/x-shellscript|bash_completion)' && # git-sh-prompt shows as 'text/plain'
+   zsh -n "$file" 2>/dev/null &&
+#   echo "sourcing '$file'..." >&2 &&
+#   TIMEFORMAT='%R' &&
+#   time . "$file"
+   . "$file"
+done
 
-# look into 'bare-metal' plugin system:
-# https://github.com/mattmc3/zsh_unplugged#question-how-do-i-load-my-plugins-with-hypersonic-speed-rocket
+# 'bare-metal' plugin system:
+# https://github.com/mattmc3/zsh_unplugged#jigsaw-the-humble-plugin-load-function
+
+##? Clone a plugin, identify its init file, source it, and add it to your fpath.
+plugin-load() {
+  local repo plugdir initfile initfiles=()
+  : ${ZPLUGINDIR:=${ZDOTDIR:-~/.config/zsh}/plugins}
+  for repo in $@; do
+    plugdir=$ZPLUGINDIR/${repo:t}
+    initfile=$plugdir/${repo:t}.plugin.zsh
+    if [[ ! -d $plugdir ]]; then
+      echo "Cloning $repo..."
+      git clone -q --depth 1 --recursive --shallow-submodules https://github.com/$repo $plugdir
+    fi
+    if [[ ! -e $initfile ]]; then
+      initfiles=($plugdir/*.{plugin.zsh,zsh-theme,zsh,sh}(N))
+      (( $#initfiles )) || { echo >&2 "No init file '$repo'." && continue }
+      ln -sf $initfiles[1] $initfile
+    fi
+    fpath+=$plugdir
+    (( $+functions[zsh-defer] )) && zsh-defer . $initfile || . $initfile
+  done
+}
+
+plugin-update() {
+  ZPLUGINDIR=${ZPLUGINDIR:-$HOME/.config/zsh/plugins}
+  for d in $ZPLUGINDIR/*/.git(/); do
+    echo "Updating ${d:h:t}..."
+    command git -C "${d:h}" pull --ff --recurse-submodules --depth 1 --rebase --autostash
+  done
+}
+
+plugins+=(
+    asdf-vm/asdf.plugin.zsh                    # runtime version manager
+    romkatv/zsh-defer                          # this defers the remaining plugins to background async execution
+    Aloxaf/fzf-tab                             # this adds fuzzy finder tab completion (interactive completion list)
+    zsh-users/zsh-autosuggestions              # this shows you auto-suggested completions; complete with Esc > Space
+    zdharma-continuum/fast-syntax-highlighting # feature-rich syntax highlighting for zsh
+)
+
+plugin-load $plugins
+unset plugins
+
+export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=248'
 
 # Set shell options
 # http://zsh.sourceforge.net/Doc/Release/Options.html
@@ -76,7 +126,12 @@ export PROMPT_EOL_MARK=''
 
 # use vi style line controls
 bindkey -v
-bindkey '	' complete-word #expand-or-complete-prefix
+
+# complete in the middle of a word
+# https://zsh.sourceforge.io/FAQ/zshfaq04.html#l50
+#bindkey '	' complete-word
+bindkey '	' expand-or-complete-prefix
+
 #bindkey '	' autosuggest-accept
 # this ensures using vi-style keys for navigating command history start the cursor at the beginning of the line, like in bash
 # from <https://unix.stackexchange.com/questions/562292/zsh-history-with-cursor-at-beginning-of-line/591511#591511>
@@ -93,15 +148,12 @@ bindkey -a v edit-command-line
 autoload -Uz zmv
 
 # Interactive Shell Environment Variables:
-export HISTSIZE=20000
 export SAVEHIST=20000
 export HISTFILE=$XDG_CACHE_HOME/zsh-history
 
 # referenced here:
 # https://www.johnhawthorn.com/2012/09/vi-escape-delays/
 export KEYTIMEOUT=1
-
-export PAGER="less -QFRX --no-histdups -i"
 
 if has vim; then
   export EDITOR=vim
@@ -130,23 +182,8 @@ complete -o nospace -C /home/cweeks/go/bin/gocomplete go
 
 complete -o nospace -C /usr/bin/vault vault
 
-for file in \
-   ${HOME}/.shellrc.d/00_vars \
-   ${HOME}/.shellrc.d/aliases_general \
-   ${HOME}/.shellrc.d/functions \
-   ${HOME}/.shellrc.d/completions \
-   ; do
-   [[ -r "$file" ]] &&
-   [[ ! "$file" =~ python ]] &&
-   file -L --mime-type "$file" | egrep -q '(text/x-shellscript|bash_completion)' && # git-sh-prompt shows as 'text/plain'
-   zsh -n "$file" 2>/dev/null &&
-#   echo "sourcing '$file'..." >&2 &&
-#   TIMEFORMAT='%R' &&
-#   time . "$file"
-   . "$file"
-done
 
-# this has to be at the end
+# this should be at the end
 has starship && {
    export STARSHIP_SHELL="${SHELL_TYPE}"
    eval "$(starship init zsh)"
