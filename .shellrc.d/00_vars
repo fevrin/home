@@ -7,7 +7,7 @@
 export BOLD="$(tput bold 2>/dev/null)"
 export UNDERLINE="$(tput smul 2>/dev/null)"
 export BLUE="$(tput setaf 4 2>/dev/null)"
-export GREEN="$(tput setaf 2>/dev/null)"
+export GREEN="$(tput setaf 2 2>/dev/null)"
 export GREY="$(tput setaf 0 2>/dev/null)"
 export MAGENTA="$(tput setaf 5 2>/dev/null)"
 export RED="$(tput setaf 1 2>/dev/null)"

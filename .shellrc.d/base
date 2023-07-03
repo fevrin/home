@@ -67,8 +67,8 @@ SHLVL_threshold=1
 if has tmux; then
    TMUX_LIST=$(tmux ls 2>/dev/null)
    if [[
-      ! $TERM =~ screen && # we're not currently in a tmux session
-                           # (tmux sets $TERM to "screen"
+      ! $TERM =~ tmux-256color && # we're not currently in a tmux session
+                           # (tmux sets $TERM to "tmux-256color", per ~/.tmux.conf
       $(env | sed -n "s;SHLVL=\([0-9][0-9]*\);\1;p") -le $SHLVL_threshold # we're in the main bash instance (not nested)
    ]]; then
 

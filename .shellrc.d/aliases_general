@@ -7,7 +7,11 @@
 alias rm='rm -i'
 
 # always list the size in human-readable format
-alias df='df -h'
+alias df='df --print-type --human-readable --portability --total'
+
+alias du='du --all --total --human-readable'
+
+alias free='free --total'
 
 # lists many info of almost all files in current directory
 alias ll='ls -Al'
@@ -61,7 +65,7 @@ alias jobs='jobs -l'
 #alias grep='grep -r'
 
 # color grep output by default
-alias grep='grep --color '
+alias grep='grep --color=auto '
 
 # use the `grep` alias defaults for egrep
 alias egrep='grep -E '
