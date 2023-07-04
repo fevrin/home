@@ -147,3 +147,36 @@ alias movs='pushd "$HOME/movies"'
 alias docs='pushd "$HOME/documents"'
 
 alias progs='pushd "$HOME/programs"'
+
+##########################################################
+
+##########################################################
+######## k8s ########
+#####################
+
+alias kubectl='k'
+alias kdev='export KUBECONFIG=${HOME}/.kube/dev_config; board-starship k8s-dev; if ! (vpn-list | grep -q "Client connected"); then vpn-start; fi'
+alias kprod='export KUBECONFIG=${HOME}/.kube/main_config; board-starship k8s-prod'
+alias kend='unset KUBECONFIG; if (vpn-list | grep -q "Client connected"); then vpn-stop; fi; board-starship main'
+
+alias kcc='k config get-contexts | awk "NR==1{print \$2\"\t\"\$3\"\t\"\$5};{ if(\$1 ~ /\*/){print \$2\"\t\"\$3\"\t\"\$5} }" | column -t'
+
+# inspired by <https://kubernetes.io/docs/reference/kubectl/cheatsheet/>
+alias kcv='if has kubecolor; then k config view | yq -C | less; else k config view; fi'
+alias kgn='k get namespaces'
+
+##########################################################
+
+##########################################################
+######## VPN ########
+#####################
+
+alias vpn-start='echo openvpn3 session-start --config ~/.config/openvpn3/vpn.ovpn; openvpn3 session-start --config ~/.config/openvpn3/vpn.ovpn'
+
+alias vpn-list='{ echo openvpn3 sessions-list; openvpn3 sessions-list; }'
+
+alias vpn-stop='for session_path in $(openvpn3 sessions-list | awk "{ if(\$0 ~ /Path:/){print \$2} else if(\$0 ~ /No sessions available/){print \"none\"} }"); do if [[ "${session_path}" =~ ^none$ ]]; then echo "No sessions available"; else echo openvpn3 session-manage --disconnect --session-path $session_path; openvpn3 session-manage --disconnect --session-path "${session_path}"; fi; done; echo openvpn3 session-manage --cleanup; openvpn3 session-manage --cleanup; unset session_path'
+
+alias vpn-reset='session_path="$(openvpn3 sessions-list | awk "{ if(\$0 ~ /Path:/){print \$2} else if(\$0 ~ /No sessions available/){print \"none\"} }")"; if [[ $(echo "${session_path}" | wc -l) -eq 0 ]]; then vpn-start; elif [[ $(echo "${session_path}" | wc -l) -eq 1 ]]; then echo openvpn3 session-manage --restart --path "${session_path}"; openvpn3 session-manage --restart --path "${session_path}"; else vpn-stop && vpn-start; fi; unset session_path'
+
+##########################################################
