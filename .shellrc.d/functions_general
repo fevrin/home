@@ -5,27 +5,256 @@
 # <https://unix.stackexchange.com/questions/4219/how-do-i-get-bash-completion-for-command-aliases/4220#4220>
 # <https://www.tldp.org/LDP/abs/html/tabexpansion.html>
 
-for funcfile in $(realpath $(dirname "$BASH_SOURCE"))/functions/*; do
-   [[ -d "$funcfile" ]] && continue
-   funcname="$(sed -rne '3 s;^(function\s+)?([^#( ]+)\(\) \{$;\2;p' "$funcfile")"
+is_zsh || {
+   SOURCE="${BASH_SOURCE}"
+   for funcfile in $(realpath $(dirname "$SOURCE"))/functions/*; do
+      [[ -d "$funcfile" ]] && continue
+      funcname="$(sed -rne '3 s;^(function\s+)?([^#( ]+)\(\) \{$;\2;p' "$funcfile")"
 
-   # export all the functions here so subshells can utilize them, if needed
-   # for some reason, exported pushd() causes issues in direnv-allowed directories
-   # though simply sourced (and not exported) pushd() is fine
-   # we don't want to source and export files with functions that don't match their filenames
-   {
-      # test conditions
-      [[ "$funcname" =~ ^${funcfile//*\/}$ ]] &&
-      [[ -r "$funcfile" ]] &&
-      file -L --mime-type "$funcfile" | grep -q 'text/x-shellscript' &&
-      bash -n "$funcfile" 2>/dev/null
-   } && {
-      # unset the function if it already exists so we start fresh
-      # then export the function
-      [[ $(type -t $funcname) =~ ^function$ ]] && unset -f funcname
-      . "$funcfile" &&
-      [[ ! "$funcfile" =~ pushd ]] &&
-      export -f "$funcname"
+      # export all the functions here so subshells can utilize them, if needed
+      # for some reason, exported pushd() causes issues in direnv-allowed directories
+      # though simply sourced (and not exported) pushd() is fine
+      # we don't want to source and export files with functions that don't match their filenames
+      {
+         # test conditions
+         [[ "$funcname" =~ ^${funcfile//*\/}$ ]] &&
+         [[ -r "$funcfile" ]] &&
+         file -L --mime-type "$funcfile" | grep -q 'text/x-shellscript' &&
+         bash -n "$funcfile" 2>/dev/null
+      } && {
+         # unset the function if it already exists so we start fresh
+         # then export the function
+         if is_zsh; then
+            TYPE="$(whence -w $funcname | awk '{print $2}')"
+            EXPORT=(export)
+         else
+            TYPE="$(type -t $funcname)"
+            EXPORT=(export -f)
+         fi
+         [[ "${TYPE}" =~ ^function$ ]] && unset -f funcname
+         . "$funcfile" &&
+         [[ ! "$funcfile" =~ pushd ]] &&
+         ${EXPORT[@]} "$funcname"
+      }
+   done
+   unset funcfile funcname SOURCE TYPE EXPORT
+}
+
+##########################################################
+######## starship ########
+##########################
+
+board-starship() {
+   # this assumes there are multiple starship configuration files in the config directory
+   local starship_to_board="${1}"
+   [[ -n "${starship_to_board}" ]] && starship_to_board="-${starship_to_board}"
+   local starship_config_dir="$HOME/.config"
+   local starship_config_file="${starship_config_dir}/starship${starship_to_board}.toml"
+
+   if [[ -r "${starship_config_file}" ]]; then
+      # symlink to the desired starshp config file
+      echo "boarding starship ${starship_to_board}..."
+      export STARSHIP_CONFIG="${starship_config_file}" || {
+         echo "problem boarding starship ${starship_to_board}"
+      }
+   else
+      echo "${RED}no such starship ${starship_to_board}${END_COLOR}"
+      echo
+      echo "available starships:"
+      ls -1 "${starship_config_dir}/"*starship*toml | sed -rne 's;.*starship-([^.]+)\.toml;* \1;p' | sort -u
+   fi
+}
+
+##########################################################
+
+##########################################################
+######## GitHub ########
+########################
+
+gist() {
+   local gist_action="${1}"
+   local gist_file
+
+   if has gh; then
+      if [[ "${gist_action}" =~ ^list$ ]]; then
+         shift
+         gh gist list "${@}"
+         return
+      elif [[ "${gist_action}" =~ ^(edit|view)$ ]]; then
+         if [[ -n "${2}" ]]; then
+            gist_file="${2}"
+         fi
+      else
+         gist_file="${gist_action}"
+         gist_action="view"
+      fi
+
+      if [[ "${gist_file}" =~ ^- ]]; then
+         gh gist ${gist_action} "${gist_file}"
+         return
+      fi
+
+      local gist_files="$(gh gist list)"
+      local found_file
+      found_file="$(echo "${gist_files}" | awk -F'\t' '{ IGNORECASE=1; if ($2 ~ /'"${gist_file}"'/){ print $1 } }')"
+      if [[ -z "${found_file}" ]]; then
+         if [[ "${gist_action}" =~ edit ]]; then
+            echo "'${gist_file}' not found"
+            return 1
+         else
+            echo "'${gist_file}' not found:"
+         fi
+      elif [[ $(echo ${found_file} | wc -l) -gt 1 ]]; then
+
+         # clear out file list so 'gh gist view' lists them all
+         found_file=""
+      fi
+      printf "ID\t\t\t\t\tDescription\n"
+      echo "${gist_files}"
+      echo
+      echo "found_file = ${found_file}"
+      echo gh gist "${gist_action}" "${found_file}"
+      gh gist ${gist_action} "${found_file}"
+   else
+      echo "error: 'gh' client not installed"
+      return 1
+   fi
+}
+
+##########################################################
+
+##########################################################
+######## k8s ########
+#####################
+
+kgetall() {
+   local namespace="${1}"
+   local api_resource_namespaced
+   local force_colors=""
+
+   if [[ -n "${namespace}" ]]; then
+      namespace=("--namespace" "${1}")
+      api_resource_namespaced=("${namespace[@]}" "--namespaced=true")
+   else
+      namespace=("--all-namespaces")
+      api_resource_namespaced=("--namespaced=false")
+   fi
+
+   has kubecolor && force_colors='--force-colors'
+
+   time (
+      echo "k get "${namespace[@]}" ${force_colors} \$(k api-resources "${api_resource_namespaced[@]}" --verbs=list -o name | sort | tr '\\\n' ',' | sed -re 's;,$;;g') -o wide 2> /dev/null"
+      k get "${namespace[@]}" ${force_colors} $(k api-resources "${api_resource_namespaced[@]}" --verbs=list -o name | sort | tr '\n' ',' | sed -re 's;,$;;g') -o wide 2> /dev/null
+      echo
+   )
+}
+
+kx() {
+   if [[ -n "${1}" ]]; then
+      k config use-context "${1}"
+   else
+      k config get-contexts
+   fi
+}
+
+kn() {
+   if [[ -n "${1}" ]]; then
+      k config set-context --current --namespace "${1}"
+   else
+      kubectl config view --minify | grep namespace | cut -d" " -f6
+   fi
+}
+
+kc() {
+   local command=("${@}")
+   local USE_YAML
+   local output_format
+
+   if [[ "${1}" =~ ^(describe|edit)$ ]]; then
+      USE_YAML="FALSE"
+      output_format=()
+   else
+      USE_YAML="TRUE"
+      output_format=("-o" "yaml")
+   fi
+
+   if [[ "${1}" =~ ^(edit)$ ]]; then
+      echo kubectl ${command} ${output_format}
+      kubectl ${command} ${output_format}
+   elif has yq && [[ "${USE_YAML}" =~ ^TRUE$ ]]; then
+      echo yq -C \<\(kubectl ${command} ${output_format} \) \| less
+      yq -C <(kubectl ${command} ${output_format}) | less
+   elif has kubecolor; then
+      echo kubecolor ${command} ${output_format} --force-colors \| less
+      kubecolor ${command} ${output_format} --force-colors | less
+   else
+      echo kubectl ${command} ${output_format} \| less
+      kubectl ${command} ${output_format} | less
+   fi
+}
+
+##########################################################
+
+##########################################################
+######## zsh ########
+#####################
+
+# <https://stackoverflow.com/questions/32614648/weird-jobs-behavior-within-zsh/32614814#32614814>
+#_jobs_wrapper_() {
+#   local command="${1}"
+#   echo "command = ${command}"
+#   shift
+#
+#   if [[ $# -eq 1 && $1 =~ ^[-0-9]+$ ]]; then
+#      builtin "${command}" %"${1}"
+#   elif [[ "${command}" =~ ^fg$ ]]; then
+#      builtin "${command}" %$(jobs | sed -rne 's;^\[([0-9])\] *\+.*;\1;p')
+#   fi
+#}
+#
+#fg() {
+#   _jobs_wrapper_ "fg" "${@}"
+#}
+#
+#kill() {
+#   _jobs_wrapper_ "kill" "${@}"
+#}
+if is_zsh; then
+   fg() {
+      if [[ $# -eq 1 && $1 =~ ^[-0-9]+$ ]]; then
+         builtin fg %"${1}"
+      else
+         # for some reason, 'jobs' sometimes doesn't print output even though it should
+         # using it once before we need to parse its output seems to relatively consistently work around that
+         builtin fg %$({ jobs &>/dev/null; jobs | sed -rne 's;^\[([0-9])\] *\+.*;\1;p'; })
+      fi
    }
-done
-unset funcfile funcname
+
+   kill() {
+      if [[ $# -eq 1 && $1 =~ ^[-0-9]+$ ]]; then
+         builtin kill -KILL %"${1}"
+      else
+         builtin kill
+      fi
+   }
+
+   pushd() {
+      if [[ $@ =~ ^[0-9]+$ ]]; then
+         builtin pushd -q +"$@"
+      else
+         builtin pushd -q "$@"
+      fi
+      dirs
+   }
+
+   popd() {
+      if [[ $@ =~ ^[0-9]+$ ]]; then
+         builtin popd -q +"$@"
+      else
+         builtin popd -q "$@"
+      fi
+      dirs
+   }
+fi
+
+##########################################################

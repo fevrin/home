@@ -26,7 +26,9 @@ has kubectl && {
    else
       alias k='kubectl'
    fi
+
    . <(kubectl completion ${SHELL_TYPE})
+
    if is_zsh; then
       # k alias hack TODO: remember compdef load order
       compdef k=kubectl
@@ -43,3 +45,7 @@ has minikube && {
 
 # starship
 has starship && . <(starship completions ${SHELL_TYPE})
+
+# glow
+# https://github.com/charmbracelet/glow
+has glow && . <(glow completion ${SHELL_TYPE})

@@ -3,7 +3,6 @@
 # The following lines were added by compinstall
 zstyle :compinstall filename '/home/$USER/.zshrc'
 
-
 # consider this:
 # https://thevaluable.dev/zsh-completion-guide-examples/
 # https://github.com/Phantas0s/.dotfiles/blob/master/zsh/completion.zsh
@@ -29,12 +28,15 @@ fi
 export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
 export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 
-. ${HOME}/.shellrc.d/base
+##########################################################
+######## Source Files #########
+###############################
 
 for file in \
+   ${HOME}/.shellrc.d/base \
    ${HOME}/.shellrc.d/00_vars \
    ${HOME}/.shellrc.d/aliases_general \
-   ${HOME}/.shellrc.d/functions \
+   ${HOME}/.shellrc.d/functions_general \
    ${HOME}/.shellrc.d/completions \
    ; do
    [[ -r "$file" ]] &&
@@ -46,6 +48,12 @@ for file in \
 #   time . "$file"
    . "$file"
 done
+
+##########################################################
+
+##########################################################
+######## Plugins ########
+#########################
 
 # 'bare-metal' plugin system:
 # https://github.com/mattmc3/zsh_unplugged#jigsaw-the-humble-plugin-load-function
@@ -92,6 +100,12 @@ unset plugins
 
 export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=248'
 
+##########################################################
+
+##########################################################
+######## Shell Options ########
+###############################
+
 # Set shell options
 # http://zsh.sourceforge.net/Doc/Release/Options.html
 setopt glob_dots            # no special treatment for file names with a leading dot
@@ -119,9 +133,22 @@ setopt no_always_last_prompt
 # -ftb-complete:7: bad output format specification
 #setopt ksh_arrays
 
+# have the redirect operator '>' null a file instead of act as catting into it
+# from:
+# <https://zsh.sourceforge.io/Doc/Release/Redirection.html#Redirection:~:text=7.3%20Redirections%20with%20no%20command>
+# <https://zsh.sourceforge.io/Doc/Release/Options.html#Description-of-Options:~:text=%E2%80%99%20will%20work.-,SH_NULLCMD%20%3CK%3E%20%3CS%3E,-Do%20not%20use>
+set -o shnullcmd
+#export NULLCMD=:
+
+##########################################################
+
 # don't print an inverse bold '%' character at the end of a line that has no newline
 # https://unix.stackexchange.com/questions/167582/why-zsh-ends-a-line-with-a-highlighted-percent-symbol#comment822112_167600
 export PROMPT_EOL_MARK=''
+
+##########################################################
+######## Key bindings ########
+##############################
 
 # use vi style line controls
 bindkey -v
@@ -143,6 +170,8 @@ autoload -z edit-command-line; zle -N edit-command-line
 zstyle :zle:edit-command-line editor vim
 bindkey -a v edit-command-line
 
+##########################################################
+
 # Autoload functions
 autoload -Uz zmv
 
@@ -154,13 +183,6 @@ export HISTFILE=${HOME}/.zsh-history
 # https://www.johnhawthorn.com/2012/09/vi-escape-delays/
 export KEYTIMEOUT=1
 
-
-# have the redirect operator '>' null a file instead of act as catting into it
-# from:
-# <https://zsh.sourceforge.io/Doc/Release/Redirection.html#Redirection:~:text=7.3%20Redirections%20with%20no%20command>
-# <https://zsh.sourceforge.io/Doc/Release/Options.html#Description-of-Options:~:text=%E2%80%99%20will%20work.-,SH_NULLCMD%20%3CK%3E%20%3CS%3E,-Do%20not%20use>
-set -o shnullcmd
-#export NULLCMD=:
 if has vim; then
   export EDITOR=vim
   export GIT_EDITOR="${EDITOR}"
