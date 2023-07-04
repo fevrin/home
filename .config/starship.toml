@@ -17,7 +17,8 @@ format = """\
    $time\
    ${custom.timezone}\
    $line_break\
-   ${custom.cmd_hist_num}\
+   ${custom.cmd_hist_num_bash}\
+   ${custom.cmd_hist_num_zsh}\
    $character
 """
 
@@ -90,10 +91,15 @@ command = 'date +%Z'
 when = '[[ -x $(command -v -- date) ]]'
 style = 'bright white'
 
-[custom.cmd_hist_num]
+[custom.cmd_hist_num_bash]
 command = 'echo "\$HISTCMD"'
 when = "[[ $STARSHIP_SHELL =~ ^(bash)$ ]]"
 style = "blue bold"
+
+#[custom.cmd_hist_num_zsh]
+#command = 'echo "%h"'
+#when = "[[ $STARSHIP_SHELL =~ ^(zsh)$ ]]"
+#style = "blue bold"
 
 [character]
 #success_symbol = "[\b\\$](bright white)" # this would set the prompt like the traditional $PROMPT_STRING in the repo
