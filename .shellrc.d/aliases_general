@@ -171,12 +171,12 @@ alias kgn='k get namespaces'
 ######## VPN ########
 #####################
 
-alias vpn-start='echo openvpn3 session-start --config ~/.config/openvpn3/vpn.ovpn; openvpn3 session-start --config ~/.config/openvpn3/vpn.ovpn'
+alias vpn-start='if has openvpn3; then echo openvpn3 session-start --config ~/.config/openvpn3/vpn.ovpn; openvpn3 session-start --config ~/.config/openvpn3/vpn.ovpn; else echo "${BOLD}${RED}error:${END_COLOR} \"openvpn3\" not found"; fi'
 
-alias vpn-list='{ echo openvpn3 sessions-list; openvpn3 sessions-list; }'
+alias vpn-list='if has openvpn3; then { echo openvpn3 sessions-list; openvpn3 sessions-list; }; else echo "${BOLD}${RED}error:${END_COLOR} \"openvpn3\" not found"; fi'
 
-alias vpn-stop='for session_path in $(openvpn3 sessions-list | awk "{ if(\$0 ~ /Path:/){print \$2} else if(\$0 ~ /No sessions available/){print \"none\"} }"); do if [[ "${session_path}" =~ ^none$ ]]; then echo "No sessions available"; else echo openvpn3 session-manage --disconnect --session-path $session_path; openvpn3 session-manage --disconnect --session-path "${session_path}"; fi; done; echo openvpn3 session-manage --cleanup; openvpn3 session-manage --cleanup; unset session_path'
+alias vpn-stop='if has openvpn3; then for session_path in $(openvpn3 sessions-list | awk "{ if(\$0 ~ /Path:/){print \$2} else if(\$0 ~ /No sessions available/){print \"none\"} }"); do if [[ "${session_path}" =~ ^none$ ]]; then echo "No sessions available"; else echo openvpn3 session-manage --disconnect --session-path $session_path; openvpn3 session-manage --disconnect --session-path "${session_path}"; fi; done; echo openvpn3 session-manage --cleanup; openvpn3 session-manage --cleanup; unset session_path; else echo "${BOLD}${RED}error:${END_COLOR} \"openvpn3\" not found"; fi'
 
-alias vpn-reset='session_path="$(openvpn3 sessions-list | awk "{ if(\$0 ~ /Path:/){print \$2} else if(\$0 ~ /No sessions available/){print \"none\"} }")"; if [[ $(echo "${session_path}" | wc -l) -eq 0 ]]; then vpn-start; elif [[ $(echo "${session_path}" | wc -l) -eq 1 ]]; then echo openvpn3 session-manage --restart --path "${session_path}"; openvpn3 session-manage --restart --path "${session_path}"; else vpn-stop && vpn-start; fi; unset session_path'
+alias vpn-reset='if has openvpn3; then session_path="$(openvpn3 sessions-list | awk "{ if(\$0 ~ /Path:/){print \$2} else if(\$0 ~ /No sessions available/){print \"none\"} }")"; if [[ $(echo "${session_path}" | wc -l) -eq 0 ]]; then vpn-start; elif [[ $(echo "${session_path}" | wc -l) -eq 1 ]]; then echo openvpn3 session-manage --restart --path "${session_path}"; openvpn3 session-manage --restart --path "${session_path}"; else vpn-stop && vpn-start; fi; unset session_path; else echo "${BOLD}${RED}error:${END_COLOR} \"openvpn3\" not found"; fi'
 
 ##########################################################

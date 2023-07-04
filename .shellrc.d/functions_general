@@ -47,8 +47,19 @@ is_zsh || {
 board-starship() {
    # this assumes there are multiple starship configuration files in the config directory
    local starship_to_board="${1}"
-   [[ -n "${starship_to_board}" ]] && starship_to_board="-${starship_to_board}"
    local starship_config_dir="$HOME/.config"
+   local starships="$(ls -1 "${starship_config_dir}/"*starship*toml | sed -Ene 's;.*starship-([^.]+)\.toml;\1;p' | sort -u)"
+   if [[ -n "${starship_to_board}" ]]; then
+      starship_to_board="-${starship_to_board}"
+   else
+      cat <<-EOF
+			${RED}you must provide the name of a starship to board${END_COLOR}
+
+			available starships:
+			${starships}
+		EOF
+      return 1
+   fi
    local starship_config_file="${starship_config_dir}/starship${starship_to_board}.toml"
 
    if [[ -r "${starship_config_file}" ]]; then
@@ -58,10 +69,11 @@ board-starship() {
          echo "problem boarding starship ${starship_to_board}"
       }
    else
-      echo "${RED}no such starship ${starship_to_board}${END_COLOR}"
+      echo "${RED}no such starship '${starship_to_board}${END_COLOR}'"
       echo
       echo "available starships:"
-      ls -1 "${starship_config_dir}/"*starship*toml | sed -rne 's;.*starship-([^.]+)\.toml;* \1;p' | sort -u
+      echo "${starships}"
+      return 1
    fi
 }
 
