@@ -102,7 +102,11 @@ alias grep-config='grep -Ev "^(\s*|#.*|\s*#.*)$"'
 # add something like these lines to a file in /etc/sudoers.d/ if you want to avoid having to sudo every time (use a username instead of '%sudo' to enable just one user to do this, and replace $HOME with the hard-coded version since sudo doesn't support $HOME)
 # %sudo   ALL=(ALL:ALL)NOPASSWD: /usr/bin/chattr -a $HOME/.bash_history
 # %sudo   ALL=(ALL:ALL)NOPASSWD: /usr/bin/chattr +a $HOME/.bash_history
-alias edit-history='history -a; vim -c "+normal G" ~/.bash_history; history -c; history -r'
+if is_zsh; then
+   alias edit-history='fc -IA; vim -c "+normal G" "${HISTFILE}"; ORIG_HISTSIZE="${HISTSIZE}"; HISTSIZE=0; HISTSIZE="${ORIG_HISTSIZE}"; fc -IR'
+else
+   alias edit-history='history -a; vim -c "+normal G" ${HISTFILE}; history -c; history -r'
+fi
 alias eh='edit-history'
 
 # Add an "alert" alias for long running commands.  Use like so:
@@ -132,7 +136,9 @@ else
    alias tsm='echo "this alias works only when run in a tmate session!"'
 fi
 
-############# Directory Shortcuts ############
+##########################################################
+######## Directory Shortcuts ########
+#####################################
 
 alias pics='pushd "$HOME/pictures"'
 

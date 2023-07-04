@@ -24,11 +24,10 @@ diff-home-files() {
    # list files that should be ignored
    # filenames relative to $HOME_DIR
    declare -a skip_files=(
-   ".bashrc.d/functions/_verify_reqs"
-   ".bashrc.d/functions/yessh"
+   ".shellrc.d/functions/_verify_reqs"
+   ".shellrc.d/functions/yessh"
    ".githooks/pre-commit"
    ".htoprc"
-   ".zshrc"
    "Makefile"
    "etc/hosts"
    "etc/logrotate.d/chrome-history"
