@@ -293,6 +293,7 @@
       # git for-each-ref --format=\"%(symref:lstrip=3)\" refs/remotes/${main_remote}/HEAD || {\
   refresh-main-branch = "!bash -c '\
      main_remote=\"$(git get-main-remote)\"; \
+     git symbolic-ref refs/remotes/${main_remote}/HEAD &>/dev/null || git symbolic-ref refs/remotes/${main_remote}/HEAD refs/remotes/${main_remote}/$(git ls-remote --symref origin HEAD | sed -Ene \"s;^ref: refs/heads/([^[[:space:]]+)[[:space:]].+$;\\1;p\"); \
      remote_main_branch=\"$(git for-each-ref --format=\"%(if)%(symref)%(then)%(symref:lstrip=3)%00%(end)\" --points-at=$(git ls-remote ${main_remote} HEAD | cut -f1) | tr -d \"\n\" | tr \"\\0\" \"\n\")\";  \
      if [[ ${remote_main_branch} =~ ^$(git for-each-ref --format=\"%(symref:lstrip=3)\" refs/remotes/${main_remote}/HEAD)$ ]]; then \
         echo \"no updates to remote main branch\"; \
