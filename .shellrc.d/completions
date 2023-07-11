@@ -4,6 +4,26 @@
 has op && . <(op completion ${SHELL_TYPE})
 is_zsh && compdef _op op
 
+# docker
+if has docker; then
+   if is_zsh; then
+      docker_completion_file="${HOME}/.local/completions/_docker.zsh"
+      [[ -s "${docker_completion_file}" ]] || {
+         curl -sLo "${docker_completion_file}" https://raw.githubusercontent.com/docker/cli/master/contrib/completion/zsh/_docker
+      }
+      zstyle ':completion:*:*:docker:*' option-stacking yes
+      zstyle ':completion:*:*:docker-*:*' option-stacking yes
+      . "${docker_completion_file}"
+   else
+      docker_completion_file="${HOME}/.local/completions/_docker.sh"
+      [[ -s ${HOME}/.local/completions/_docker.sh ]] || {
+         curl -sLo ${HOME}/.local/completions/_docker.sh https://raw.githubusercontent.com/docker/cli/master/contrib/completion/bash/docker
+      }
+      . "${docker_completion_file}"
+   fi
+   unset docker_completion_file
+fi
+
 # dotfile manager
 has chezmoi && . <(chezmoi completion ${SHELL_TYPE})
 is_zsh && compdef _chezmoi chezmoi
