@@ -2,6 +2,318 @@
 
 # CHANGELOG
 
+## v2.9.0
+
+### 2023-07-12 (Wed, Jul 12, 2023)
+* feat(starship): change command timeout to be a snappy 50 milliseconds
+
+### 2023-07-11 (Tue, Jul 11, 2023)
+* feat: add 'glow' config
+
+### 2023-07-11 (Tue, Jul 11, 2023)
+* fix: regex in zsh' 'fg()' function
+
+### 2023-07-10 (Mon, Jul 10, 2023)
+* feat: add docker completion
+
+### 2023-07-04 (Tue, Jul 04, 2023)
+* refactor: update 'board-starship()' logic and add upcoming zsh config change
+
+* 'cmd_hist_num_zsh' needs 1 or 2 subtracted from it to get the accurate history number, but the present command isn't cooperating when executed by starship
+
+### 2023-07-06 (Thu, Jul 06, 2023)
+* fix: update 'refresh-main-branch' to set the main branch if needed
+
+### 2023-07-06 (Thu, Jul 06, 2023)
+* fix: update 'refresh-main-branch' to set the main branch if needed
+
+### 2023-07-04 (Tue, Jul 04, 2023)
+* fix: add checks for existence of 'openvpn3' before running it and of a starship to board
+
+### 2023-07-04 (Tue, Jul 04, 2023)
+* feat: config updates, style changes, new functions
+
+### 2023-07-04 (Tue, Jul 04, 2023)
+* style: heading updates
+
+### 2023-07-04 (Tue, Jul 04, 2023)
+* feat: add several new k8s, starship, and zsh functions
+
+### 2023-07-04 (Tue, Jul 04, 2023)
+* feat: minor config updates and style changes
+
+### 2023-07-03 (Mon, Jul 03, 2023)
+* style: group 'setops' opts and clean up the comment area
+
+### 2023-07-03 (Mon, Jul 03, 2023)
+* feat: increase '$HISTSIZE' and have leading '>' in zsh behave like bash
+
+* fix: 'asdf-vm/asdf' plugin URL and outdated references to '.bashrc.d'
+
+### 2023-07-03 (Mon, Jul 03, 2023)
+* refactor: move some Bash-specific env vars to .bashrc and add zsh CONFIG var
+
+### 2023-07-02 (Sun, Jul 02, 2023)
+* feat: update tmux's '$TERM' to use colors and add some aliases
+
+* also fix '$GREEN' value
+
+### 2023-07-02 (Sun, Jul 02, 2023)
+* refactor: rearrange ~/.bashrc and add zsh plugin code
+
+* also remove unneeded variables
+
+### 2023-07-02 (Sun, Jul 02, 2023)
+* fix: update remaining 'shellrc.d' references, add color vars
+
+* also update a function to compare a variable instead of re-running a command run elsewhere
+
+### 2023-07-02 (Sun, Jul 02, 2023)
+* refactor: move around locations of some variables and functions
+
+* also add a completions file and rename '$NO_COLOR' to '$END_COLOR'
+
+### 2023-07-02 (Sun, Jul 02, 2023)
+* refactor: rename '.bashrc.d/' to '.shellrc.d/'
+
+### 2023-07-02 (Sun, Jul 02, 2023)
+* refactor: config cleanup and clarification
+
+### 2023-07-02 (Sun, Jul 02, 2023)
+* refactor: move Bash History Control configuration to main .bashrc
+
+* also add some comments and minor changes
+
+### 2023-06-21 (Wed, Jun 21, 2023)
+* feat: add commitlint pre-commit hook
+
+### 2023-06-21 (Wed, Jun 21, 2023)
+* fix: change back to use 'which' for some commands instead of 'has'
+
+### 2023-06-19 (Mon, Jun 19, 2023)
+* .zshrc: add a bunch of accumulated zshrc configs
+
+### 2023-06-19 (Mon, Jun 19, 2023)
+* refactor: various minor changes
+
+#### .bashrc.d/00_vars
+* update '$SYSTEMD_LESS' to match '$LESS'
+
+#### .bashrc.d/functions/rsync-with-progress
+* switch to using 'has()' instead of 'which'
+
+#### .bashrc.d/functions_sec
+* remove extraneous 'grep' command
+
+#### .vimrc
+* update URL for 'listchars' usage of "multiline"
+
+### 2023-06-17 (Sat, Jun 17, 2023)
+* feat(starship): Update the config to be more like the '$PROMPT_STRING'  
+
+  This updates the starship config to be more like the '$PROMPT_STRING' in this repo.
+
+### 2023-06-17 (Sat, Jun 17, 2023)
+* style(starship): Modernize the git sections of the shell prompt
+
+### 2023-06-17 (Sat, Jun 17, 2023)
+* feat: Add and enable starship configuration
+
+### 2023-06-17 (Sat, Jun 17, 2023)
+* feat: add preliminary support for zsh
+
+#### .bashrc
+* add '$SHELL_TYPE' to reference the current shell's type (bash, zsh, etc.)
+
+#### .bashrc.d/00_vars
+* set the '$FUNCNEST' value based on the type of shell
+
+#### .bashrc.d/functions/get-ips
+* use an array for the network interfaces (it's better practice but also enables support for zsh)
+
+### 2023-06-16 (Fri, Jun 16, 2023)
+#### .bashrc.d/00_vars
+* update '$SYSTEMD_LESS' to use a slightly different set of options than '$LESS'
+
+#### .bashrc.d/base
+* add a condition in which to attach to an existing tmux session
+
+#### .vimrc
+* update 'listchars' to enable built-in indent guides with spaces
+
+### 2023-06-16 (Fri, Jun 16, 2023)
+#### .bashrc
+* utilize 'has()' instead of 'which'
+
+#### .bashrc.d/base
+* utilize 'has()' instead of 'which'
+
+### 2023-06-13 (Tue, Jun 13, 2023)
+#### .bashrc.d/functions/show-user-installed-pkgs
+* add file
+
+### 2023-06-12 (Mon, Jun 12, 2023)
+#### .bashrc
+* update indentation
+
+#### .gvimrc
+* update window lines/columns to be variables and use a formula
+
+### 2023-05-10 (Wed, May 10, 2023)
+#### .bashrc.d/00_vars
+* update '$HTTP_REGEX' regex
+* correct "LESS" setting for text search default ignore case
+
+#### .bashrc.d/base
+* update logic to take into account machines that do not offer "deep" sleep S3 setting
+
+#### .bashrc.d/functions/fix-session-manager
+* fix the session manager value only if needed
+
+#### .bashrc.d/functions/rsync-with-progress
+* add sudo support
+* add "$PV_METHOD" flag
+* retrieve file list only when using "pv"
+
+#### .bashrc.d/remote/remote_base
+* remove old "run-check()" function
+
+#### .vimrc
+* disable "cursorcolumn" setting by default, as it may slow vim down (as of v8.0.1599)
+
+### 2023-03-20 (Mon, Mar 20, 2023)
+#### .apple_keyboard_mod.rc
+* simplify conditional statement
+
+#### .bashrc
+* enable resource-intensive variable only in small repos
+
+#### .bashrc.d/base
+* add a fix for slow startup in vim
+
+#### .bashrc.d/functions/diff-home-files
+* change behavior to not skip the '.bashrc' file
+
+#### .bashrc.d/functions/rsync-with-progress
+* change behavior to not use '--info=progress2' during dry runs
+
+#### etc/sudoers
+* add standard default settings
+
+#### var/spool/cron/crontabs/username
+* add configuration to keep password manager open during certain times
+
+### 2023-01-31 (Tue, Jan 31, 2023)
+#### .docker/config.json
+* add a note to restart 'docker' when changing the config
+
+#### .gitconfig
+* add 'cl' alias to clone in a standard directory
+* add "include" directive for additional config files
+
+### 2023-01-26 (Thu, Jan 26, 2023)
+#### .gitconfig
+* update 'bclean' to default to 'gh' and its 'poi' extension
+
+### 2023-01-26 (Thu, Jan 26, 2023)
+#### .bashrc.d/functions_sec
+* remove unnecessary uses of 'sudo'
+* echo dangerous 'sgdisk' commands
+* fix 'cryptsetup' commands
+
+### 2023-01-26 (Thu, Jan 26, 2023)
+#### .apple_keyboard_mod.rc
+* update OS release conditional
+* update dconf configuration
+
+#### .bashrc.d/functions/rsync-with-progress
+* add '--hard-links' as a default option
+* skip processing the destination if it's a file
+* use the "${LINK_DEST}" value only if it exists
+
+#### .bashrc.d/functions_sec
+* fix commands to what is confirmed to work
+
+### 2022-12-22 (Thu, Dec 22, 2022)
+#### .gitconfig.d/git-sync.sh
+* fix 'stash pop' by using the index instead of a regex
+
+### 2022-12-17 (Sat, Dec 17, 2022)
+#### etc/systemd/system/powertop-restart.service
+* fix service name reference
+
+### 2022-12-08 (Thu, Dec 08, 2022)
+#### etc/systemd/system/powertop-restart.service
+* add
+
+#### etc/systemd/system/powertop.service
+* add
+
+### 2022-12-07 (Wed, Dec 07, 2022)
+#### .editorconfig
+* add settings for multiple languages
+
+#### .gitconfig
+* update some formatting
+* add `rf`, `save`, `ss`, and `undo` aliases
+
+#### .tmux.conf
+* update "status-interval" to be 5 seconds
+
+#### .vimrc
+* turn off visual bell
+* add commented out "catppuccin" theme plugin
+
+### 2022-11-30 (Wed, Nov 30, 2022)
+#### .bashrc.d/functions/fix-session-manager
+* new file
+
+#### .gvimrc
+* set window size since the default in GNOME is woefully small
+
+### 2022-11-19 (Sat, Nov 19, 2022)
+#### .bashrc.d/functions/grip
+* fix file canonicalization
+
+#### .bashrc.d/functions/yessh
+* update arg processing to accept IP addresses for the hostname
+
+### 2022-11-19 (Sat, Nov 19, 2022)
+#### .bashrc
+* change hostname color when ssh'ed in for easier identification
+
+#### .vimrc
+* add EasyAlign remaps
+
+#### etc/hosts
+* add missing comment character
+
+### 2022-11-12 (Sat, Nov 12, 2022)
+#### .apple_keyboard_mod.rc
+* wrap updated `xmodmap` command in a conditional since it doesn't work in 20.04
+
+#### .bashrc.d/functions/show-disk-space-usage
+* use `sudo` so the command doesn't fail due to perms
+
+#### .gitconfig
+* remove extraneous config
+
+#### .gitconfig.d/gitignore
+* add more file patterns to ignore
+
+#### .tmux.conf
+* update status-right width limit
+
+### 2022-11-11 (Fri, Nov 11, 2022)
+#### .bashrc.d/functions/grip
+* add to easily display Markdown files in a browser
+
+#### .vimrc
+* update plugins and plugin list format
+
+#### etc/hosts
+* add many more domains to blocklist
+
 ## v2.3.8
 
 ### 2022-10-26 (Wed, Oct 26, 2022)
