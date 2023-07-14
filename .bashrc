@@ -166,7 +166,9 @@ GOPATH="${GOPATH%%:}"
 
 # don't overwrite ~/.bash_history file upon logging out
 shopt -s histappend
-#
+
+export HISTFILE=${HOME}/.bash_history
+
 # this must be set really high or not set at all; it seems as of bash version 4.4.19(1)-release, having the history file larger than this size causes a segfault
 export HISTFILESIZE="${HISTSIZE}"
 
