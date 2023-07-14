@@ -33,11 +33,11 @@ export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 ###############################
 
 for file in \
-   ${HOME}/.shellrc.d/base \
    ${HOME}/.shellrc.d/00_vars \
    ${HOME}/.shellrc.d/aliases_general \
-   ${HOME}/.shellrc.d/functions_general \
+   ${HOME}/.shellrc.d/base \
    ${HOME}/.shellrc.d/completions \
+   ${HOME}/.shellrc.d/functions_general \
    ; do
    [[ -r "$file" ]] &&
    [[ ! "$file" =~ python ]] &&

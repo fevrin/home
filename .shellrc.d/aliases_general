@@ -102,7 +102,7 @@ alias grep-config='grep -Ev "^(\s*|#.*|\s*#.*)$"'
 # add something like these lines to a file in /etc/sudoers.d/ if you want to avoid having to sudo every time (use a username instead of '%sudo' to enable just one user to do this, and replace $HOME with the hard-coded version since sudo doesn't support $HOME)
 # %sudo   ALL=(ALL:ALL)NOPASSWD: /usr/bin/chattr -a $HOME/.bash_history
 # %sudo   ALL=(ALL:ALL)NOPASSWD: /usr/bin/chattr +a $HOME/.bash_history
-if is_zsh; then
+if [[ "${SHELL}" =~ zsh$ || "${SHELL_TYPE}" =~ ^zsh$ ]]; then
    alias edit-history='fc -IA; vim -c "+normal G" "${HISTFILE}"; ORIG_HISTSIZE="${HISTSIZE}"; HISTSIZE=0; HISTSIZE="${ORIG_HISTSIZE}"; fc -IR'
 else
    alias edit-history='history -a; vim -c "+normal G" ${HISTFILE}; history -c; history -r'
