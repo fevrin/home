@@ -3,22 +3,27 @@
 aptupchange() {
    # view the changelogs of all packages to be upgraded
 
-   local packages="$(sudo apt-get -us upgrade | sed -ne "s;^Inst \([^[]\+\) \([[(]\).*;\1;"p)"
+   local packages_temp="$(sudo apt-get -us upgrade | sed -ne "s;^Inst \([^[]\+\) \([[(]\).*;\1;"p)"
+   [[ -n "${packages_temp}" ]] || {
+      echo "no packages to be upgraded"
+      return 1
+   }
+   declare -a packages=($(echo "${packages_temp}" | sort))
 
-   cat <<-EOF
-	packages to be upgraded:
-	$packages
-
-	EOF
-
+   echo "packages to be upgraded:"
    local package
-   for package in $packages; do
-      echo -n "view changelog for $package? [y/N]: "
+   for package in ${packages[@]}; do
+      echo "${package}"
+   done
+   echo
+
+   for package in ${packages[@]}; do
+      echo -n "view changelog for '${package}'? [y/N]: "
 
       read
 
       [[ $REPLY = "y" ]] &&
-       aptchangelog "$package" &&
+       aptchangelog "${package}" &&
        echo
    done
 }

@@ -5,7 +5,7 @@
 get-public-ip() {
 # returns the public ip of the local computer.  help from <http://www.go2linux.org/what-is-my-public-ip-address-with-linux>
 #   curl ifconfig.me/all/json
-   wget -q -O - icanhazip.com || wget -q -O - checkip.dyndns.org | grep -oE '[0-9.]{7,15}' || curl -s checkip.dyndns.org | grep -oE '[0-9.]{7,15}'
+   wget -q -O - icanhazip.com || wget -q -O - ifconfig.co || wget -q -O - checkip.dyndns.org | grep -oE '[0-9.]{7,15}' || curl -s checkip.dyndns.org | grep -oE '[0-9.]{7,15}'
    #if [[ $(which curl) ]]; then
    #   #curl http://www.whatismyip.com/automation/n09230945.asp ||
    #   curl http://automation.whatismyip.com/n09230945.asp ||
@@ -17,12 +17,12 @@ get-public-ip() {
 }
 
 get-ip-location() {
-   local ip="$(get-public-ip)"
-   local data="$(curl -sw "%{response_code}" http://api.db-ip.com/v2/free/$ip)"
+   local data="$(curl -sw "%{response_code}" ifconfig.co/json)"
    local location="$(echo "$data" | sed -re 's;(.*[^0-9])[0-9]+$;\1;')"
    local resp_code="$(echo "$data" | sed -re 's;.*[^0-9]([0-9]+)$;\1;')"
 
    [[ ! "$resp_code" =~ 200 ]] && {
+      local ip="$(get-public-ip)"
       location="$(curl -s -H "User-Agent: keycdn-tools:https://www.example.com" "https://tools.keycdn.com/geo.json?host=${ip}")"
    }
 
@@ -30,7 +30,7 @@ get-ip-location() {
 }
 
 get-ip-city() {
-   local data="$(curl -sw "%{response_code}" https://ipinfo.io/city 2> /dev/null | tr ' ' '+')"
+   local data="$(curl -sw "%{response_code}" https://ifconfig.co/city 2> /dev/null | tr ' ' '+')"
    local city="$(echo "$data" | sed -re 's;(.*[^0-9])[0-9]+$;\1;')"
    local resp_code="$(echo "$data" | sed -re 's;.*[^0-9]([0-9]+)$;\1;')"
 

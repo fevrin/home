@@ -15,6 +15,7 @@ export YELLOW="$(tput setaf 3 2>/dev/null)"
 export END_COLOR="$(tput sgr0 2>/dev/null)"
 
 export SHELL_TYPE="$(command -p \ps -ocomm= -p $$)"
+export SHELL="$(which "${SHELL_TYPE}")"
 
 if [[ "${SHELL}" =~ zsh$ || "${SHELL_TYPE}" =~ ^zsh$ ]]; then
    export FUNCNEST=35 # for safety against fork bombs :3

@@ -41,9 +41,15 @@ _verify_reqs() {
       echo "ERROR: you must supply a list of required files or functions!"
 
       echo
-      echo "file: $(realpath ${BASH_SOURCE[1]})"
-      echo "function: ${FUNCNAME[1]}"
-      echo "line: ${BASH_LINENO[0]}";
+      if is_zsh; then
+         echo "file: ${funcfiletrace[1]%:*}"
+         echo "function: ${funcstack[1]}"
+         echo "line: ${LINENO}";
+      else
+         echo "file: $(realpath ${BASH_SOURCE[1]})"
+         echo "function: ${FUNCNAME[1]}"
+         echo "line: ${BASH_LINENO[0]}";
+      fi
    fi
 
    declare -a failures
@@ -55,15 +61,20 @@ _verify_reqs() {
       local failure_output
       req="${req%:*}"
 
-      actual_version="$(${req%:*} --version 2>&1 | sed -rne '1s;.* ([0-9.a-z+]+\.[0-9.a-z+]+)([^0-9.a-z+].*|$);\1;p')"
-      [[ "$actual_version" ]] || actual_version="$(${req%:*} -v 2>&1 | sed -rne '1s;.* ([0-9.a-z+]+\.[0-9.a-z+]+)([^0-9.a-z+].*|$);\1;p')"
-      [[ "$actual_version" ]] || actual_version="$(${req%:*} -V 2>&1 | sed -rne '1s;.* ([0-9.a-z+]+\.[0-9.a-z+]+)([^0-9.a-z+].*|$);\1;p')"
+      if command -V verbose 2>/dev/null | head -n1 | grep -qE 'a( shell)? function'; then
+         # the command is a function and might not have a version
+         actual_version="${needed_version}"
+      else
+         actual_version="$(${req%:*} --version 2>&1 | sed -rne '1s;.* ([0-9.a-z+]+\.[0-9.a-z+]+)([^0-9.a-z+].*|$);\1;p')"
+         [[ "$actual_version" ]] || actual_version="$(${req%:*} -v 2>&1 | sed -rne '1s;.* ([0-9.a-z+]+\.[0-9.a-z+]+)([^0-9.a-z+].*|$);\1;p')"
+         [[ "$actual_version" ]] || actual_version="$(${req%:*} -V 2>&1 | sed -rne '1s;.* ([0-9.a-z+]+\.[0-9.a-z+]+)([^0-9.a-z+].*|$);\1;p')"
+      fi
 
       # if no version was specified, pretend the actual version is what we want
       [[ "$needed_version" == "$req" ]] && needed_version="$actual_version"
 
       # make sure both the required command, as well as the version, if specified, are what we actually have
-      { type -t "$req" &>/dev/null && [[ "$needed_version" == "$actual_version" ]]; } || {
+      { command -V verbose 2>/dev/null | head -n1 | grep -qE 'a( shell)? function' && [[ "$needed_version" == "$actual_version" ]]; } || {
 
          if [[ -x /usr/lib/command-not-found ]]; then
             failure_output=$'\n'"$(/usr/lib/command-not-found "$req" 2>&1 | tr '\n' '\1' | tr ' ' '\2')"
@@ -97,9 +108,15 @@ _verify_reqs() {
       done
 
       echo
-      echo "file: $(realpath ${BASH_SOURCE[1]})"
-      echo "function: ${FUNCNAME[1]}"
-      echo "line: ${BASH_LINENO[0]}";
+      if is_zsh; then
+         echo "file: ${funcfiletrace[1]%:*}"
+         echo "function: ${funcstack[1]}"
+         echo "line: ${LINENO}";
+      else
+         echo "file: $(realpath ${BASH_SOURCE[1]})"
+         echo "function: ${FUNCNAME[1]}"
+         echo "line: ${BASH_LINENO[0]}";
+      fi
 
       return 1
    else
