@@ -150,6 +150,14 @@ alias progs='pushd "$HOME/programs"'
 
 ##########################################################
 
+# per the code here, we have to use CLICOLOR_FORCE="0" to disable color:
+# https://github.com/cli/go-gh/blob/7adca2a0702063e9dad0683f24e9a64d0c5ee6d9/pkg/term/env.go#L165-L167
+#
+# would be nice if the documentation itself mentioned this...
+if gh extension list | grep -q gh-poi; then
+   alias poi='CLICOLOR_FORCE="0" gh poi'
+fi
+
 ##########################################################
 ######## k8s ########
 #####################
