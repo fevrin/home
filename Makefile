@@ -6,7 +6,7 @@ MAKE_COMMAND := $(MAKE) -C $(abspath $(dir $(MAKEFILE))) -f $(abspath $(MAKEFILE
 .RECIPEPREFIX := $(.RECIPEPREFIX) # switch to using spaces instead of tabs for recipe separators
 
 CONFIG_FILE := "config.new.$$$$"
-ssh:
+ssh: ## Generators: generates "${HOME}/.ssh/config" file using 'includes' directives
 ifeq ($(notdir $(CURDIR)), .ssh)
    $(info running $@)
 
@@ -36,7 +36,7 @@ else
    @$(MAKE) -sC .ssh -f $(abspath $(lastword $(MAKEFILE_LIST))) ssh
 endif
 
-git:
+git: ## Generators: generates "${HOME}/.gitconfig" file using 'includes' directives
 ifeq ($(notdir $(CURDIR)), .gitconfig.d)
    $(info running $@)
 
@@ -67,16 +67,16 @@ else
 endif
 
 .PHONY: dev
-dev:
+dev: ## Aliases: runs 'git-hooks'
    @$(MAKE_COMMAND) git-hooks
 
 git-hooks:
    @$(MAKE_COMMAND) $(subst .githooks, .git/hooks, $(wildcard .githooks/*))
-.git/hooks/%: .githooks/%
+.git/hooks/%: .githooks/% ## Automatic: creates symlinks for all git hooks from '.githooks' to '.git/hooks'
    @[ -h $@ ] || ln -siv ../../$< $@
 
 .PHONY: check-defs
-check-defs: $(shell find -name '*.md')
+check-defs: $(shell find -name '*.md') ## Miscellaneous: checks all Markdown files for unused definitions
    @/bin/bash -c '\
       for file in $^; do \
          for footnote in $$(\
@@ -118,6 +118,9 @@ check-defs: $(shell find -name '*.md')
       done; \
    '
 
+.PHONY: help
+help: ## Miscellaneous: returns this Makefile's commands and their descriptions in a formatted table
+   @scripts/makefile_help.sh $(MAKEFILE_LIST)
 
 
 #test:
