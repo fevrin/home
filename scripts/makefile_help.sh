@@ -20,7 +20,7 @@ IFS="${OIFS}"
 
 # prints a table of the sorted sections and commands
 for section in $(echo "${sections[*]}" | tr ' ' '\n' | sort -u); do
-   printf "\033[36m%-30s\033[0m\n" $section
+   printf "${BOLD}${GREEN}[%s]$END_COLOR\n" $section
    echo "${CONTENT}" | sort | while read line; do
       echo "$line" | sed -Ene "s;^${section}\o1(.*)\o2(.*);\1\t\2;p"
    done
