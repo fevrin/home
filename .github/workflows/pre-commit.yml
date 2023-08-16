@@ -22,6 +22,15 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 1
+      - name: Install go
+        # required due to this issue:
+        # package mvdan.cc/sh/v3/cmd/shfmt@v3.7.0: can only use path@version syntax with 'go get'
+        # https://www.reddit.com/r/golang/comments/n628db/go_install_fails_with_can_only_use_pathversion/
+        if: ${{ env.ACT }}
+        uses: actions/setup-go@v4
+        with:
+          go-version: '>=1.21'
+          check-latest: true
       - name: Lint the repository with pre-commit
         run: |
           python3 -V
