@@ -73,3 +73,63 @@ jobs:
             echo "error: ${README_FILENAME} doesn't exist or is empty"
             exit 1
           fi
+
+  dump-env:
+    # most of this inspired by:
+    # https://stackoverflow.com/questions/67503656/echo-github-action-environment-variables/72920652#72920652
+    #
+    # unfortunately, a matrix doesn't seem to work properly without hacky
+    # workarounds due to expression evaluation
+
+    if: github.event.inputs.DEBUG == 'true' || github.event.inputs.DEBUG == 1 || (always() && contains(needs.*.result, 'failure'))
+    needs:
+      - pre-commit
+      - check-readme
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Git log
+        run: git --no-pager log --graph -30 --abbrev-commit --decorate --date=relative --color --format=format:'%C(bold blue)%h%C(reset) - %C(bold yellow)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(auto)%d%C(reset)' --all -30
+
+      - name: Dump 'env' context
+        run: echo '${{ toJson(env) }}'
+
+      - name: Dump 'vars' context
+        run: echo '${{ toJson(vars) }}'
+
+      - name: Dump 'secrets' context
+        run: echo '${{ toJson(secrets) }}'
+
+      - name: Dump 'needs' context
+        run: echo '${{ toJson(needs) }}'
+
+      - name: Dump 'inputs' context
+        run: echo '${{ toJson(inputs) }}'
+
+      - name: Dump GitHub context
+        run: echo '${{ toJson(github) }}'
+
+      - name: Dump job context
+        run: echo '${{ toJson(job) }}'
+
+      - name: Dump steps context
+        run: echo '${{ toJson(steps) }}'
+
+      - name: Dump runner context
+        run: echo '${{ toJson(runner) }}'
+
+      - name: Dump strategy context
+        run: echo '${{ toJson(strategy) }}'
+
+      - name: Dump matrix context
+        run: echo '${{ toJson(matrix) }}'
+
+      - name: Show default environment variables
+        run: |
+          echo "The job_id is: $GITHUB_JOB"   # reference the default environment variables
+          echo "The id of this action is: $GITHUB_ACTION"   # reference the default environment variables
+          echo "The run id is: $GITHUB_RUN_ID"
+          echo "The GitHub Actor's username is: $GITHUB_ACTOR"
+          echo "GitHub SHA: $GITHUB_SHA"
