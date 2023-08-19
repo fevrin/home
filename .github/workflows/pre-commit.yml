@@ -82,25 +82,11 @@ jobs:
           go-version: '>=1.21'
           check-latest: true
 
-        # ~copy-paste of the official action since that isn't verified by GitHub:
-        # https://github.com/pre-commit/action/blob/main/action.yml
-      - name: Install pre-commit
-        run: python -m pip install pre-commit==3.3.3
-        shell: bash
-
-      - name: Output requirements.txt
-        run: python -m pip freeze --local
-        shell: bash
-
-      - name: Create pre-commit cache
-        uses: actions/cache@v3
+      - uses: pre-commit/action@v3.0.0
         with:
-          path: ~/.cache/pre-commit
-          key: pre-commit-3|${{ env.pythonLocation }}|${{ hashFiles('.pre-commit-config.yaml') }}
+          # this should run the pre-commit hooks only on the files changed between the default branch and the one in the PR
+          extra_args: --from-ref ${{ needs.get-changed-files.outputs.BASE_REF }} --to-ref HEAD
 
-      - name: Run pre-commit
-        run: pre-commit run --show-diff-on-failure --color=always --from-ref ${{ env.BASE_REF }} --to-ref HEAD
-        shell: bash
 
   # this only checks if the README had been generated; it can't itself commit
   # the generated file
