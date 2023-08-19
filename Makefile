@@ -1,5 +1,7 @@
 MAKEFILE := $(lastword $(MAKEFILE_LIST))
 MAKE_COMMAND := $(MAKE) -C $(abspath $(dir $(MAKEFILE))) -f $(abspath $(MAKEFILE))
+CHANGED_FILES ?= $(shell git diff --name-only origin/HEAD)
+REPO_ROOT ?= $(shell git rev-parse --show-toplevel)
 
 .PHONY: ssh git
 # from <https://stackoverflow.com/questions/2131213/can-you-make-valid-makefiles-without-tab-characters/60363121#60363121>
@@ -120,7 +122,35 @@ check-defs: $(shell find -name '*.md') ## Miscellaneous: checks all Markdown fil
 
 .PHONY: help
 help: ## Miscellaneous: returns this Makefile's commands and their descriptions in a formatted table
-   @scripts/makefile_help.sh $(MAKEFILE_LIST)
+   @scripts/makefile_help.sh $(MAKEFILE_LIST) 1
+
+.PHONY: readme
+readme: ## Generators: Regenerates README.md (including table of contents and Makefile help)
+   -@echo
+   -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   -@echo $(shell echo '$@' | tr '[:lower:]' '[:upper:]')
+   -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   @echo "Generating README..."
+   @TEMP_FILE="$$(mktemp -p $(REPO_ROOT))"; \
+      MAKEFILE_HELP="$$($(REPO_ROOT)/scripts/makefile_help.sh $(MAKEFILE_LIST))" \
+      TOC="$$( \
+         sed -rne 's;^(##+) (.*);\1- [\2](\#\L\2);p' $(REPO_ROOT)/README.md.tpl | \
+         sed -Ee 's;^(#+);\1\1;' | \
+         awk 'BEGIN{FS=OFS="-"} {gsub(/#/, " ", $$1)} $$1' | \
+         awk 'BEGIN{FS=OFS="("} {gsub(/ /, "-", $$2)} {gsub(/[/`.]/, "", $$2)} $$1' | \
+         sed -e 's;^    ;;' \
+      )" \
+      envsubst \
+      ${MAKEFILE_HELP} \
+      ${TOC} \
+      < $(REPO_ROOT)/README.md.tpl \
+      > $${TEMP_FILE}; \
+   if diff $${TEMP_FILE} $(REPO_ROOT)/README.md >/dev/null 2>&1; then \
+      echo "no changes"; \
+      rm $${TEMP_FILE}; \
+   else \
+      mv -fu $${TEMP_FILE} $(REPO_ROOT)/README.md; \
+   fi;
 
 
 #test:
