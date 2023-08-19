@@ -37,3 +37,39 @@ jobs:
           pip3 install --upgrade pip
           pip3 install pre-commit==2.20.0
           pre-commit run --verbose
+
+
+  # this only checks if the README had been generated; it can't itself commit
+  # the generated file
+  check-readme:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install envsubst
+        # this is required when using nektos/act due to this sort of issue with
+        # act's ubuntu:latest image (it's still on 20.04):
+        if: ${{ env.ACT }}
+        run: apt-get install gettext-base
+
+      - name: Ensure Documentation Was Generated
+        run: |
+          README_FILENAME="README.md"
+          if [[ -s "${README_FILENAME}" ]]; then
+            ORIG_CHECKSUM="$(md5sum "${README_FILENAME}")"
+            mv -v "${README_FILENAME}" "${README_FILENAME}.orig"
+            make readme
+            NEW_CHECKSUM="$(md5sum "${README_FILENAME}")"
+            [[ "${ORIG_CHECKSUM}" == "${NEW_CHECKSUM}" ]] || {
+              echo "error: ${README_FILENAME} was not generated"
+              echo
+              echo "Generate the documentation using this command, then commit and push:"
+              echo
+              echo "    make readme
+              echo
+              exit 1
+            }
+          else
+            echo "error: ${README_FILENAME} doesn't exist or is empty"
+            exit 1
+          fi
