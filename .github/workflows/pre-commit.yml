@@ -2,7 +2,11 @@ name: pre-commit
 
 # Controls when the workflow will run
 on:
+  workflow_dispatch:
   push:
+    branches:
+      - $GITHUB_BASE_REF
+        #if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
     paths:
        - '.github/workflows/pre-commit.yml'
        - '.pre-commit-config.yaml'
@@ -13,6 +17,15 @@ on:
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+
+# from the example here:
+# https://docs.github.com/en/actions/examples/using-scripts-to-test-your-code-on-a-runner#example-workflow
+permissions:
+  contents: read
+  pull-requests: read
+concurrency:
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  cancel-in-progress: true
 
 jobs:
   get-changed-files:
@@ -55,12 +68,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: [get-changed-files]
     steps:
-      - name: Check out repository code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
         with:
-          fetch-depth: 1
+          fetch-depth: 2
+
       - name: Install go
-        # required due to this issue:
+        # 'act' requires this conditional step due to the following issue:
         # package mvdan.cc/sh/v3/cmd/shfmt@v3.7.0: can only use path@version syntax with 'go get'
         # https://www.reddit.com/r/golang/comments/n628db/go_install_fails_with_can_only_use_pathversion/
         if: ${{ env.ACT }}
@@ -68,6 +81,7 @@ jobs:
         with:
           go-version: '>=1.21'
           check-latest: true
+
       - name: Lint the repository with pre-commit
         run: |
           python3 -V
