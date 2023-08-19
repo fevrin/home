@@ -2,6 +2,7 @@ name: pre-commit
 
 # Controls when the workflow will run
 on:
+  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
   push:
     branches:
@@ -14,9 +15,6 @@ on:
     paths:
        - '.github/workflows/pre-commit.yml'
        - '.pre-commit-config.yaml'
-
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
 
 # from the example here:
 # https://docs.github.com/en/actions/examples/using-scripts-to-test-your-code-on-a-runner#example-workflow
@@ -73,7 +71,8 @@ jobs:
           fetch-depth: 2
 
       - name: Install go
-        # 'act' requires this conditional step due to the following issue:
+        # 'nektos/act' requires this conditional step due to the following
+        # issue when running 'shfmt' from pre-commit-config.yaml:
         # package mvdan.cc/sh/v3/cmd/shfmt@v3.7.0: can only use path@version syntax with 'go get'
         # https://www.reddit.com/r/golang/comments/n628db/go_install_fails_with_can_only_use_pathversion/
         if: ${{ env.ACT }}
