@@ -231,7 +231,10 @@ if is_zsh; then
       else
          # for some reason, 'jobs' sometimes doesn't print output even though it should
          # using it once before we need to parse its output seems to relatively consistently work around that
-         builtin fg %$({ jobs &>/dev/null; jobs | sed -Ene 's;^\[([0-9])\] *\+.*;\1;p'; })
+         local JOBS="$(jobs | sed -Ene 's;^\[([0-9]+)\] *\+.*;\1;p')"
+         if [[ -n "${JOBS}" ]]; then
+            builtin fg %$({ jobs &>/dev/null; echo "${JOBS}"; })
+         fi
       fi
    }
 
