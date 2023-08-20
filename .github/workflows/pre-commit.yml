@@ -1,4 +1,4 @@
-name: pre-commit
+name: 'Pre-Commit tests'
 
 # Controls when the workflow will run
 on:
@@ -81,6 +81,10 @@ jobs:
           go-version: '>=1.21'
           check-latest: true
 
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
       - uses: pre-commit/action@v3.0.0
         with:
           # this should run the pre-commit hooks only on the files changed between the default branch and the one in the PR
@@ -100,7 +104,16 @@ jobs:
         # this is required when using nektos/act due to this sort of issue with
         # act's ubuntu:latest image (it's still on 20.04):
         if: ${{ env.ACT }}
-        run: apt-get install gettext-base
+        run: |
+          declare -A pkgs_to_install=(
+          [envsubst]=gettext-base
+          [column]=bsdextrautils
+          )
+          for pkg in ${!pkgs_to_check[*]}; do
+             which "${pkg}" &>/dev/null && unset pkgs_to_install["${pkg}"]
+          done
+          apt-get update &&
+          apt-get install ${pkgs_to_install[*]}
 
       - name: Ensure Documentation Was Generated
         run: |
@@ -115,7 +128,7 @@ jobs:
               echo
               echo "Generate the documentation using this command, then commit and push:"
               echo
-              echo "    make readme
+              echo "    make readme"
               echo
               exit 1
             }
