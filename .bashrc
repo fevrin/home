@@ -76,6 +76,7 @@ files_to_source=(
 
 # prep apple terminal, if we're using it
 MAC_OS_X=0
+# shellcheck disable=SC2154
 if [[ "$TERM_PROGRAM" == "Apple_Terminal" || "$TERM_PROGRAM" =~ iTerm ]]; then
    MAC_OS_X=1
    files_to_source+=("$HOME/.macrc")
@@ -114,7 +115,9 @@ dirs_for_path+=(
 
 # add a GOPATH value if go's installed
 # and add it to the general PATH, as well
-if has go; then
+if has go || [[ -x /usr/local/go/bin/go ]]; then
+   ! which go &>/dev/null && [[ -x /usr/local/go/bin/go ]] && ln -s /usr/local/go/bin/go ${HOME}/.local/bin/
+
    dirs_for_gopath+=(
       "$HOME/go"
    )
