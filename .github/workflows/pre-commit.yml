@@ -9,6 +9,14 @@ on:
         description: 'The SHA of the default branch'
         required: true
         type: string
+      DEBUG:
+        description: 'Enables debug output'
+        required: false
+        default: false
+        type: choice
+        options:
+          - true
+          - false
   push:
     branches:
       - $GITHUB_BASE_REF
