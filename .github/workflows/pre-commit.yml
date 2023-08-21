@@ -39,7 +39,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 2
+          fetch-depth: 0
 
       - name: Export BASE_REF
         id: export_base_ref
@@ -76,7 +76,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 2
+          fetch-depth: 0
 
       - name: Install go
         # 'nektos/act' requires this conditional step due to the following
@@ -107,6 +107,8 @@ jobs:
     if: contains(needs.get-changed-files.outputs.CHANGED_FILES, 'README.md.tpl')
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Install envsubst
         # this is required when using nektos/act due to this sort of issue with
@@ -161,12 +163,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - run: echo "BASE_REF = '${{ needs.get-changed-files.outputs.BASE_REF }}'"
       - run: echo "CHANGED_FILES = '${{ needs.get-changed-files.outputs.CHANGED_FILES }}'"
 
       - name: Git log
-        run: git --no-pager log --graph -30 --abbrev-commit --decorate --date=relative --color --format=format:'%C(bold blue)%h%C(reset) - %C(bold yellow)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(auto)%d%C(reset)' --all -30
+        run: git --no-pager log --graph --abbrev-commit --decorate --date=relative --color --format=format:'%C(bold blue)%h%C(reset) - %C(bold yellow)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(auto)%d%C(reset)' --all -50
 
       - name: Dump 'env' context
         run: echo '${{ toJson(env) }}'
