@@ -4,6 +4,11 @@ name: 'Pre-Commit tests'
 on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+    inputs:
+      default_branch:
+        description: 'The SHA of the default branch'
+        required: true
+        type: string
   push:
     branches:
       - $GITHUB_BASE_REF
@@ -42,6 +47,9 @@ jobs:
           if [[ -n "${{ github.event.pull_request.base.sha }}" ]]; then
             # use GHA's variable
             BASE_REF=${{ github.event.pull_request.base.sha }}
+          elif [[ -n "${{ inputs.default_branch }}" ]]; then
+            # trust user input for default branch SHA
+            BASE_REF=${{ inputs.default_branch }}
           else
             # assume 'origin/HEAD' can be referenced
             BASE_REF='origin/HEAD'
