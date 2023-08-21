@@ -46,14 +46,10 @@ jobs:
       CHANGED_FILES: ${{ steps.changed_files.outputs.CHANGED_FILES }}
     steps:
       - uses: actions/checkout@v3
-        if: github.event_name != 'workflow_dispatch'
+        env:
+          CHECKOUT_DEPTH: "${{ github.event_name == 'workflow_dispatch' && '0' || '2' }}"
         with:
-          fetch-depth: 2
-
-      - uses: actions/checkout@v3
-        if: github.event_name == 'workflow_dispatch'
-        with:
-          fetch-depth: 0
+          fetch-depth: $CHECKOUT_DEPTH
 
       - name: Export BASE_REF
         id: export_base_ref
@@ -89,8 +85,10 @@ jobs:
     needs: [get-changed-files]
     steps:
       - uses: actions/checkout@v3
+        env:
+          CHECKOUT_DEPTH: "${{ github.event_name == 'workflow_dispatch' && '0' || '2' }}"
         with:
-          fetch-depth: 0
+          fetch-depth: $CHECKOUT_DEPTH
 
       - name: Install go
         # 'nektos/act' requires this conditional step due to the following
@@ -121,8 +119,10 @@ jobs:
     if: contains(needs.get-changed-files.outputs.CHANGED_FILES, 'README.md.tpl')
     steps:
       - uses: actions/checkout@v3
+        env:
+          CHECKOUT_DEPTH: "${{ github.event_name == 'workflow_dispatch' && '0' || '2' }}"
         with:
-          fetch-depth: 0
+          fetch-depth: $CHECKOUT_DEPTH
 
       - name: Install envsubst
         # this is required when using nektos/act due to this sort of issue with
@@ -177,8 +177,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        env:
+          CHECKOUT_DEPTH: "${{ github.event_name == 'workflow_dispatch' && '0' || '2' }}"
         with:
-          fetch-depth: 0
+          fetch-depth: $CHECKOUT_DEPTH
 
       - run: echo "BASE_REF = '${{ needs.get-changed-files.outputs.BASE_REF }}'"
       - run: echo "CHANGED_FILES = '${{ needs.get-changed-files.outputs.CHANGED_FILES }}'"
