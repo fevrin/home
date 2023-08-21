@@ -97,7 +97,7 @@ jobs:
         # issue when running 'shfmt' from pre-commit-config.yaml:
         # package mvdan.cc/sh/v3/cmd/shfmt@v3.7.0: can only use path@version syntax with 'go get'
         # https://www.reddit.com/r/golang/comments/n628db/go_install_fails_with_can_only_use_pathversion/
-        if: ${{ env.ACT }}
+        if: env.ACT
         uses: actions/setup-go@v4
         with:
           go-version: '>=1.21'
@@ -127,7 +127,7 @@ jobs:
       - name: Install envsubst
         # this is required when using nektos/act due to this sort of issue with
         # act's ubuntu:latest image (it's still on 20.04):
-        if: ${{ env.ACT }}
+        if: env.ACT
         run: |
           declare -A pkgs_to_install=(
           [envsubst]=gettext-base
