@@ -131,7 +131,10 @@ readme: ## Generators: Regenerates README.md (including table of contents and Ma
    -@echo $(shell echo '$@' | tr '[:lower:]' '[:upper:]')
    -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
    @echo "Generating README..."
-   @TEMP_FILE="$$(mktemp -p $(REPO_ROOT))"; \
+   @for file in README.md.tpl; do \
+      [ -s $${file} ] || continue; \
+      TEMP_FILE="$$(mktemp -p $(REPO_ROOT))"; \
+      OUTPUT_FILENAME="$${file%%.tpl}"; \
       MAKEFILE_HELP="$$($(REPO_ROOT)/scripts/makefile_help.sh $(MAKEFILE_LIST))" \
       TOC="$$( \
          sed -rne 's;^(##+) (.*);\1- [\2](\#\L\2);p' $(REPO_ROOT)/README.md.tpl | \
@@ -143,14 +146,15 @@ readme: ## Generators: Regenerates README.md (including table of contents and Ma
       envsubst \
       ${MAKEFILE_HELP} \
       ${TOC} \
-      < $(REPO_ROOT)/README.md.tpl \
+      < $(REPO_ROOT)/$${file} \
       > $${TEMP_FILE}; \
-   if diff $${TEMP_FILE} $(REPO_ROOT)/README.md >/dev/null 2>&1; then \
-      echo "no changes"; \
-      rm $${TEMP_FILE}; \
-   else \
-      mv -fu $${TEMP_FILE} $(REPO_ROOT)/README.md; \
-   fi;
+      if diff $${TEMP_FILE} $(REPO_ROOT)/$${OUTPUT_FILENAME} >/dev/null 2>&1; then \
+         echo "no changes for $${file}"; \
+         rm $${TEMP_FILE}; \
+      else \
+         mv -fu $${TEMP_FILE} $(REPO_ROOT)/$${OUTPUT_FILENAME}; \
+      fi; \
+   done
 
 
 #test:
