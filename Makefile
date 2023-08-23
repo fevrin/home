@@ -122,20 +122,28 @@ check-defs: $(shell find -regex '.*\.md\(\.tpl\)?') ## Miscellaneous: checks all
 
 .PHONY: check-md-links
 check-md-links: $(shell find -regex '.*\.md\(\.tpl\)?') ## Miscellaneous: checks all Markdown files for unused definitions
+   -@echo
+   -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   -@echo $(shell echo '$@' | tr '[:lower:]' '[:upper:]')
+   -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
    @for file in $^; do \
       refs="$$(grep -Eo '\[[^]]+\]\[[^]]*\]' $${file} | sort -u | wc -l)"; \
       defs="$$(grep -Eo '^\[[^]]+\]: ' $${file} | sort -u | wc -l)"; \
       if [ "$${refs}" != "$${defs}" ]; then \
+         errors="$$((errors + 1))"; \
          echo "$${file} has $${refs} reference(s) but $${defs} definition(s)"; \
       fi; \
-   done
+   done; \
+   if [ -n "$${errors}" ]; then \
+      echo "$${errors} error(s) found"; \
+   fi
 
 .PHONY: help
 help: ## Miscellaneous: returns this Makefile's commands and their descriptions in a formatted table
    @scripts/makefile_help.sh $(MAKEFILE_LIST) 1
 
 .PHONY: readme
-readme: ## Generators: Regenerates README.md (including table of contents and Makefile help)
+readme: check-md-links ## Generators: Regenerates README.md (including table of contents and Makefile help)
    -@echo
    -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
    -@echo $(shell echo '$@' | tr '[:lower:]' '[:upper:]')
