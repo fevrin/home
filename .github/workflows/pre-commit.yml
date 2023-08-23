@@ -203,22 +203,22 @@ jobs:
       - name: Dump 'inputs' context
         run: echo '${{ toJson(inputs) }}'
 
-      - name: Dump GitHub context
+      - name: Dump 'GitHub' context
         run: echo '${{ toJson(github) }}'
 
-      - name: Dump job context
+      - name: Dump 'job' context
         run: echo '${{ toJson(job) }}'
 
-      - name: Dump steps context
+      - name: Dump 'steps' context
         run: echo '${{ toJson(steps) }}'
 
-      - name: Dump runner context
+      - name: Dump 'runner' context
         run: echo '${{ toJson(runner) }}'
 
-      - name: Dump strategy context
+      - name: Dump 'strategy' context
         run: echo '${{ toJson(strategy) }}'
 
-      - name: Dump matrix context
+      - name: Dump 'matrix' context
         run: echo '${{ toJson(matrix) }}'
 
       - name: Show default environment variables
