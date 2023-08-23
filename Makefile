@@ -78,7 +78,7 @@ git-hooks:
    @[ -h $@ ] || ln -siv ../../$< $@
 
 .PHONY: check-defs
-check-defs: $(shell find -name '*.md') ## Miscellaneous: checks all Markdown files for unused definitions
+check-defs: $(shell find -regex '.*\.md\(\.tpl\)?') ## Miscellaneous: checks all Markdown files for unused definitions
    @/bin/bash -c '\
       for file in $^; do \
          for footnote in $$(\
@@ -119,6 +119,16 @@ check-defs: $(shell find -name '*.md') ## Miscellaneous: checks all Markdown fil
          fi; \
       done; \
    '
+
+.PHONY: check-md-links
+check-md-links: $(shell find -regex '.*\.md\(\.tpl\)?') ## Miscellaneous: checks all Markdown files for unused definitions
+   @for file in $^; do \
+      refs="$$(grep -Eo '\[[^]]+\]\[[^]]*\]' $${file} | sort -u | wc -l)"; \
+      defs="$$(grep -Eo '^\[[^]]+\]: ' $${file} | sort -u | wc -l)"; \
+      if [ "$${refs}" != "$${defs}" ]; then \
+         echo "$${file} has $${refs} reference(s) but $${defs} definition(s)"; \
+      fi; \
+   done
 
 .PHONY: help
 help: ## Miscellaneous: returns this Makefile's commands and their descriptions in a formatted table

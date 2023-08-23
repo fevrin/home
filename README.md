@@ -29,5 +29,6 @@ ssh              generates "${HOME}/.ssh/config" file using 'includes' directive
 
 [Miscellaneous]
 check-defs       checks all Markdown files for unused definitions
+check-md-links   checks all Markdown files for unused definitions
 help             returns this Makefile's commands and their descriptions in a formatted table
 ```
