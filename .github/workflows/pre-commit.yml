@@ -127,7 +127,7 @@ jobs:
       - name: Install envsubst
         # this is required when using nektos/act due to this sort of issue with
         # act's ubuntu:latest image (it's still on 20.04):
-        if: env.ACT && endsWith(matrix.file, '.md.tpl')
+        if: env.ACT
         run: |
           declare -A pkgs_to_install=(
           [envsubst]=gettext-base
@@ -139,46 +139,18 @@ jobs:
           apt-get update &&
           apt-get install ${pkgs_to_install[*]}
 
-          #      - name: Install envsubst
-          #        # this is required when using nektos/act due to this sort of issue with
-          #        # act's ubuntu:latest image (it's still on 20.04):
-          #        if: env.ACT
-          #        run: |
-          #          declare -A pkgs_to_install=(
-          #          [envsubst]=gettext-base
-          #          [column]=bsdextrautils
-          #          )
-          #          for pkg in ${!pkgs_to_check[*]}; do
-          #             which "${pkg}" &>/dev/null && unset pkgs_to_install["${pkg}"]
-          #          done
-          #          apt-get update &&
-          #          apt-get install ${pkgs_to_install[*]}
-
       - name: Ensure Documentation Was Generated
         run: |
           make readme
-          git diff --exit-code
-          #          for file in $(echo ${{ needs.get-changed-files.outputs.CHANGED_FILES }} | jq -r '.[]'); do
-          #            echo "file = '$file'"
-          #            RENDERED_FILENAME="${file%%.tpl}"
-          #            if [[ -s "${RENDERED_FILENAME}" ]]; then
-          #              ORIG_CHECKSUM="$(md5sum "${RENDERED_FILENAME}")"
-          #              mv -v "${RENDERED_FILENAME}" "${RENDERED_FILENAME}.orig"
-          #              make readme
-          #              NEW_CHECKSUM="$(md5sum "${RENDERED_FILENAME}")"
-          #              [[ "${ORIG_CHECKSUM}" == "${NEW_CHECKSUM}" ]] || {
-          #                echo "error: ${RENDERED_FILENAME} was not generated"
-          #                echo
-          #                echo "Generate the documentation using this command, then commit and push:"
-          #                echo
-          #                echo "    make readme"
-          #                echo
-          #                exit 1
-          #              }
-          #            else
-          #              echo "error: ${RENDERED_FILENAME} doesn't exist or is empty"
-          #              exit 1
-          #            fi
+          echo
+          git diff --exit-code || {
+            echo
+            echo "Generate the documentation using this command, then commit and push:"
+            echo
+            echo "    make readme"
+            echo
+            exit 1
+          }
 
   dump-env:
     # most of this inspired by:
