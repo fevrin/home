@@ -151,14 +151,17 @@ readme: check-md-links ## Generators: Regenerates README.md (including table of 
       OUTPUT_FILENAME="$${file%%.tpl}"; \
       MAKEFILE_HELP="$$($(REPO_ROOT)/scripts/makefile_help.sh $(MAKEFILE_LIST))" \
       TOC="$$( \
-         sed -rne 's;^(##+) (.*);\1- [\2](\#\L\2);p' $(REPO_ROOT)/README.md.tpl | \
+         sed -rne 's;^(##+) (.*);\1- [\2](\#\L\2);p' $(REPO_ROOT)/$${file} | \
          sed -Ee 's;^(#+);\1\1;' | \
          awk 'BEGIN{FS=OFS="-"} {gsub(/#/, " ", $$1)} $$1' | \
          awk 'BEGIN{FS="[]][(]"; OFS="]("} {gsub(/[ ]/, "-", $$2)} {gsub(/[/()`.]/, "", $$2)}; $$2=$$2")"' | \
          sed -e 's;^    ;;' \
       )" \
       envsubst \
-      '$${MAKEFILE_HELP},$${TOC}' \
+      '\
+      $${MAKEFILE_HELP} \
+      $${TOC} \
+      ' \
       < $(REPO_ROOT)/$${file} \
       > $${TEMP_FILE}; \
       if diff $${TEMP_FILE} $(REPO_ROOT)/$${OUTPUT_FILENAME} >/dev/null 2>&1; then \
