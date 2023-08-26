@@ -138,10 +138,6 @@ check-md-links: $(shell find -regex '.*\.md\(\.tpl\)?') ## Miscellaneous: checks
       echo "$${errors} error(s) found"; \
    fi
 
-.PHONY: help
-help: ## Miscellaneous: returns this Makefile's commands and their descriptions in a formatted table
-   @scripts/makefile_help.sh $(MAKEFILE_LIST) 1
-
 .PHONY: readme
 readme: check-md-links ## Generators: Regenerates README.md (including table of contents and Makefile help)
    -@echo
@@ -173,6 +169,10 @@ readme: check-md-links ## Generators: Regenerates README.md (including table of 
       fi; \
    done
 
+
+.PHONY: help
+help: ## Miscellaneous: returns this Makefile's commands and their descriptions in a formatted table
+   @scripts/makefile_help.sh $(MAKEFILE_LIST) 1
 
 #test:
 #   @DIR="config.d"; \
