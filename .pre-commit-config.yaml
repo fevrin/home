@@ -12,17 +12,29 @@ repos:
 #      - id: double-quote-string-fixer # only Python files
 
        # text file tests
-      - id: check-json
+      - id: check-case-conflict
+      - id: check-docstring-first
       - id: check-executables-have-shebangs
+      - id: check-json
       - id: check-merge-conflict
+      - id: check-symlinks
+      - id: check-toml
+      - id: check-vcs-permalinks
+      - id: check-xml
       - id: check-yaml
         args: [--unsafe]  # Instead of loading the files, simply parse them for syntax.
+      - id: destroyed-symlinks
       - id: detect-private-key
+      - id: double-quote-string-fixer
       - id: end-of-file-fixer
+      - id: mixed-line-ending
+        args:
+          - --fix=no
       - id: pretty-format-json
         args:
            - --autofix
            - --indent=3
+      - id: sort-simple-yaml
       - id: trailing-whitespace
         args:
            - --markdown-linebreak-ext=md,tpl
