@@ -138,14 +138,14 @@ check-md-links: $(shell find -regex '.*\.md\(\.tpl\)?') ## Miscellaneous: checks
       echo "$${errors} error(s) found"; \
    fi
 
-.PHONY: readme
-readme: check-md-links ## Generators: Regenerates README.md (including table of contents and Makefile help)
+.PHONY: generate-docs
+generate-docs: check-md-links $(shell find -regex '.*\.md\(\.tpl\)?') ## Generators: Regenerates Markdown files (including table of contents and sourcing Makefile help)
    -@echo
    -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
    -@echo $(shell echo '$@' | tr '[:lower:]' '[:upper:]')
    -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
-   @echo "Generating README..."
-   @for file in README.md.tpl; do \
+   @echo "Generating docs..."
+   @for file in $^; do \
       [ -s $${file} ] || continue; \
       TEMP_FILE="$$(mktemp -p $(REPO_ROOT))"; \
       OUTPUT_FILENAME="$${file%%.tpl}"; \
