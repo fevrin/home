@@ -141,7 +141,7 @@ jobs:
 
       - name: Ensure Documentation Was Generated
         run: |
-          make readme
+          make generate-docs
           echo
           git diff --exit-code || {
             echo

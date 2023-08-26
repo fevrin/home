@@ -23,8 +23,8 @@ dev              runs 'git-hooks'
 .git/hooks/%     creates symlinks for all git hooks from '.githooks' to '.git/hooks'
 
 [Generators]
+generate-docs    Regenerates Markdown files (including table of contents and sourcing Makefile help)
 git              generates "${HOME}/.gitconfig" file using 'includes' directives
-readme           Regenerates README.md (including table of contents and Makefile help)
 ssh              generates "${HOME}/.ssh/config" file using 'includes' directives
 
 [Miscellaneous]
