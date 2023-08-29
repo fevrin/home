@@ -22,12 +22,12 @@ on:
       - $GITHUB_BASE_REF
         #if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
     paths:
-       - '.github/workflows/pre-commit.yml'
-       - '.pre-commit-config.yaml'
+      - '.github/workflows/pre-commit.yml'
+      - '.pre-commit-config.yaml'
   pull_request:
     paths:
-       - '.github/workflows/pre-commit.yml'
-       - '.pre-commit-config.yaml'
+      - '.github/workflows/pre-commit.yml'
+      - '.pre-commit-config.yaml'
 
 # from the example here:
 # https://docs.github.com/en/actions/examples/using-scripts-to-test-your-code-on-a-runner#example-workflow
@@ -56,6 +56,7 @@ jobs:
         run: |
           # some useful GitHub Actions SHA information:
           # https://www.kenmuse.com/blog/the-many-shas-of-a-github-pull-request/
+
           if [[ -n "${{ github.event.pull_request.base.sha }}" ]]; then
             # use GHA's variable
             BASE_REF=${{ github.event.pull_request.base.sha }}
@@ -115,7 +116,6 @@ jobs:
         with:
           # this should run the pre-commit hooks only on the files changed between the default branch and the one in the PR
           extra_args: --from-ref ${{ needs.get-changed-files.outputs.BASE_REF }} --to-ref HEAD
-
 
   # this only checks if the README had been generated; it can't itself commit
   # the generated file

@@ -5,13 +5,13 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
-       # to check the files types these support:
-       # https://github.com/pre-commit/pre-commit-hooks/blob/main/.pre-commit-hooks.yaml
+      # to check the files types these support:
+      # https://github.com/pre-commit/pre-commit-hooks/blob/main/.pre-commit-hooks.yaml
 
-        # Python file tests
-#      - id: double-quote-string-fixer # only Python files
+      # Python file tests
+      #     - id: double-quote-string-fixer # only Python files
 
-       # text file tests
+      # text file tests
       - id: check-case-conflict
       - id: check-docstring-first
       - id: check-executables-have-shebangs
@@ -32,12 +32,12 @@ repos:
           - --fix=no
       - id: pretty-format-json
         args:
-           - --autofix
-           - --indent=3
+          - --autofix
+          - --indent=3
       - id: sort-simple-yaml
       - id: trailing-whitespace
         args:
-           - --markdown-linebreak-ext=md,tpl
+          - --markdown-linebreak-ext=md,tpl
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v3.0.2
     hooks:
@@ -83,9 +83,9 @@ repos:
   - repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook
     rev: v9.5.0
     hooks:
-        - id: commitlint
-          stages: [commit-msg]
-          additional_dependencies: ['@commitlint/config-conventional']
+      - id: commitlint
+        stages: [commit-msg]
+        additional_dependencies: ['@commitlint/config-conventional']
 #  - repo: https://github.com/psf/black # this is for python code
 #    rev: 22.3.0
 #    hooks:
