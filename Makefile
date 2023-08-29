@@ -173,6 +173,16 @@ generate-docs: check-md-links $(shell find -regex '.*\.md\(\.tpl\)?') ## Generat
    done
 
 
+.PHONY: pre-commit
+pre-commit: ## Lints all files changed between the default branch and the current branch
+   -@echo
+   -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   -@echo $(shell echo '$@' | tr '[:lower:]' '[:upper:]')
+   -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   -@command -v -- pipenv >/dev/null 2>&1 || pip3 install pipenv
+   -@pipenv run pre-commit -V >/dev/null 2>&1 || pipenv install pre-commit
+   -pipenv run pre-commit run -v --show-diff-on-failure --color=always --files $(CHANGED_FILES)
+
 .PHONY: help
 help: ## Miscellaneous: returns this Makefile's commands and their descriptions in a formatted table
    @scripts/makefile_help.sh $(MAKEFILE_LIST) 1
