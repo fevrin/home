@@ -134,8 +134,8 @@ jobs:
         if: env.ACT
         run: |
           declare -A pkgs_to_install=(
-          [envsubst]=gettext-base
-          [column]=bsdextrautils
+            [envsubst]=gettext-base
+            [column]=bsdextrautils
           )
           for pkg in ${!pkgs_to_check[*]}; do
              which "${pkg}" &>/dev/null && unset pkgs_to_install["${pkg}"]
