@@ -3,6 +3,10 @@
 indent_style = space
 indent_size  = 3
 
+[*.y{,a}ml]
+indent_size  = 2
+quote_type = single
+
 # Generic options
 # list = true # List files whose formatting differs from shfmt's
 # diff = true # Error with a diff when the formatting differs

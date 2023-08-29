@@ -1,0 +1,5 @@
+trailingComma: "es5"
+overrides:
+  - files: "*.ya?ml"
+    options:
+      semi: false
