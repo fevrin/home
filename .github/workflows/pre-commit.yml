@@ -90,6 +90,10 @@ jobs:
         with:
           fetch-depth: $CHECKOUT_DEPTH
 
+      - name: Stop if .pre-commit-config.yaml is unstaged
+        if: env.ACT
+        run: git status --porcelain | grep -qE '^[ MTARC?!]{2} \.pre-commit-config.ya?ml$' && exit 1
+
       - name: Install go
         # 'nektos/act' requires this conditional step due to the following
         # issue when running 'shfmt' from pre-commit-config.yaml:
