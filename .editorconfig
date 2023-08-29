@@ -1,7 +1,7 @@
 [{*.sh,.bashrc**}]
 # like --indent=3
-indent_style = space
 indent_size  = 3
+indent_style = space
 
 [*.y{,a}ml]
 indent_size  = 2
@@ -33,17 +33,18 @@ root = true
 
 [*]
 charset = utf-8
+end_of_line = lf
+indent_brace_style = K&R
 indent_size = 2
 indent_style = space
-end_of_line = lf
 insert_final_newline = true
+quote_type = auto
 trim_trailing_whitespace = true
-indent_brace_style = K&R
 
 # go
 [*.go]
-indent_style = tab
 indent_size = 4
+indent_style = tab
 
 # python
 [*.{ini,py,py.tpl,rst}]
