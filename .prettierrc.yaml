@@ -1,6 +1,6 @@
-trailingComma: "es5"
+trailingComma: 'es5'
 overrides:
-  - files: "*.ya?ml"
+  - files: '*.ya?ml'
     options:
       trailingComma: all
       arrowParens: avoid
