@@ -55,9 +55,9 @@ repos:
     hooks:
       - id: shellcheck
         args:
-           # more args in .shellcheckrc
-           - --severity=warning
-           - --color=always
+          # more args in .shellcheckrc
+          - --severity=warning
+          - --color=always
   - repo: https://github.com/scop/pre-commit-shfmt
     rev: v3.7.0-1
     hooks:
