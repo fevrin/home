@@ -38,7 +38,6 @@ repos:
       - id: pretty-format-json
         args:
           - --autofix
-          - --indent=3
       - id: sort-simple-yaml
       - id: trailing-whitespace
         args:
@@ -66,8 +65,7 @@ repos:
   - repo: https://github.com/scop/pre-commit-shfmt
     rev: v3.7.0-1
     hooks:
-      # Choose one of:
-      - id: shfmt         # native (requires Go to build)
+      - id: shfmt
         args:
           # more args in .editorconfig (though it seems shfmt doesn't actually honor those...)
           - --indent=3         # 0 for tabs (default), >0 for number of spaces
@@ -78,7 +76,6 @@ repos:
             #          - --simplify         # simplify the code
             #          - --minify           # minify the code to reduce its size (implies -s)
             #          - --diff             # error with a diff when the formatting differs
-        #    - id: shfmt-docker  # Docker image (requires Docker to run)
   - repo: https://github.com/hadolint/hadolint # for linting Dockerfiles
     # there's a breaking issue:
     # https://github.com/hadolint/hadolint/issues/886
