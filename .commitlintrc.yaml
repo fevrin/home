@@ -1,12 +1,14 @@
+# https://commitlint.js.org/#/reference-rules?id=rules
+
 rules:
   header-max-length:
+    - 2        # Level [0..2]: 0 disables the rule, 1 is considered a warning, and 2 is an error.
+    - 'always' # Applicable (always|never): 'never' inverts the rule.
+    - 72       # Value: value to use for this rule.
+  body-max-line-length:
     - 2
     - 'always'
     - 72
-  subject-case:
-    - 2
-    - 'always'
-    - 'sentence-case'
   scope-enum:
     - 2
     - 'always'
