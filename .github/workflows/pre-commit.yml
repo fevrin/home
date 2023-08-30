@@ -115,7 +115,7 @@ jobs:
       - uses: pre-commit/action@v3.0.0
         with:
           # this should run the pre-commit hooks only on the files changed between the default branch and the one in the PR
-          extra_args: --from-ref ${{ needs.get-changed-files.outputs.BASE_REF }} --to-ref HEAD
+          extra_args: --verbose --from-ref ${{ needs.get-changed-files.outputs.BASE_REF }} --to-ref HEAD
 
   # this only checks if the README had been generated; it can't itself commit
   # the generated file
@@ -153,7 +153,7 @@ jobs:
             echo
             echo "Generate the documentation using this command, then commit and push:"
             echo
-            echo "    make readme"
+            echo "    make generate-docs"
             echo
             exit 1
           }
