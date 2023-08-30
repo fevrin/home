@@ -104,8 +104,8 @@ jobs:
       - name: Stop if .pre-commit-config.yaml is unstaged
         if: env.ACT && failure()
         run: |
-          echo "[ERROR] Your pre-commit configuration is unstaged." &&
-          echo "`git add .pre-commit-config.yaml` to fix this." &&
+          printf '\033[31m%s\033[m %s\n' '[ERROR]' 'Your pre-commit configuration is unstaged.' &&
+          echo '`git add .pre-commit-config.yaml` to fix this.' &&
           exit 1
 
       - name: Install go
