@@ -95,7 +95,18 @@ jobs:
 
       - name: Stop if .pre-commit-config.yaml is unstaged
         if: env.ACT
-        run: git status --porcelain | grep -qE '^[ MTARC?!]{2} \.pre-commit-config.ya?ml$' && exit 1
+        run: git diff --quiet --exit-code .pre-commit-config.yaml
+        shell: bash {0}
+
+        # nektos/act seems to fail immediately in the last step if
+        # .pre-commit-config.yaml is found unstaged, so it doesn't output the
+        # following error
+      - name: Stop if .pre-commit-config.yaml is unstaged
+        if: env.ACT && failure()
+        run: |
+          echo "[ERROR] Your pre-commit configuration is unstaged." &&
+          echo "`git add .pre-commit-config.yaml` to fix this." &&
+          exit 1
 
       - name: Install go
         # 'nektos/act' requires this conditional step due to the following
