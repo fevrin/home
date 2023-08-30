@@ -64,7 +64,7 @@ repos:
       # Choose one of:
       - id: shfmt         # native (requires Go to build)
         args:
-          # more args in .editorconfig (though it seems shftm doesn't actually honor those...)
+          # more args in .editorconfig (though it seems shfmt doesn't actually honor those...)
           - --indent=3         # 0 for tabs (default), >0 for number of spaces
           - --binary-next-line # binary ops like && and | may start a line
           - --case-indent      # switch cases will be indented
