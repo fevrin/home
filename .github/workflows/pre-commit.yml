@@ -141,7 +141,7 @@ jobs:
         with:
           fetch-depth: $CHECKOUT_DEPTH
 
-      - name: Install envsubst
+      - name: Install packages for nektos/act
         # this is required when using nektos/act due to this sort of issue with
         # act's ubuntu:latest image (it's still on 20.04):
         if: env.ACT
