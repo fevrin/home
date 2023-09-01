@@ -25,23 +25,34 @@ root = true
 [*]
 charset = utf-8
 end_of_line = lf
-indent_brace_style = K&R
-indent_size = 2
-indent_style = space
-insert_final_newline = true
 quote_type = auto
-tab_width = 3
+
+# Tab indentation
+indent_brace_style = K&R
+indent_style = space
+indent_size = 3
+
+# Make sure every file has a blank line at the end
+insert_final_newline = true
+
+# Remove any whitespace characters preceding newline characters
 trim_trailing_whitespace = true
 
+# Give operators breathing room, but not brackets
+spaces_around_operators = true
+spaces_around_brackets = false
+
+# Max line length (not supported by all editors)
+max_line_length = 150
+
 [{*.sh,.bashrc**}]
-# like --indent=3
 indent_size = 3
 
 [*.y{,a}ml]
 indent_size = 2
 quote_type = single
 
-[*.js]
+[*.js{,on}]
 indent_size = 2
 quote_type = single
 
