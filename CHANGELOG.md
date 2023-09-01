@@ -1,5 +1,3 @@
-# TODO
-
 # CHANGELOG
 
 ## v2.9.0
