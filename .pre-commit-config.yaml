@@ -29,7 +29,6 @@ repos:
           - --allow-multiple-documents
       - id: destroyed-symlinks
       - id: detect-private-key
-      - id: double-quote-string-fixer
       - id: end-of-file-fixer
       - id: mixed-line-ending
         args:
