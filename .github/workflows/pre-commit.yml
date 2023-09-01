@@ -18,6 +18,14 @@ on:
         options:
           - true
           - false
+      LINT:
+        description: 'Enables Mega Linter linting'
+        required: false
+        default: false
+        type: choice
+        options:
+          - true
+          - false
   push:
     branches:
       - $GITHUB_BASE_REF
@@ -83,6 +91,22 @@ jobs:
           files="$(git diff --diff-filter=d --name-only $BASE_REF..HEAD | jq -cRn '[inputs | select(length>0)]')"
           echo "CHANGED_FILES=${files}" >> $GITHUB_OUTPUT
         shell: bash
+
+  lint:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.LINT == 'true' || github.event.inputs.LINT == 1
+    steps:
+      - uses: actions/checkout@v3
+        env:
+          CHECKOUT_DEPTH: "${{ github.event_name == 'workflow_dispatch' && '0' || '2' }}"
+        with:
+          fetch-depth: $CHECKOUT_DEPTH
+
+      - name: MegaLinter
+        uses: oxsecurity/megalinter/flavors/cupcake@v6.19.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MEGALINTER_CONFIG: ci/.mega-linter.yaml
 
   pre-commit:
     runs-on: ubuntu-latest
