@@ -163,7 +163,7 @@ generate-docs: check-md-links $(shell find -regex '.*\.md\(\.tpl\)?') ## Generat
       $${TOC} \
       ' \
       < $(REPO_ROOT)/$${file} \
-      > $${TEMP_FILE}; \
+      | grep -v '^ *<!-- # vim:' | tee $${TEMP_FILE} >/dev/null; \
       if diff $${TEMP_FILE} $(REPO_ROOT)/$${OUTPUT_FILENAME} >/dev/null 2>&1; then \
          echo "no changes for $${file}"; \
          rm $${TEMP_FILE}; \

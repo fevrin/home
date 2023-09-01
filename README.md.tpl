@@ -1,4 +1,5 @@
 # Purpose
+<!-- # vim: set ft=markdown: -->
 
 These files set up functions that offer ways to automate some repetitive work tasks and offer simple interfaces to more complex commands.
 

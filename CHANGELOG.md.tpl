@@ -1,5 +1,6 @@
 # TODO
 
+<!-- # vim: set ft=markdown: -->
 # CHANGELOG
 
 ## v2.9.0
