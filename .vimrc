@@ -348,7 +348,7 @@ call plug#begin(s:vim_home_dir . '/plugged')
 "   Plug 'arp242/undofile_warn.vim'                                                     "
 "   Plug 'catppuccin/vim', { 'as': 'catppuccin' }                                       " pastel themes
 "   Plug 'dense-analysis/ale'                                                           " live linting; possibly slows vim down
-"   Plug 'editorconfig/editorconfig-vim'                                                " https://github.com/editorconfig/editorconfig/wiki/EditorConfig-Properties
+   Plug 'editorconfig/editorconfig-vim'                                                " https://github.com/editorconfig/editorconfig/wiki/EditorConfig-Properties
    Plug 'ekalinin/Dockerfile.vim'                                                       " adds syntax highlighting for Dockerfiles
 "   Plug 'ervandew/supertab'                                                            " smart tab completion (old)
    Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries', 'frozen': 'true' }                "
