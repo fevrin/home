@@ -119,7 +119,8 @@ jobs:
           go-version: '>=1.21'
           check-latest: true
 
-      - uses: actions/setup-python@v4
+      - name: Install python
+        uses: actions/setup-python@v4
         with:
           python-version: '3.11'
 
