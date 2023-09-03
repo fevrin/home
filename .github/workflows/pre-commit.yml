@@ -223,37 +223,59 @@ jobs:
         run: git --no-pager log --graph --abbrev-commit --decorate --date=relative --color --format=format:'%C(bold blue)%h%C(reset) - %C(bold yellow)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(auto)%d%C(reset)' --all -50
 
       - name: Dump 'env' context
-        run: echo '${{ toJson(env) }}'
+        run: echo "$ENV_CONTEXT"
+        env:
+          ENV_CONTEXT: ${{ toJson(env) }}
 
       - name: Dump 'vars' context
-        run: echo '${{ toJson(vars) }}'
+        run: echo "$VARS_CONTEXT"
+        env:
+          VARS_CONTEXT: ${{ toJson(vars) }}
 
       - name: Dump 'secrets' context
-        run: echo '${{ toJson(secrets) }}'
+        run: echo "$SECRETS_CONTEXT"
+        env:
+          SECRETS_CONTEXT: ${{ toJson(secrets) }}
 
       - name: Dump 'needs' context
-        run: echo '${{ toJson(needs) }}'
+        run: echo "$NEEDS_CONTEXT"
+        env:
+          NEEDS_CONTEXT: ${{ toJson(needs) }}
 
       - name: Dump 'inputs' context
-        run: echo '${{ toJson(inputs) }}'
+        run: echo "$INPUTS_CONTEXT"
+        env:
+          INPUTS_CONTEXT: ${{ toJson(inputs) }}
 
-      - name: Dump 'GitHub' context
-        run: echo '${{ toJson(github) }}'
+      - name: Dump GitHub context
+        run: echo "$GITHUB_CONTEXT"
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
 
-      - name: Dump 'job' context
-        run: echo '${{ toJson(job) }}'
+      - name: Dump job context
+        run: echo "$JOB_CONTEXT"
+        env:
+          JOB_CONTEXT: ${{ toJson(job) }}
 
-      - name: Dump 'steps' context
-        run: echo '${{ toJson(steps) }}'
+      - name: Dump steps context
+        run: echo "$STEPS_CONTEXT"
+        env:
+          STEPS_CONTEXT: ${{ toJson(steps) }}
 
-      - name: Dump 'runner' context
-        run: echo '${{ toJson(runner) }}'
+      - name: Dump runner context
+        run: echo "$RUNNER_CONTEXT"
+        env:
+          RUNNER_CONTEXT: ${{ toJson(runner) }}
 
-      - name: Dump 'strategy' context
-        run: echo '${{ toJson(strategy) }}'
+      - name: Dump strategy context
+        run: echo "$STRATEGY_CONTEXT"
+        env:
+          STRATEGY_CONTEXT: ${{ toJson(strategy) }}
 
-      - name: Dump 'matrix' context
-        run: echo '${{ toJson(matrix) }}'
+      - name: Dump matrix context
+        run: echo "$MATRIX_CONTEXT"
+        env:
+          MATRIX_CONTEXT: ${{ toJson(matrix) }}
 
       - name: Show default environment variables
         run: |
