@@ -822,7 +822,7 @@
 * added commented out code that may fix the issue with tmux tabs not automatically getting renamed
 
 #### .vimrc
-* set formatting options explicitly so they're not as easily overriden
+* set formatting options explicitly so they're not as easily overridden
 
 ### Wed Apr 8 21:27:49 2020 -0400
 #### .bashrc.d/remote/remote_base

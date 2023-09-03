@@ -179,7 +179,7 @@ au BufNewFile,BufRead ssh_config,*/.ssh/config* setf sshconfig
 " <https://stackoverflow.com/questions/11023194/automatically-wrap-long-git-commit-messages-in-vim/11023282#11023282>
 au FileType gitcommit setlocal spell
 
-" since 'textwidth' is overriden in the global file /usr/share/vim/vim80/ftplugin/gitcommit.vim, we have to put this config
+" since 'textwidth' is overridden in the global file /usr/share/vim/vim80/ftplugin/gitcommit.vim, we have to put this config
 " in a separate file, ~/.vim/after/ftplugin/gitcommit.vim, as that's at the very end of the 'runtimepath'
 " not even rearranging the 'runtime' value so ~/.vimrc is at the end fixes the issue
 "au FileType gitcommit setlocal tw=125

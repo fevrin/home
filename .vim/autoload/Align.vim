@@ -760,7 +760,7 @@ fun! Align#Align(hasctrl,...) range
 		 " left justify rightmost field (no trailing blanks needed)
 	     let newtxt= newtxt.field
 		else
-		 " left justfiy the field
+		 " left justify the field
 	     let newtxt= newtxt.field.s:MakeSpace(spaces).sep
 	    endif
 	   elseif ragged && doend == 2
