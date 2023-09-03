@@ -1,0 +1,4 @@
+# - Level of verbose logging. 0 is standard, higher numbers are more verbose
+# - overridden by passing --verbose / -v
+# - default = 0
+verbose: 2
