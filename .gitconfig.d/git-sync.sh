@@ -151,9 +151,9 @@ for DIR in ${DIRS[*]}; do
 
    if [[ "$FETCH_LAST_REFRESH" -ge "$FETCH_REFRESH_TIME" || "$FORCE_FETCH" -eq 1 ]]; then
       if [[ "$FETCH_LAST_REFRESH" -ge "$FETCH_REFRESH_TIME" ]]; then
-         log "it's been more than 5 minutes since last fetch; fetching...";
+         log "it's been more than 5 minutes since last fetch; fetching..."
       elif [[ "$FORCE_FETCH" -eq 1 ]]; then
-         log "force fetching...";
+         log "force fetching..."
       fi
 
       log "FETCHING REMOTES..."
