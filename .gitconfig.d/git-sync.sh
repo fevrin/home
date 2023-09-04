@@ -16,9 +16,9 @@ SSH_AUTH_SOCK=/run/user/$(id -u)/keyring/ssh
 export SSH_AUTH_SOCK
 
 # we have to source these since this is a script and not an environmental function
-. $HOME/.bashrc.d/functions/verbose
-. $HOME/.bashrc.d/functions/_print_var_vals
-. $HOME/.bashrc.d/functions/_verify_reqs
+. ${HOME}/.bashrc.d/functions/verbose
+. ${HOME}/.bashrc.d/functions/_print_var_vals
+. ${HOME}/.bashrc.d/functions/_verify_reqs
 #VERBOSE=8
 INTERACTIVE=$(! tty -s; echo $?) # 1 if interactive; 0 if not
 FETCH_REFRESH_TIME=300 # 300 seconds is the threshold before we, by default, skip fetching
@@ -27,26 +27,26 @@ REBASE=1
 
 declare -a DIRS
 
-for arg in $@; do
-   if [[ -d "$arg" ]]; then
-      DIRS+=("$arg")
-   elif [[ "$arg" =~ ^-a( |$) ]]; then
+for arg in ${@}; do
+   if [[ -d "${arg}" ]]; then
+      DIRS+=("${arg}")
+   elif [[ "${arg}" =~ ^-a( |$) ]]; then
       GIT_ADD_FILES=1
-   elif [[ "$arg" =~ ^--no-rebase( |$) ]]; then
+   elif [[ "${arg}" =~ ^--no-rebase( |$) ]]; then
       REBASE=0
-   elif [[ "$arg" =~ ^--force-sync$ ]]; then
+   elif [[ "${arg}" =~ ^--force-sync$ ]]; then
       FORCE_FETCH=1
    fi
 done
 
-[[ ${#DIRS[*]} -gt 0 ]] || DIRS+=("$PWD")
+[[ ${#DIRS[*]} -gt 0 ]] || DIRS+=("${PWD}")
 
 log() {
-   local messages="$@"
+   local messages="${@}"
    local IFS=$'\n'
-   for message in $messages; do
-      [[ "$INTERACTIVE" -eq 1 ]] && echo -e "$message" 2>&1
-      date "+%F %H:%M:%S %Z: ($$) $(basename "$REPO_ROOT"): $(echo -e "$message" 2>&1)" >>"$HOME/$(basename "$REPO_ROOT")-git-pull-timestamps"
+   for message in ${messages}; do
+      [[ "${INTERACTIVE}" -eq 1 ]] && echo -e "${message}" 2>&1
+      date "+%F %H:%M:%S %Z: ($$) $(basename "${REPO_ROOT}"): $(echo -e "${message}" 2>&1)" >>"${HOME}/$(basename "${REPO_ROOT}")-git-pull-timestamps"
    done
 }
 
@@ -59,164 +59,164 @@ branch_is_current() {
    local REMOTE_HASH
    local BASE_HASH
 
-   LOCAL="$($GITBIN rev-parse --abbrev-ref @ 2>&1)" &&
-   LOCAL_HASH="$($GITBIN rev-parse "$LOCAL" 2>&1)" &&
-   REMOTE="$MAIN_BRANCH" &&
-   REMOTE_HASH="$($GITBIN rev-parse "$REMOTE" 2>&1)" &&
-   BASE_HASH="$($GITBIN merge-base "$LOCAL" "$REMOTE" 2>&1)"
-#   REMOTE="$($GITBIN rev-parse --abbrev-ref "$UPSTREAM" 2>&1)" &&
-#   REMOTE_HASH="$($GITBIN rev-parse "$REMOTE" 2>&1)" &&
-#   BASE_HASH="$($GITBIN merge-base "$LOCAL" "$REMOTE" 2>&1)"
+   LOCAL="$(${GITBIN} rev-parse --abbrev-ref @ 2>&1)" &&
+   LOCAL_HASH="$(${GITBIN} rev-parse "${LOCAL}" 2>&1)" &&
+   REMOTE="${MAIN_BRANCH}" &&
+   REMOTE_HASH="$(${GITBIN} rev-parse "${REMOTE}" 2>&1)" &&
+   BASE_HASH="$(${GITBIN} merge-base "${LOCAL}" "${REMOTE}" 2>&1)"
+#   REMOTE="$(${GITBIN} rev-parse --abbrev-ref "${UPSTREAM}" 2>&1)" &&
+#   REMOTE_HASH="$(${GITBIN} rev-parse "${REMOTE}" 2>&1)" &&
+#   BASE_HASH="$(${GITBIN} merge-base "${LOCAL}" "${REMOTE}" 2>&1)"
 
    for var in UPSTREAM LOCAL LOCAL_HASH REMOTE REMOTE_HASH BASE_HASH; do
       if [[ -z "${!var}" || "${!var}" =~ ^fatal: ]]; then
-         log "cannot determine $var:\n${!var}"
+         log "cannot determine ${var}:\n${!var}"
          return 4
       fi
    done
 
    _print_var_vals LOCAL LOCAL_HASH REMOTE REMOTE_HASH BASE_HASH
-   if [[ $LOCAL_HASH == "$REMOTE_HASH" ]]; then
-      log "'$LOCAL' and '$REMOTE' are: Up-to-date"
+   if [[ ${LOCAL_HASH} == "${REMOTE_HASH}" ]]; then
+      log "'${LOCAL}' and '${REMOTE}' are: Up-to-date"
       return 0
-   elif [[ $LOCAL_HASH == "$BASE_HASH" ]]; then
-      log "Need to pull from '$REMOTE'"
+   elif [[ ${LOCAL_HASH} == "${BASE_HASH}" ]]; then
+      log "Need to pull from '${REMOTE}'"
       return 1
-   elif [[ $REMOTE_HASH == "$BASE_HASH" ]]; then
-      log "Need to push to '$REMOTE'"
+   elif [[ ${REMOTE_HASH} == "${BASE_HASH}" ]]; then
+      log "Need to push to '${REMOTE}'"
       return 2
    else
-      log "'$LOCAL' and '$REMOTE': Diverged"
+      log "'${LOCAL}' and '${REMOTE}': Diverged"
       return 3
    fi
 }
 
 local_changes_exist() {
-   [[ $($GITBIN status --untracked-files=no --porcelain=v2 | grep -c .) -gt 0 ]] && {
+   [[ $(${GITBIN} status --untracked-files=no --porcelain=v2 | grep -c .) -gt 0 ]] && {
       return 1
    }
    return 0
 }
 
 #echo "DIRS = '"${DIRS[*]}"'"
-#echo "STASH = '$STASH'"
+#echo "STASH = '${STASH}'"
 #echo "DIRS LENGTH = '${#DIRS[*]}'"
 
 #DIRS=(
-##"$HOME"/home
-##"$HOME"/repos/documentation
-##"$HOME"/repos/chef
-##"$HOME"/repos/cthulhu
-##"$HOME"/repos/teams/service-catalog
+##"${HOME}"/home
+##"${HOME}"/repos/documentation
+##"${HOME}"/repos/chef
+##"${HOME}"/repos/cthulhu
+##"${HOME}"/repos/teams/service-catalog
 #)
 
 GITBIN="/usr/bin/git"
 
 for DIR in ${DIRS[*]}; do
-   cd "$DIR" || exit 1
-   REPO_ROOT="$($GITBIN rev-parse --show-toplevel)"
-   cd "$REPO_ROOT" || exit 1
+   cd "${DIR}" || exit 1
+   REPO_ROOT="$(${GITBIN} rev-parse --show-toplevel)"
+   cd "${REPO_ROOT}" || exit 1
 
    # check if the directory is a git repo
-   $GITBIN rev-parse --is-inside-work-tree &>/dev/null || {
-      log "not a git directory: '$DIR'"
+   ${GITBIN} rev-parse --is-inside-work-tree &>/dev/null || {
+      log "not a git directory: '${DIR}'"
       log "skipping!"
       continue
    }
 
-#   log "INTERACTIVE = '$INTERACTIVE'"
+#   log "INTERACTIVE = '${INTERACTIVE}'"
 
-   log "WORKING ON '$DIR'"
+   log "WORKING ON '${DIR}'"
 
-   GIT_BRANCH="$($GITBIN branch --show-current)"
+   GIT_BRANCH="$(${GITBIN} branch --show-current)"
 
    echo
-   MAIN_BRANCH="$($GITBIN get-main-branch)" || {
+   MAIN_BRANCH="$(${GITBIN} get-main-branch)" || {
       echo "error: couldn't get main branch"
       exit 1
    }
-   MAIN_REMOTE="$($GITBIN get-main-remote)" || {
+   MAIN_REMOTE="$(${GITBIN} get-main-remote)" || {
       echo "error: couldn't get main remote"
       exit 1
    }
-#   git rev-parse --verify --quiet $MAIN_BRANCH || MAIN_BRANCH="main"
-#   ORIGINAL_MAIN_BRANCH_REF="$($GITBIN rev-parse $MAIN_BRANCH)"
+#   git rev-parse --verify --quiet ${MAIN_BRANCH} || MAIN_BRANCH="main"
+#   ORIGINAL_MAIN_BRANCH_REF="$(${GITBIN} rev-parse ${MAIN_BRANCH})"
 
    # fetch any upstream first
    UPSTREAM="upstream"
-#   [[ -n $(git branch --list $UPSTREAM) ]] && git ls-remote --heads $UPSTREAM &>/dev/null {
+#   [[ -n $(git branch --list ${UPSTREAM}) ]] && git ls-remote --heads ${UPSTREAM} &>/dev/null {
    MERGE_TYPE=
    FETCH_LAST_REFRESH="$(echo "($(date +%s) - $(stat -c %Y .git/FETCH_HEAD 2>&1))" | bc 2>&1)"
    [[ "${FETCH_LAST_REFRESH}" =~ ^[0-9]+$ ]] || FETCH_LAST_REFRESH="$((FETCH_REFRESH_TIME + 1))"
 
-   if [[ "$FETCH_LAST_REFRESH" -ge "$FETCH_REFRESH_TIME" || "$FORCE_FETCH" -eq 1 ]]; then
-      if [[ "$FETCH_LAST_REFRESH" -ge "$FETCH_REFRESH_TIME" ]]; then
+   if [[ "${FETCH_LAST_REFRESH}" -ge "${FETCH_REFRESH_TIME}" || "${FORCE_FETCH}" -eq 1 ]]; then
+      if [[ "${FETCH_LAST_REFRESH}" -ge "${FETCH_REFRESH_TIME}" ]]; then
          log "it's been more than 5 minutes since last fetch; fetching..."
-      elif [[ "$FORCE_FETCH" -eq 1 ]]; then
+      elif [[ "${FORCE_FETCH}" -eq 1 ]]; then
          log "force fetching..."
       fi
 
       log "FETCHING REMOTES..."
       # this expects the `git fet` alias to be set up in ~/.gitconfig
       fetch_output=$(
-         $GITBIN fet
+         ${GITBIN} fet
          exit $?
       )
       fetch_exit_code="$?"
-      log "$fetch_output"
-      [[ $fetch_exit_code -eq 0 ]] || {
+      log "${fetch_output}"
+      [[ ${fetch_exit_code} -eq 0 ]] || {
          log "failure"
          continue
       }
    else
-      log "skipping refresh since last refreshed $FETCH_LAST_REFRESH seconds ago"
+      log "skipping refresh since last refreshed ${FETCH_LAST_REFRESH} seconds ago"
    fi
 
    log "UPDATING MAIN BRANCH..."
-   if $GITBIN ls-remote --heads $UPSTREAM &>/dev/null; then
-      # we're in a forked repo (assuming the upstream repo is aliased to $UPSTREAM)
+   if ${GITBIN} ls-remote --heads ${UPSTREAM} &>/dev/null; then
+      # we're in a forked repo (assuming the upstream repo is aliased to ${UPSTREAM})
 
       # if we're on the main branch, just merge the changes; otherwise fetch them
       # (which also merges with the '+' marker)
-      if [[ "$GIT_BRANCH" =~ $MAIN_BRANCH ]]; then
-         log "$GITBIN merge $UPSTREAM $MAIN_BRANCH"
-         $GITBIN merge $UPSTREAM $MAIN_BRANCH || {
+      if [[ "${GIT_BRANCH}" =~ ${MAIN_BRANCH} ]]; then
+         log "${GITBIN} merge ${UPSTREAM} ${MAIN_BRANCH}"
+         ${GITBIN} merge ${UPSTREAM} ${MAIN_BRANCH} || {
             MERGE_TYPE="merge upstream"
          }
       else
-#         echo "$GITBIN checkout $MAIN_BRANCH"
-#         $GITBIN checkout $MAIN_BRANCH
+#         echo "${GITBIN} checkout ${MAIN_BRANCH}"
+#         ${GITBIN} checkout ${MAIN_BRANCH}
 
-#         echo "$GITBIN merge $UPSTREAM/$MAIN_BRANCH"
-#         if $GITBIN merge $UPSTREAM/$MAIN_BRANCH; then
-         log "$GITBIN fetch $UPSTREAM +$MAIN_BRANCH:$MAIN_BRANCH"
-         $GITBIN fetch $UPSTREAM +$MAIN_BRANCH:$MAIN_BRANCH || {
+#         echo "${GITBIN} merge ${UPSTREAM}/${MAIN_BRANCH}"
+#         if ${GITBIN} merge ${UPSTREAM}/${MAIN_BRANCH}; then
+         log "${GITBIN} fetch ${UPSTREAM} +${MAIN_BRANCH}:${MAIN_BRANCH}"
+         ${GITBIN} fetch ${UPSTREAM} +${MAIN_BRANCH}:${MAIN_BRANCH} || {
             MERGE_TYPE="fetch upstream"
          }
 
-#         echo "$GITBIN checkout -"
-#         $GITBIN checkout -
+#         echo "${GITBIN} checkout -"
+#         ${GITBIN} checkout -
       fi
 
-      if [[ -z "$MERGE_TYPE" ]]; then
+      if [[ -z "${MERGE_TYPE}" ]]; then
          # if the fetch/merge was successful, push the changes to the fork
-         log "$GITBIN push $MAIN_REMOTE $MAIN_BRANCH:$MAIN_BRANCH"
-         $GITBIN push $MAIN_REMOTE $MAIN_BRANCH:$MAIN_BRANCH
+         log "${GITBIN} push ${MAIN_REMOTE} ${MAIN_BRANCH}:${MAIN_BRANCH}"
+         ${GITBIN} push ${MAIN_REMOTE} ${MAIN_BRANCH}:${MAIN_BRANCH}
       fi
    else
-      if [[ $(git rev-parse $MAIN_REMOTE/$MAIN_BRANCH) == $(git rev-parse $MAIN_BRANCH) ]]; then
+      if [[ $(git rev-parse ${MAIN_REMOTE}/${MAIN_BRANCH}) == $(git rev-parse ${MAIN_BRANCH}) ]]; then
          log "main branch already up-to-date"
       else
          log "$(_print_var_vals -e GIT_BRANCH MAIN_BRANCH 2>&1)"
-         if [[ "$GIT_BRANCH" =~ $MAIN_BRANCH ]]; then
-            log "$GITBIN merge"
-            $GITBIN merge || {
+         if [[ "${GIT_BRANCH}" =~ ${MAIN_BRANCH} ]]; then
+            log "${GITBIN} merge"
+            ${GITBIN} merge || {
                MERGE_TYPE=merge
             }
 
          else
-            log "$GITBIN fetch $MAIN_REMOTE $MAIN_BRANCH:$MAIN_BRANCH"
-            $GITBIN fetch $MAIN_REMOTE $MAIN_BRANCH:$MAIN_BRANCH || {
+            log "${GITBIN} fetch ${MAIN_REMOTE} ${MAIN_BRANCH}:${MAIN_BRANCH}"
+            ${GITBIN} fetch ${MAIN_REMOTE} ${MAIN_BRANCH}:${MAIN_BRANCH} || {
                MERGE_TYPE=fetch
             }
 
@@ -224,7 +224,7 @@ for DIR in ${DIRS[*]}; do
       fi
    fi
 
-   if [[ -n "$MERGE_TYPE" ]]; then
+   if [[ -n "${MERGE_TYPE}" ]]; then
       echo
       echo
       log "GIT ${MERGE_TYPE} FAILED! SKIPPING FURTHER CHANGES"
@@ -233,40 +233,40 @@ for DIR in ${DIRS[*]}; do
 
    # the original conditional here didn't work since just a fetch wouldn't update where it points,
    # even if its upstream did have changes
-#   if [[ "$ORIGINAL_MAIN_BRANCH_REF" = "$(git rev-parse $MAIN_BRANCH)" ]]; then
+#   if [[ "${ORIGINAL_MAIN_BRANCH_REF}" = "$(git rev-parse ${MAIN_BRANCH})" ]]; then
 
-   if [[ "$REBASE" -eq 1 ]]; then
+   if [[ "${REBASE}" -eq 1 ]]; then
 
       branch_is_current_output="$(
          branch_is_current 2>&1
          exit $?
       )"
       branch_is_current_exit="$?"
-      log "$branch_is_current_output"
-      if [[ "$branch_is_current_exit" -ne 1 && "$branch_is_current_exit" -ne 3 ]]; then
+      log "${branch_is_current_output}"
+      if [[ "${branch_is_current_exit}" -ne 1 && "${branch_is_current_exit}" -ne 3 ]]; then
          continue
       fi
 
       if [[ "$(local_changes_exist; echo $?)" -eq 1 ]]; then
-         [[ $GIT_ADD_FILES -eq 1 && $($GITBIN diff --quiet --exit-code; echo $?) -eq 1 ]] && {
+         [[ ${GIT_ADD_FILES} -eq 1 && $(${GITBIN} diff --quiet --exit-code; echo $?) -eq 1 ]] && {
             echo
             echo
             log "STAGING FILES..."
-            $GITBIN add -u
+            ${GITBIN} add -u
          }
 
-         STAGED_FILES="$($GITBIN diff --staged --name-only)"
-         UNSTAGED_FILES="$($GITBIN diff --name-only)"
-         UNMERGED_FILES="$($GITBIN status --porcelain=v2 | sed -rne 's;^u.? .* ([^ ]+)$;\1;p')"
+         STAGED_FILES="$(${GITBIN} diff --staged --name-only)"
+         UNSTAGED_FILES="$(${GITBIN} diff --name-only)"
+         UNMERGED_FILES="$(${GITBIN} status --porcelain=v2 | sed -rne 's;^u.? .* ([^ ]+)$;\1;p')"
 
-         if [[ -n "$UNMERGED_FILES" ]]; then
+         if [[ -n "${UNMERGED_FILES}" ]]; then
             echo
             log "THERE ARE UNMERGED FILES; EXITING..."
-            log "$UNMERGED_FILES"
-            if [[ "$INTERACTIVE" -eq 1 ]]; then
-               $GITBIN status
+            log "${UNMERGED_FILES}"
+            if [[ "${INTERACTIVE}" -eq 1 ]]; then
+               ${GITBIN} status
             else
-               log "$($GITBIN status 2>&1)"
+               log "$(${GITBIN} status 2>&1)"
             fi
             exit 1
          fi
@@ -280,7 +280,7 @@ for DIR in ${DIRS[*]}; do
                STASH_NAME="git-sync.$$"
             fi
          done
-         [[ -n "$STASH_NAME" ]] && $GITBIN stash push --message "$STASH_NAME"
+         [[ -n "${STASH_NAME}" ]] && ${GITBIN} stash push --message "${STASH_NAME}"
          echo
          log "$(_print_var_vals -e STASH_NAME STAGED_FILES UNSTAGED_FILES UNMERGED_FILES 2>&1)"
       else
@@ -288,35 +288,35 @@ for DIR in ${DIRS[*]}; do
       fi
 
       # the main branch is already updated, so we just need to update the current branch if it's not the main one
-      if [[ ! "$GIT_BRANCH" =~ $MAIN_BRANCH ]]; then
+      if [[ ! "${GIT_BRANCH}" =~ ${MAIN_BRANCH} ]]; then
          echo
          echo
-         log "ATTEMPTING TO GIT REBASE '$GIT_BRANCH' ONTO '$MAIN_BRANCH'"
+         log "ATTEMPTING TO GIT REBASE '${GIT_BRANCH}' ONTO '${MAIN_BRANCH}'"
          rebase_result=$(
-            $GITBIN rebase $MAIN_BRANCH 2>&1
+            ${GITBIN} rebase ${MAIN_BRANCH} 2>&1
             exit $?
          )
          rebase_exit_code="$?"
-         #echo "rebase_result = '$rebase_result'"
-         #echo "rebase_exit_code = '$rebase_exit_code'"
-         log "$rebase_result"
-         if [[ $rebase_exit_code -eq 0 ]]; then
+         #echo "rebase_result = '${rebase_result}'"
+         #echo "rebase_exit_code = '${rebase_exit_code}'"
+         log "${rebase_result}"
+         if [[ ${rebase_exit_code} -eq 0 ]]; then
             echo
-            if [[ -n "$STASH_NAME" ]]; then
+            if [[ -n "${STASH_NAME}" ]]; then
                log "POPPING STASHED FILES"
-#               verbose 8 $GITBIN stash pop --index stash@{/"$STASH_NAME"}
-               log "$GITBIN stash pop --index stash@{/\"$STASH_NAME\"}"
-               if [[ "$INTERACTIVE" -eq 1 ]]; then
+#               verbose 8 ${GITBIN} stash pop --index stash@{/"${STASH_NAME}"}
+               log "${GITBIN} stash pop --index stash@{/\"${STASH_NAME}\"}"
+               if [[ "${INTERACTIVE}" -eq 1 ]]; then
                   # we can't pop using a regex, apparently, so we have to use the index instead
                   STASH_INDEX="$(git stash list | sed -rne "s;^(stash@\{[0-9]+\}): [^:]+: ${STASH_NAME}$;\1;p")"
-                  $GITBIN stash pop --index "${STASH_INDEX}"
+                  ${GITBIN} stash pop --index "${STASH_INDEX}"
                else
-                  pop_result="$($GITBIN stash pop --index "stash@{/$STASH_NAME}")"
+                  pop_result="$(${GITBIN} stash pop --index "stash@{/${STASH_NAME}}")"
                fi
                POP_EXIT_CODE="$?"
-               log "$pop_result"
-               log "stash pop exit code: '$POP_EXIT_CODE'"
-               [[ "$POP_EXIT_CODE" -ne 0 ]] && exit 1
+               log "${pop_result}"
+               log "stash pop exit code: '${POP_EXIT_CODE}'"
+               [[ "${POP_EXIT_CODE}" -ne 0 ]] && exit 1
             fi
          else
             if [[ -f .git/rebase-merge/done ]]; then
@@ -324,17 +324,17 @@ for DIR in ${DIRS[*]}; do
                echo
                rebase_abort() {
                   [[ "$1" =~ trapped ]] && echo
-                  if [[ ! "$REPLY" =~ ^n$ || $INTERACTIVE -eq 0 ]]; then
-                     $GITBIN rebase --abort
+                  if [[ ! "${REPLY}" =~ ^n$ || ${INTERACTIVE} -eq 0 ]]; then
+                     ${GITBIN} rebase --abort
                      log "failure: rebase aborted"
-                     [[ -n "$STASH_NAME" ]] && log "stash saved as 'stash@{/"$STASH_NAME"}'"
+                     [[ -n "${STASH_NAME}" ]] && log "stash saved as 'stash@{/"${STASH_NAME}"}'"
                   else
                      log 'failure: resolve any conflicts to fully rebase this branch, then retry `git-sync`'
                   fi
                   exit 1
                }
                trap "rebase_abort trapped" SIGINT
-               echo -n "ABORT GIT REBASE '$GIT_BRANCH' ONTO '$MAIN_BRANCH'? [Y/n] "
+               echo -n "ABORT GIT REBASE '${GIT_BRANCH}' ONTO '${MAIN_BRANCH}'? [Y/n] "
                read
                rebase_abort
             else
