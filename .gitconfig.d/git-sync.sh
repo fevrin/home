@@ -16,6 +16,7 @@ SSH_AUTH_SOCK=/run/user/$(id -u)/keyring/ssh
 export SSH_AUTH_SOCK
 
 # we have to source these since this is a script and not an environmental function
+. "${HOME}"/.shellrc.d/base # needed for is_zsh()
 . "${HOME}"/.shellrc.d/functions/verbose
 . "${HOME}"/.shellrc.d/functions/_print_var_vals
 . "${HOME}"/.shellrc.d/functions/_verify_reqs
