@@ -97,11 +97,6 @@ jobs:
     needs: [get-changed-files]
 #   if: github.event.inputs.LINT == 'true' || github.event.inputs.LINT == 1
     steps:
-      - name: Convert 'CHANGED_FILES' JSON to regex
-        run: >
-          echo "INCLUDE_FILES=($(echo ${{ needs.get-changed-files.outputs.CHANGED_FILES }} | jq -r 'join("|")' | sed -Ee 's;([\/.]);\\\1;g'))"
-          >> $GITHUB_ENV
-
       - uses: actions/checkout@v3
         env:
           CHECKOUT_DEPTH: "${{ github.event_name == 'workflow_dispatch' && '0' || '2' }}"
@@ -113,7 +108,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MEGALINTER_CONFIG: ci/.mega-linter.yaml
-          FILTER_REGEX_INCLUDE: ${{ env.INCLUDE_FILES }}
+          VALIDATE_ALL_CODEBASE: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }} # Validates all source when push on main, else just the git diff with main. Override with true if you always want to lint all sources
 
   pre-commit:
     runs-on: ubuntu-latest
