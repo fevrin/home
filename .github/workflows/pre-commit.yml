@@ -113,7 +113,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MEGALINTER_CONFIG: ci/.mega-linter.yaml
-          FILTER_REGEX_INCLUDE: ${INCLUDE_FILES}
+          FILTER_REGEX_INCLUDE: ${{ env.INCLUDE_FILES }}
 
   pre-commit:
     runs-on: ubuntu-latest
