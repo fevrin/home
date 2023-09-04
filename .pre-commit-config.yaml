@@ -58,6 +58,8 @@ repos:
     rev: v0.9.0
     hooks:
       - id: shellcheck
+        exclude_types:
+          - zsh
         args:
           # more args in .shellcheckrc
           - --severity=warning
