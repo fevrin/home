@@ -1,13 +1,19 @@
 ---
-# ENABLE_LINTERS:
-#   - SHELLCHECK
+ENABLE_LINTERS:
+   - ACTION_ACTIONLINT
+   - BASH_SHELLCHECK
 #   - SHFMT
 DISABLE_LINTERS:
   - SPELL_CSPELL
 
+PRINT_ALL_FILES: true
+
 ACTION_ACTIONLINT_ARGUMENTS: -shellcheck
 
-BASH_SHELLCHECK_ARGUMENTS: -W 20
+BASH_SHELLCHECK_ARGUMENTS: -W 20 --color=always
+BASH_SHELLCHECK_FILE_NAMES_REGEX:
+  - "[-a-z_.0-9]+"
+BASH_SHELLCHECK_FILTER_REGEX_INCLUDE: (scripts|\.([^.]+\.d/|githooks|(bash|mac|apple_keyboard_mod\.)rc))
 BASH_SHELLCHECK_PRE_COMMANDS:
   - command: ln -s ci/.shellcheckrc . # necessary since shellcheck doesn't let you speconfig the config file
     cwd: "workspace"
