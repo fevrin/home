@@ -16,9 +16,9 @@ SSH_AUTH_SOCK=/run/user/$(id -u)/keyring/ssh
 export SSH_AUTH_SOCK
 
 # we have to source these since this is a script and not an environmental function
-. "${HOME}"/.bashrc.d/functions/verbose
-. "${HOME}"/.bashrc.d/functions/_print_var_vals
-. "${HOME}"/.bashrc.d/functions/_verify_reqs
+. "${HOME}"/.shellrc.d/functions/verbose
+. "${HOME}"/.shellrc.d/functions/_print_var_vals
+. "${HOME}"/.shellrc.d/functions/_verify_reqs
 #VERBOSE=8
 INTERACTIVE=$(! tty -s; echo $?) # 1 if interactive; 0 if not
 FETCH_REFRESH_TIME=300 # 300 seconds is the threshold before we, by default, skip fetching
