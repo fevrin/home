@@ -160,6 +160,22 @@ jobs:
           # this should run the pre-commit hooks only on the files changed between the default branch and the one in the PR
           extra_args: --verbose --from-ref ${{ needs.get-changed-files.outputs.BASE_REF }} --to-ref HEAD
 
+  check-zshrc:
+    runs-on: ubuntu-latest
+    if: contains(needs.get-changed-files.outputs.CHANGED_FILES, '.zshrc')
+    steps:
+      - uses: actions/checkout@v3
+        env:
+          CHECKOUT_DEPTH: "${{ github.event_name == 'workflow_dispatch' && '0' || '2' }}"
+        with:
+          fetch-depth: $CHECKOUT_DEPTH
+
+      - name: Check zshrc syntax
+        run: |
+          apt-get update &&
+          apt-get install -y zsh
+          zsh -n .zshrc
+
   # this only checks if the README had been generated; it can't itself commit
   # the generated file
   check-readme:
