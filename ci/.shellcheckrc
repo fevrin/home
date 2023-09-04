@@ -42,3 +42,5 @@ enable=require-double-brackets
 # example: var=hello; echo $var
 # fix:     var=hello; echo ${var}
 enable=require-variable-braces
+
+external-sources=true

@@ -4,13 +4,18 @@
 #   - SHFMT
 DISABLE_LINTERS:
   - SPELL_CSPELL
-REPOSITORY_CHECKOV_ARGUMENTS: "--skip-check CKV_GHA_7"
-REPOSITORY_CHECKOV_CONFIG_FILE: ci/.checkov.yaml
-MARKDOWN_MARKDOWNLINT_CONFIG_FILE: ci/.markdownlint.yaml
-YAML_V8R_FILTER_REGEX_EXCLUDE: pre-commit.ya?ml
-ACTION_ACTIONLINT_ARGUMENTS: -shellcheck
-MAKEFILE_CHECKMAKE_CONFIG_FILE: ci/.checkmake.ini
 
+ACTION_ACTIONLINT_ARGUMENTS: -shellcheck
+
+BASH_SHELLCHECK_ARGUMENTS: -W 20
 BASH_SHELLCHECK_PRE_COMMANDS:
   - command: ln -s ci/.shellcheckrc . # necessary since shellcheck doesn't let you speconfig the config file
     cwd: "workspace"
+
+MAKEFILE_CHECKMAKE_CONFIG_FILE: ci/.checkmake.ini
+MARKDOWN_MARKDOWNLINT_CONFIG_FILE: ci/.markdownlint.yaml
+
+REPOSITORY_CHECKOV_ARGUMENTS: "--skip-check CKV_GHA_7"
+REPOSITORY_CHECKOV_CONFIG_FILE: ci/.checkov.yaml
+
+YAML_V8R_FILTER_REGEX_EXCLUDE: pre-commit.ya?ml
