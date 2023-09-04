@@ -98,8 +98,9 @@ jobs:
 #   if: github.event.inputs.LINT == 'true' || github.event.inputs.LINT == 1
     steps:
       - name: Convert 'CHANGED_FILES' JSON to regex
-        run: |
-          echo "INCLUDE_FILES=($(echo ${{ needs.get-changed-files.outputs.CHANGED_FILES }} | jq -r 'join("|")' | sed -Ee 's;([\/.]);\\\1;g'))" >> $GITHUB_ENV
+        run: >
+          echo "INCLUDE_FILES=($(echo ${{ needs.get-changed-files.outputs.CHANGED_FILES }} | jq -r 'join("|")' | sed -Ee 's;([\/.]);\\\1;g'))"
+          >> $GITHUB_ENV
 
       - uses: actions/checkout@v3
         env:
@@ -243,7 +244,17 @@ jobs:
       - run: echo "CHANGED_FILES = '${{ needs.get-changed-files.outputs.CHANGED_FILES }}'"
 
       - name: Git log
-        run: git --no-pager log --graph --abbrev-commit --decorate --date=relative --color --format=format:'%C(bold blue)%h%C(reset) - %C(bold yellow)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(auto)%d%C(reset)' --all -50
+        run: >
+          git
+          --no-pager log
+          --graph
+          --abbrev-commit
+          --decorate
+          --date=relative
+          --color
+          --format=format:'%C(bold blue)%h%C(reset) - %C(bold yellow)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(auto)%d%C(reset)'
+          --all
+          -50
 
       - name: Dump 'env' context
         run: echo "$ENV_CONTEXT"
