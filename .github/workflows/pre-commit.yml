@@ -94,7 +94,6 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
-    needs: [get-changed-files]
 #   if: github.event.inputs.LINT == 'true' || github.event.inputs.LINT == 1
     steps:
       - uses: actions/checkout@v3
