@@ -5,7 +5,7 @@
 # for examples
 
 # If not running interactively, don't do anything
-[ -z "$PS1" ] && return
+[[ -z "$PS1" ]] && return
 
 . ${HOME}/.shellrc.d/base
 
@@ -14,7 +14,7 @@
 shopt -s checkwinsize
 
 # make less more friendly for non-text input files, see lesspipe(1)
-[ -x /usr/bin/lesspipe ] && eval "$(lesspipe)"
+[[ -x /usr/bin/lesspipe ]] && eval "$(lesspipe)"
 
 # Alias definitions.
 # See /usr/share/doc/bash-doc/examples in the bash-doc package.
@@ -270,7 +270,7 @@ export HISTIGNORE
 ###########################
 
 # set variable identifying the chroot you work in (used in the prompt below)
-if [ -z "$debian_chroot" ] && [ -r /etc/debian_chroot ]; then
+if [[ -z "$debian_chroot" ]] && [[ -r /etc/debian_chroot ]]; then
    debian_chroot=$(cat /etc/debian_chroot)
 fi
 
