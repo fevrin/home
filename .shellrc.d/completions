@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # 1password
-has op && . <(op completion ${SHELL_TYPE})
+has op && . <(op completion "${SHELL_TYPE}")
 is_zsh && compdef _op op
 
 # docker
@@ -32,19 +32,19 @@ if has docker; then
 fi
 
 # dotfile manager
-has chezmoi && . <(chezmoi completion ${SHELL_TYPE})
+has chezmoi && . <(chezmoi completion "${SHELL_TYPE}")
 is_zsh && compdef _chezmoi chezmoi
 
 # github-cli
-has gh && . <(gh completion -s ${SHELL_TYPE})
+has gh && . <(gh completion -s "${SHELL_TYPE}")
 is_zsh && compdef _gh gh
 
 # gitlab-cli
-has glab && . <(glab completion -s ${SHELL_TYPE})
+has glab && . <(glab completion -s "${SHELL_TYPE}")
 is_zsh && compdef _glab glab
 
 # helm
-has helm && . <(helm completion ${SHELL_TYPE})
+has helm && . <(helm completion "${SHELL_TYPE}")
 
 # k8s
 has kubectl && {
@@ -54,7 +54,7 @@ has kubectl && {
       alias k='kubectl'
    fi
 
-   . <(kubectl completion ${SHELL_TYPE})
+   . <(kubectl completion "${SHELL_TYPE}")
 
    if is_zsh; then
       # k alias hack TODO: remember compdef load order
@@ -66,13 +66,13 @@ has kubectl && {
 
 # minikube
 has minikube && {
-   . <(minikube completion ${SHELL_TYPE})
+   . <(minikube completion "${SHELL_TYPE}")
    alias mk='minikube kubectl --'
 }
 
 # starship
-has starship && . <(starship completions ${SHELL_TYPE})
+has starship && . <(starship completions "${SHELL_TYPE}")
 
 # glow
 # https://github.com/charmbracelet/glow
-has glow && . <(glow completion ${SHELL_TYPE})
+has glow && . <(glow completion "${SHELL_TYPE}")

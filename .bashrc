@@ -7,7 +7,7 @@
 # If not running interactively, don't do anything
 [[ -z "${PS1}" ]] && return
 
-. ${HOME}/.shellrc.d/base
+. "${HOME}"/.shellrc.d/base
 
 # check the window size after each command and, if necessary,
 # update the values of LINES and COLUMNS.
@@ -43,7 +43,7 @@ for completion_file in \
          egrep -q "(\.|source) ${completion_file}" /etc/bash_completion.d/* || {
             # otherwise, symlink to it
             echo -n "symlink ${completion_file} ${completion_link}? [Y/n] "; read
-            [[ ${REPLY} =~ ^n$ ]] || {
+            [[ "${REPLY}" =~ ^n$ ]] || {
                sudo ln -s "${completion_file}" "${completion_link}" || {
                   # or source it directly if that doesn't work
                   . "${completion_file}"
@@ -56,7 +56,7 @@ done
 unset completion_file
 unset completion_link
 
-[[ -x ${HOME}/go/bin/gocomplete ]] && complete -C ${HOME}/go/bin/gocomplete go
+[[ -x "${HOME}"/go/bin/gocomplete ]] && complete -C "${HOME}"/go/bin/gocomplete go
 
 ##########################################################
 ######## Source Files #########
@@ -116,7 +116,7 @@ dirs_for_path+=(
 # add a GOPATH value if go's installed
 # and add it to the general PATH, as well
 if has go || [[ -x /usr/local/go/bin/go ]]; then
-   ! which go &>/dev/null && [[ -x /usr/local/go/bin/go ]] && ln -s /usr/local/go/bin/go ${HOME}/.local/bin/
+   ! which go &>/dev/null && [[ -x /usr/local/go/bin/go ]] && ln -s /usr/local/go/bin/go "${HOME}"/.local/bin/
 
    dirs_for_gopath+=(
       "${HOME}/go"
@@ -124,7 +124,7 @@ if has go || [[ -x /usr/local/go/bin/go ]]; then
 
    for dir in ${dirs_for_gopath[*]}; do
       # add optional directories to the user's PATH if they exist and are not already in their PATH
-      if [[ -d "${dir}" ]] && [[ ! ${GOPATH} =~ (:"${dir}"|"^${dir}$"|"${dir}":) ]]; then
+      if [[ -d "${dir}" ]] && [[ ! "${GOPATH}" =~ (:"${dir}"|"^${dir}$"|"${dir}":) ]]; then
          if [[ -n "${GOPATH}" ]]; then
             GOPATH+=":${dir}"
          else
@@ -133,7 +133,7 @@ if has go || [[ -x /usr/local/go/bin/go ]]; then
       fi
 
       # add the last bin subdirectory that exists as the value of GOBIN
-      if [[ -d "${dir}/bin" && -z ${GOBIN} ]]; then
+      if [[ -d "${dir}/bin" && -z "${GOBIN}" ]]; then
          dirs_for_path+=("${dir}/bin")
          export GOBIN="${dir}/bin"
       fi
@@ -143,7 +143,7 @@ fi
 
 for dir in ${dirs_for_path[*]}; do
    # add optional directories to the user's PATH if they exist and are not already in their PATH
-   if [[ -d "${dir}" ]] && [[ ! ${PATH} =~ (:"${dir}"|"^${dir}$"|"${dir}":) ]]; then
+   if [[ -d "${dir}" ]] && [[ ! "${PATH}" =~ (:"${dir}"|"^${dir}$"|"${dir}":) ]]; then
       if [[ -n "${PATH}" ]]; then
          PATH+=":${dir}"
       else
@@ -170,7 +170,7 @@ GOPATH="${GOPATH%%:}"
 # don't overwrite ~/.bash_history file upon logging out
 shopt -s histappend
 
-export HISTFILE=${HOME}/.bash_history
+export HISTFILE="${HOME}"/.bash_history
 
 # this must be set really high or not set at all; it seems as of bash version 4.4.19(1)-release, having the history file larger than this size causes a segfault
 export HISTFILESIZE="${HISTSIZE}"
@@ -183,30 +183,30 @@ export HISTTIMEFORMAT="%Y-%m-%d %H:%M:%S "
 
 # ensure ~/.bash_history is in append-only mode since there's craziness with it being inappropriately truncated
 # the `ls -lO` part is a Mac OS X compatibility crutch
-if [[ ${MAC_OS_X} -eq 0 ]]; then
-   [[ $(has lsattr) && $(lsattr ${HOME}/.bash_history) =~ ^.....a.*$ ]] ||
+if [[ "${MAC_OS_X}" -eq 0 ]]; then
+   [[ $(has lsattr) && $(lsattr "${HOME}"/.bash_history) =~ ^.....a.*$ ]] ||
       cat <<-EOF
-		warning: ${HOME}/.bash_history is not in append-only mode!
+		warning: "${HOME}"/.bash_history is not in append-only mode!
 
 		enable that with this command:
 
-		   sudo chattr +a ${HOME}/.bash_history
+		   sudo chattr +a "${HOME}"/.bash_history
 
 		EOF
 else
    [[ ! $(ls -lO "${HOME}"/.bash_history) =~ uappnd ]] ||
       cat <<-EOF
-		warning: ${HOME}/.bash_history is not in append-only mode!
+		warning: "${HOME}"/.bash_history is not in append-only mode!
 
 		enable that with this command:
 
-		   sudo chflags uappend ${HOME}/.bash_history
+		   sudo chflags uappend "${HOME}"/.bash_history
 
 		EOF
 fi
 
 # inform the user if the ~/.bash_history file is greater than or equal to the ${HISTFILESIZE} value for rotation
-[[ $(wc -l ${HOME}/.bash_history | cut -d' ' -f1) -ge ${HISTFILESIZE} ]] && echo "consider making a new ${HOME}/.bash_history file, as it's >= to ${HISTFILESIZE} lines"
+[[ $(wc -l "${HOME}"/.bash_history | cut -d' ' -f1) -ge "${HISTFILESIZE}" ]] && echo "consider making a new ${HOME}/.bash_history file, as it's >= to ${HISTFILESIZE} lines"
 
 # don't remember basic/common commands, including all bash aliases
 # i really need to make a level 0/level 6 script using perl or something to have greater control over regexes; plus, it can be annoying to have the commands immediately removed; lastly, duplicates aren't always removed like they should be
@@ -287,7 +287,7 @@ else
          DIRENV_ALLOWED="$(direnv status | sed -rne "/^Found RC path ${PWD//\//\\/}\/\.envrc/,/Found RC allowed/s;Found RC allowed (.+)$;\1;p")"
          if [[ $(egrep -c '(^|[^#]+)\b(export|unset) GIT_PS1_SHOWUNTRACKEDFILES\b' .envrc) -lt 1 ]]; then
             # the variable isn't already explicitly set or unset
-            if [[ $(du -s --block-size=1M ${PWD} 2>/dev/null | egrep -o '^[0-9]+') -lt 100 ]]; then
+            if [[ $(du -s --block-size=1M "${PWD}" 2>/dev/null | egrep -o '^[0-9]+') -lt 100 ]]; then
                # GIT_PS1_SHOWUNTRACKEDFILES adds some load time to each bash prompt when within large git repos
                # we'll export it only if we use `direnv` and the repo is less than 100MB
                # this is so we run `du` just once, when either setting or unsetting the variable,
@@ -299,7 +299,7 @@ else
                echo 'unset GIT_PS1_SHOWUNTRACKEDFILES' >>.envrc
             fi
             # run `direnv allow` if it was already allowed before the above change
-            [[ ${DIRENV_ALLOWED} =~ ^true$ ]] && direnv allow
+            [[ "${DIRENV_ALLOWED}" =~ ^true$ ]] && direnv allow
          fi
          unset DIRENV_ALLOWED
       fi
@@ -315,7 +315,7 @@ else
       # history -r;
 
       hostname_color="yellow"
-      [[ -n ${SSH_CONNECTION} ]] && hostname_color="red"
+      [[ -n "${SSH_CONNECTION}" ]] && hostname_color="red"
 
       PROMPT_COMMAND='
       __git_ps1 \
