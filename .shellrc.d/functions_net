@@ -18,27 +18,27 @@ get-public-ip() {
 
 get-ip-location() {
    local data="$(curl -sw "%{response_code}" ifconfig.co/json)"
-   local location="$(echo "$data" | sed -re 's;(.*[^0-9])[0-9]+$;\1;')"
-   local resp_code="$(echo "$data" | sed -re 's;.*[^0-9]([0-9]+)$;\1;')"
+   local location="$(echo "${data}" | sed -re 's;(.*[^0-9])[0-9]+$;\1;')"
+   local resp_code="$(echo "${data}" | sed -re 's;.*[^0-9]([0-9]+)$;\1;')"
 
-   [[ ! "$resp_code" =~ 200 ]] && {
+   [[ ! "${resp_code}" =~ 200 ]] && {
       local ip="$(get-public-ip)"
       location="$(curl -s -H "User-Agent: keycdn-tools:https://www.example.com" "https://tools.keycdn.com/geo.json?host=${ip}")"
    }
 
-   echo "$location"
+   echo "${location}"
 }
 
 get-ip-city() {
    local data="$(curl -sw "%{response_code}" https://ifconfig.co/city 2> /dev/null | tr ' ' '+')"
-   local city="$(echo "$data" | sed -re 's;(.*[^0-9])[0-9]+$;\1;')"
-   local resp_code="$(echo "$data" | sed -re 's;.*[^0-9]([0-9]+)$;\1;')"
+   local city="$(echo "${data}" | sed -re 's;(.*[^0-9])[0-9]+$;\1;')"
+   local resp_code="$(echo "${data}" | sed -re 's;.*[^0-9]([0-9]+)$;\1;')"
 
-   [[ ! "$resp_code" =~ 200 ]] && {
+   [[ ! "${resp_code}" =~ 200 ]] && {
       city="$(get-ip-location | jq -r '.city')"
    }
 
-   echo "$city"
+   echo "${city}"
 }
 
 count-ips-from-tcpdump() {
@@ -46,7 +46,7 @@ count-ips-from-tcpdump() {
    # first run something like this on the server to get good sample data:
    # tcpdump -i eth0 -nnc 1000
 
-   local file="$1"
-   [[ -r "$file" ]] || { echo "file doesn't exist or is unreadable!"; return 1; }
-   sed -rne "s;.*IP $IP_REGEX\.?.*;\1;p" "$file" | sort | uniq -c | sort -h
+   local file="${1}"
+   [[ -r "${file}" ]] || { echo "file doesn't exist or is unreadable!"; return 1; }
+   sed -rne "s;.*IP ${IP_REGEX}\.?.*;\1;p" "${file}" | sort | uniq -c | sort -h
 }

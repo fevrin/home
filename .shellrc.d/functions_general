@@ -7,9 +7,9 @@
 
 is_zsh || {
    SOURCE="${BASH_SOURCE}"
-   for funcfile in $(realpath $(dirname "$SOURCE"))/functions/*; do
-      [[ -d "$funcfile" ]] && continue
-      funcname="$(sed -rne '3 s;^(function\s+)?([^#( ]+)\(\) \{$;\2;p' "$funcfile")"
+   for funcfile in $(realpath $(dirname "${SOURCE}"))/functions/*; do
+      [[ -d "${funcfile}" ]] && continue
+      funcname="$(sed -rne '3 s;^(function\s+)?([^#( ]+)\(\) \{$;\2;p' "${funcfile}")"
 
       # export all the functions here so subshells can utilize them, if needed
       # for some reason, exported pushd() causes issues in direnv-allowed directories
@@ -17,24 +17,24 @@ is_zsh || {
       # we don't want to source and export files with functions that don't match their filenames
       {
          # test conditions
-         [[ "$funcname" =~ ^${funcfile//*\/}$ ]] &&
-         [[ -r "$funcfile" ]] &&
-         file -L --mime-type "$funcfile" | grep -q 'text/x-shellscript' &&
-         bash -n "$funcfile" 2>/dev/null
+         [[ "${funcname}" =~ ^${funcfile//*\/}$ ]] &&
+         [[ -r "${funcfile}" ]] &&
+         file -L --mime-type "${funcfile}" | grep -q 'text/x-shellscript' &&
+         bash -n "${funcfile}" 2>/dev/null
       } && {
          # unset the function if it already exists so we start fresh
          # then export the function
          if is_zsh; then
-            TYPE="$(whence -w $funcname | awk '{print $2}')"
+            TYPE="$(whence -w ${funcname} | awk '{print $2}')"
             EXPORT=(export)
          else
-            TYPE="$(type -t $funcname)"
+            TYPE="$(type -t ${funcname})"
             EXPORT=(export -f)
          fi
          [[ "${TYPE}" =~ ^function$ ]] && unset -f funcname
-         . "$funcfile" &&
-         [[ ! "$funcfile" =~ pushd ]] &&
-         ${EXPORT[@]} "$funcname"
+         . "${funcfile}" &&
+         [[ ! "${funcfile}" =~ pushd ]] &&
+         ${EXPORT[@]} "${funcname}"
       }
    done
    unset funcfile funcname SOURCE TYPE EXPORT
@@ -47,7 +47,7 @@ is_zsh || {
 board-starship() {
    # this assumes there are multiple starship configuration files in the config directory
    local starship_to_board="${1}"
-   local starship_config_dir="$HOME/.config"
+   local starship_config_dir="${HOME}/.config"
    local starship_config_file="${starship_config_dir}/starship${starship_to_board}.toml"
    [[ -n "${starship_to_board}" ]] && starship_config_file="${starship_config_dir}/starship-${starship_to_board}.toml"
    local starships="$(ls -1 "${starship_config_dir}/"*starship*toml | sed -Ene 's;.*starship-([^.]+)\.toml;\1;p' | sort -u)"
@@ -210,7 +210,7 @@ kc() {
 #   echo "command = ${command}"
 #   shift
 #
-#   if [[ $# -eq 1 && $1 =~ ^[-0-9]+$ ]]; then
+#   if [[ $# -eq 1 && ${1} =~ ^[-0-9]+$ ]]; then
 #      builtin "${command}" %"${1}"
 #   elif [[ "${command}" =~ ^fg$ ]]; then
 #      builtin "${command}" %$(jobs | sed -rne 's;^\[([0-9])\] *\+.*;\1;p')
@@ -226,7 +226,7 @@ kc() {
 #}
 if is_zsh; then
    fg() {
-      if [[ $# -eq 1 && $1 =~ ^[-0-9]+$ ]]; then
+      if [[ $# -eq 1 && ${1} =~ ^[-0-9]+$ ]]; then
          builtin fg %"${1}"
       else
          # for some reason, 'jobs' sometimes doesn't print output even though it should
@@ -239,7 +239,7 @@ if is_zsh; then
    }
 
    kill() {
-      if [[ $# -eq 1 && $1 =~ ^[-0-9]+$ ]]; then
+      if [[ $# -eq 1 && ${1} =~ ^[-0-9]+$ ]]; then
          builtin kill -KILL %"${1}"
       else
          builtin kill
@@ -247,19 +247,19 @@ if is_zsh; then
    }
 
    pushd() {
-      if [[ $@ =~ ^[0-9]+$ ]]; then
-         builtin pushd -q +"$@"
+      if [[ ${@} =~ ^[0-9]+$ ]]; then
+         builtin pushd -q +"${@}"
       else
-         builtin pushd -q "$@"
+         builtin pushd -q "${@}"
       fi
       dirs
    }
 
    popd() {
-      if [[ $@ =~ ^[0-9]+$ ]]; then
-         builtin popd -q +"$@"
+      if [[ ${@} =~ ^[0-9]+$ ]]; then
+         builtin popd -q +"${@}"
       else
-         builtin popd -q "$@"
+         builtin popd -q "${@}"
       fi
       dirs
    }

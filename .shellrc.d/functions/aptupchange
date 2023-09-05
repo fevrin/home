@@ -22,7 +22,7 @@ aptupchange() {
 
       read
 
-      [[ $REPLY = "y" ]] &&
+      [[ ${REPLY} = "y" ]] &&
        aptchangelog "${package}" &&
        echo
    done

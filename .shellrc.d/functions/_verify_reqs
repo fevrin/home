@@ -14,12 +14,12 @@ _verify_reqs() {
    # call this function using one of these two forms:
    #
    # form 1:
-   # _verify_reqs $input_value1[:version_string][ $input_value2[:version_string]...] || return 1
+   # _verify_reqs ${input_value1}[:version_string][ ${input_value2}[:version_string]...] || return 1
    #
    # form 2:
    # _verify_reqs <<-EOF || return 1
-   #    $input_value1[:version_string]
-   #    [$input_value2[:version_string]...]
+   #    ${input_value1}[:version_string]
+   #    [${input_value2}[:version_string]...]
    # EOF
 
    # example:
@@ -31,8 +31,8 @@ _verify_reqs() {
    #		verbose
    #	EOF
 
-   if [[ -n "$@" ]]; then
-      declare -a requirements=($@)
+   if [[ -n "${@}" ]]; then
+      declare -a requirements=(${@})
    elif [[ ! -t 0 ]]; then
       # input isn't a terminal, i.e., use stdin
       # inspired by <https://unix.stackexchange.com/questions/484630/check-if-no-command-line-arguments-and-stdin-is-empty/484643#484643>
@@ -66,36 +66,36 @@ _verify_reqs() {
          actual_version="${needed_version}"
       else
          actual_version="$(${req%:*} --version 2>&1 | sed -rne '1s;.* ([0-9.a-z+]+\.[0-9.a-z+]+)([^0-9.a-z+].*|$);\1;p')"
-         [[ "$actual_version" ]] || actual_version="$(${req%:*} -v 2>&1 | sed -rne '1s;.* ([0-9.a-z+]+\.[0-9.a-z+]+)([^0-9.a-z+].*|$);\1;p')"
-         [[ "$actual_version" ]] || actual_version="$(${req%:*} -V 2>&1 | sed -rne '1s;.* ([0-9.a-z+]+\.[0-9.a-z+]+)([^0-9.a-z+].*|$);\1;p')"
+         [[ "${actual_version}" ]] || actual_version="$(${req%:*} -v 2>&1 | sed -rne '1s;.* ([0-9.a-z+]+\.[0-9.a-z+]+)([^0-9.a-z+].*|$);\1;p')"
+         [[ "${actual_version}" ]] || actual_version="$(${req%:*} -V 2>&1 | sed -rne '1s;.* ([0-9.a-z+]+\.[0-9.a-z+]+)([^0-9.a-z+].*|$);\1;p')"
       fi
 
       # if no version was specified, pretend the actual version is what we want
-      [[ "$needed_version" == "$req" ]] && needed_version="$actual_version"
+      [[ "${needed_version}" == "${req}" ]] && needed_version="${actual_version}"
 
       # make sure both the required command, as well as the version, if specified, are what we actually have
-      { command -V verbose 2>/dev/null | head -n1 | grep -qE 'a( shell)? function' && [[ "$needed_version" == "$actual_version" ]]; } || {
+      { command -V verbose 2>/dev/null | head -n1 | grep -qE 'a( shell)? function' && [[ "${needed_version}" == "${actual_version}" ]]; } || {
 
          if [[ -x /usr/lib/command-not-found ]]; then
-            failure_output=$'\n'"$(/usr/lib/command-not-found "$req" 2>&1 | tr '\n' '\1' | tr ' ' '\2')"
-#            failure_output="$(/usr/lib/command-not-found "$req" 2>&1 | sed -rne 's;^ *sudo apt install (.*)$;\1;p')"
+            failure_output=$'\n'"$(/usr/lib/command-not-found "${req}" 2>&1 | tr '\n' '\1' | tr ' ' '\2')"
+#            failure_output="$(/usr/lib/command-not-found "${req}" 2>&1 | sed -rne 's;^ *sudo apt install (.*)$;\1;p')"
              local separator="=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-             [[ -n "$failure_output" ]] && failure_output="$separator$failure_output$separator"
+             [[ -n "${failure_output}" ]] && failure_output="${separator}${failure_output}${separator}"
          fi
 
-         if [[ -z "$failure_output" ]]; then
-            failure_output="* $req"
+         if [[ -z "${failure_output}" ]]; then
+            failure_output="* ${req}"
          fi
-         failures+=("$failure_output")
+         failures+=("${failure_output}")
       }
 
-#      echo "req = '$req'"
+#      echo "req = '${req}'"
 #      echo "test1"
 #      echo "test3"
-#      echo "type = '$(type -t "$req"; echo $?)'"
-#      echo "actual_version = '$actual_version'"
-#      echo "needed_version = '$needed_version'"
-#      echo "failures = '$failures'"
+#      echo "type = '$(type -t "${req}"; echo $?)'"
+#      echo "actual_version = '${actual_version}'"
+#      echo "needed_version = '${needed_version}'"
+#      echo "failures = '${failures}'"
    done
 
    if [[ -n ${failures[*]} ]]; then
@@ -104,7 +104,7 @@ _verify_reqs() {
 
       local failure
       for failure in ${failures[*]}; do
-         printf "%s\n" "$failure" 2>&1 | tr '\1' '\n' | tr '\2' ' '
+         printf "%s\n" "${failure}" 2>&1 | tr '\1' '\n' | tr '\2' ' '
       done
 
       echo

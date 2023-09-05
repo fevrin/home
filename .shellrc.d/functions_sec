@@ -28,23 +28,23 @@ hash_pw() {
    EXAMPLE:
    hash_pw testpass crypt testsalt"
 
-   [[ $1 =~ -(h|-?help) ]] && echo "$help" && return
+   [[ ${1} =~ -(h|-?help) ]] && echo "${help}" && return
 
    local rand_string="$(tr -cd '[:graph:]' </dev/urandom | fold -w 12 | head -n1)"
 
    local salt=${3// /}
    local type=${2// /}
-   local password=${1// /:-$rand_string}
+   local password=${1// /:-${rand_string}}
 
-   salt=${salt:-$rand_string}
+   salt=${salt:-${rand_string}}
    type=${type:-1}
 
-   verbose 8 openssl passwd -$type -salt $salt $password
+   verbose 8 openssl passwd -${type} -salt ${salt} ${password}
 
-   if [[ "$type" == crypt ]]; then
-      openssl passwd -$type -salt $salt $password
+   if [[ "${type}" == crypt ]]; then
+      openssl passwd -${type} -salt ${salt} ${password}
    else
-      openssl passwd -$type $password
+      openssl passwd -${type} ${password}
    fi
 }
 
@@ -66,20 +66,20 @@ gen_pw() {
    -a             alphanumeric characters only
 
    EXAMPLE:
-   $FUNCNAME 15 2
+   ${FUNCNAME} 15 2
    "
 
    while getopts l:n:t:h opt; do
-      case "$opt" in
-         l) local length="$OPTARG";;
-         n) local number="$OPTARG";;
-         t) local type="$OPTARG";;
-         h) echo "$help"; return;;
+      case "${opt}" in
+         l) local length="${OPTARG}";;
+         n) local number="${OPTARG}";;
+         t) local type="${OPTARG}";;
+         h) echo "${help}"; return;;
       esac
    done
 
-   [[ $length =~ ^[0-9]{1,20}$ ]] || length=12
-   [[ $type =~ ^\[?:?[a-z]+:?\]?$ ]] || type="graph"
+   [[ ${length} =~ ^[0-9]{1,20}$ ]] || length=12
+   [[ ${type} =~ ^\[?:?[a-z]+:?\]?$ ]] || type="graph"
 #   alnum
 #   alpha
 #   blank
@@ -94,7 +94,7 @@ gen_pw() {
 #   xdigit
    number="${number:-1}"
 
-   tr -cd "[:${type}:]" </dev/urandom | fold -w $length | head -n$number | tr -d '\n'
+   tr -cd "[:${type}:]" </dev/urandom | fold -w ${length} | head -n${number} | tr -d '\n'
 }
 
 get_ssl_cert() {
@@ -103,11 +103,11 @@ get_ssl_cert() {
    openssl
 	EOF
 
-   local host="$1"
+   local host="${1}"
 
-   [[ "$host" =~ $DOMAIN_REGEX ]] || {
+   [[ "${host}" =~ ${DOMAIN_REGEX} ]] || {
       echo "error: not a valid URL:"
-      echo "$host"
+      echo "${host}"
       return 1
    }
 
@@ -116,27 +116,27 @@ get_ssl_cert() {
 
    _print_var_vals host
 
-   echo Q | openssl s_client -connect $host:443 | openssl x509 -noout -text
+   echo Q | openssl s_client -connect ${host}:443 | openssl x509 -noout -text
 }
 
 generate_luks_keyfile() {
    # from <https://github.com/thrdroom/ManualFullSystemEncryption/blob/master/encryptinstallation#L1165>
 
-   local outfile="$1"
+   local outfile="${1}"
    local count="${2:-1}"
    local bs="${3:-512}"
 
-   if [[ "$outfile" ]]; then
-      if [[ -s "$outfile" ]]; then
-         echo -n "$outfile exists. overwrite it? [y/N] "
+   if [[ "${outfile}" ]]; then
+      if [[ -s "${outfile}" ]]; then
+         echo -n "${outfile} exists. overwrite it? [y/N] "
          read
-         if [[ "$REPLY" =~ [Yy] ]]; then
-            sudo dd if=/dev/urandom of="$outfile" count="$count" bs="$bs"
+         if [[ "${REPLY}" =~ [Yy] ]]; then
+            sudo dd if=/dev/urandom of="${outfile}" count="${count}" bs="${bs}"
          else
             echo "cancelling keyfile generation"
          fi
       else
-         sudo dd if=/dev/urandom of="$outfile" count="$count" bs="$bs"
+         sudo dd if=/dev/urandom of="${outfile}" count="${count}" bs="${bs}"
       fi
    else
       echo "you must specify an output file!"
@@ -144,16 +144,16 @@ generate_luks_keyfile() {
 }
 
 ssh_key_is_encrypted() {
-   local file="$1"
+   local file="${1}"
 
-   [[ -r "$file" ]] || {
-      echo "error: file unreadable or doesn't exist: '$file'"
+   [[ -r "${file}" ]] || {
+      echo "error: file unreadable or doesn't exist: '${file}'"
       return 2
    }
 
-   grep -iq encrypted "$file" || {
-      if head -n1 "$file" | grep -iq openssh; then
-         { tail -n+2 "$file" | head -n-1 | base64 -d | strings | grep -iq bcrypt; } &&
+   grep -iq encrypted "${file}" || {
+      if head -n1 "${file}" | grep -iq openssh; then
+         { tail -n+2 "${file}" | head -n-1 | base64 -d | strings | grep -iq bcrypt; } &&
             return 0
       else
          return 1
@@ -166,11 +166,11 @@ format_external_luks_lvm() {
    # nvme designations aren't yet supported
 
    local REPLY
-   local drive="$1"
+   local drive="${1}"
    drive="${drive##/dev/}"
    declare -A drive_info=(
-      [device]="/dev/$(echo "$drive" | sed 's;[0-9]+$;;')"
-      [path]="/dev/$(if [[ "$drive" =~ [A-Za-z][0-9]$ ]]; then echo "$drive"; else echo "${drive}1";fi)"
+      [device]="/dev/$(echo "${drive}" | sed 's;[0-9]+$;;')"
+      [path]="/dev/$(if [[ "${drive}" =~ [A-Za-z][0-9]$ ]]; then echo "${drive}"; else echo "${drive}1";fi)"
       [vendor]="$(if [[ -s /sys/block/${drive}/device/vendor ]]; then cat /sys/block/${drive}/device/vendor | sed -re 's; +$;;'; else echo 'unknown_vendor'; fi)"
       [model]="$(cat /sys/block/${drive}/device/model | sed -re 's; +$;;' -e 's; ;_;g')"
    )
@@ -179,25 +179,25 @@ format_external_luks_lvm() {
    local keyfile_name
    local fs_label
    for i in vendor size model; do
-      keyfile_name+="${drive_info[$i],,}_"
+      keyfile_name+="${drive_info[${i}],,}_"
    done
    keyfile_name="${keyfile_name%%_}"
-   echo "$keyfile_name"
+   echo "${keyfile_name}"
    echo
    echo -n "is '${drive_info[path]}' the correct drive and partition? [y/N] "; read
-   [[ $REPLY =~ [Yy] ]] || {
+   [[ ${REPLY} =~ [Yy] ]] || {
       echo "please re-run with the correct drive"
       return
    }
    echo -n "is the label '${keyfile_name}' ok to use? [y/N] "; read
-   [[ $REPLY =~ [Yy] ]] || {
+   [[ ${REPLY} =~ [Yy] ]] || {
       echo -n "which name would you like to use instead? "; read
-      keyfile_name="$REPLY"
+      keyfile_name="${REPLY}"
    }
    fs_label="${keyfile_name}"
    [[ ${#fs_label} -gt 16 ]] && fs_label="${drive_info[vendor],,}_${drive_info[size],,}"
    _print_var_vals drive_info[device] drive_info[vendor] drive_info[model] drive_info[size] keyfile_name
-   echo "'${drive_info[device]}' '${drive_info[path]}''${drive_info[vendor]}' '${drive_info[model]}' '${drive_info[size]}' '$keyfile_name'"
+   echo "'${drive_info[device]}' '${drive_info[path]}''${drive_info[vendor]}' '${drive_info[model]}' '${drive_info[size]}' '${keyfile_name}'"
 
    # ensure sudo privileges are active
    sudo -v
@@ -222,7 +222,7 @@ format_external_luks_lvm() {
    sudo sgdisk --print "${drive_info[device]}"
    echo
    echo -n "would you like to reformat the drive? [y/N] "; read
-   [[ $REPLY =~ [Yy] ]] && {
+   [[ ${REPLY} =~ [Yy] ]] && {
       echo sudo sgdisk --zap-all "${drive_info[device]}" &&
       echo sudo sgdisk --new=1:0:0 "${drive_info[device]}" &&
       echo sudo sgdisk --typecode=1:8301 "${drive_info[device]}" &&
@@ -230,7 +230,7 @@ format_external_luks_lvm() {
       echo sudo sgdisk --print "${drive_info[device]}"
       echo
       echo -n "does the new partition table look correct? [y/N] "; read
-      [[ $REPLY =~ [Yy] ]] || {
+      [[ ${REPLY} =~ [Yy] ]] || {
          echo "please manually correct the partition table with \`sgdisk\`"
          echo "exiting..."
          return 1
@@ -238,7 +238,7 @@ format_external_luks_lvm() {
    }
 #   generate_luks_keyfile /etc/"${keyfile_name}"
    echo -n "ready to encrypt the drive? [y/N] "; read
-   [[ $REPLY =~ [Yy] ]] && {
+   [[ ${REPLY} =~ [Yy] ]] && {
       echo sudo cryptsetup luksFormat --verbose --verify-passphrase --type=luks2 "${drive_info[path]}" &&
       sudo cryptsetup luksFormat --verbose --verify-passphrase --type=luks2 "${drive_info[path]}" &&
       echo cryptsetup open --verbose --type=luks2 "${drive_info[path]}" "${keyfile_name}" &&
@@ -254,8 +254,8 @@ format_external_luks_lvm() {
       #   echo lvcreate -L 100%FREE -n "${keyfile_name}-lv" "${keyfile_name}-vg"
       echo mkfs.ext4 -vL "${fs_label}" /dev/mapper/"${keyfile_name}" &&
       mkfs.ext4 -vL "${fs_label}" /dev/mapper/"${keyfile_name}" &&
-      echo udisksctl mount -b /dev/mapper/"${keyfile_name}" /media/$USER/"${keyfile_name}" &&
-      udisksctl mount -b /dev/mapper/"${keyfile_name}" /media/$USER/"${keyfile_name}"
+      echo udisksctl mount -b /dev/mapper/"${keyfile_name}" /media/${USER}/"${keyfile_name}" &&
+      udisksctl mount -b /dev/mapper/"${keyfile_name}" /media/${USER}/"${keyfile_name}"
 #      sudo cryptsetup close --verbose "${keyfile_name}"
 #      sudo cryptsetup unlock -b "${drive_info[path]}"
    }
