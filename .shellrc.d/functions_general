@@ -34,7 +34,7 @@ is_zsh || {
          [[ "${TYPE}" =~ ^function$ ]] && unset -f funcname
          . "${funcfile}" &&
          [[ ! "${funcfile}" =~ pushd ]] &&
-         ${EXPORT[@]} "${funcname}"
+         "${EXPORT[@]}" "${funcname}"
       }
    done
    unset funcfile funcname SOURCE TYPE EXPORT
@@ -148,8 +148,9 @@ kgetall() {
    has kubecolor && force_colors='--force-colors'
 
    time (
-      echo "k get "${namespace[@]}" ${force_colors} \$(k api-resources "${api_resource_namespaced[@]}" --verbs=list -o name | sort | tr '\\\n' ',' | sed -re 's;,$;;g') -o wide 2> /dev/null"
-      k get "${namespace[@]}" ${force_colors} $(k api-resources "${api_resource_namespaced[@]}" --verbs=list -o name | sort | tr '\n' ',' | sed -re 's;,$;;g') -o wide 2> /dev/null
+      # shellcheck disable=SC2145
+      echo "k get ${namespace[@]} ${force_colors} \$(k api-resources ${api_resource_namespaced[@]} --verbs=list -o name | sort | tr '\\\n' ',' | sed -re 's;,$;;g') -o wide 2> /dev/null"
+      k get "${namespace[@]}" "${force_colors}" $(k api-resources "${api_resource_namespaced[@]}" --verbs=list -o name | sort | tr '\n' ',' | sed -re 's;,$;;g') -o wide 2> /dev/null
       echo
    )
 }
@@ -184,16 +185,16 @@ kc() {
    fi
 
    if [[ "${1}" =~ ^(edit)$ ]]; then
-      echo kubectl ${command} ${output_format}
+      echo "kubectl ${command} ${output_format}"
       kubectl ${command} ${output_format}
    elif has yq && [[ "${USE_YAML}" =~ ^TRUE$ ]]; then
-      echo yq -C \<\(kubectl ${command} ${output_format} \) \| less
+      echo "yq -C <(kubectl ${command} ${output_format}) | less"
       yq -C <(kubectl ${command} ${output_format}) | less
    elif has kubecolor; then
-      echo kubecolor ${command} ${output_format} --force-colors \| less
+      echo "kubecolor ${command} ${output_format} --force-colors \| less"
       kubecolor ${command} ${output_format} --force-colors | less
    else
-      echo kubectl ${command} ${output_format} \| less
+      echo "kubectl ${command} ${output_format} \| less"
       kubectl ${command} ${output_format} | less
    fi
 }
@@ -247,19 +248,19 @@ if is_zsh; then
    }
 
    pushd() {
-      if [[ ${@} =~ ^[0-9]+$ ]]; then
-         builtin pushd -q +"${@}"
+      if [[ "${1}" =~ ^[0-9]+$ ]]; then
+         builtin pushd -q +"${1}"
       else
-         builtin pushd -q "${@}"
+         builtin pushd -q "${1}"
       fi
       dirs
    }
 
    popd() {
-      if [[ ${@} =~ ^[0-9]+$ ]]; then
-         builtin popd -q +"${@}"
+      if [[ "${1}" =~ ^[0-9]+$ ]]; then
+         builtin popd -q +"${1}"
       else
-         builtin popd -q "${@}"
+         builtin popd -q "${1}"
       fi
       dirs
    }

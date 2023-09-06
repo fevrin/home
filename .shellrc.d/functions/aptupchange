@@ -12,17 +12,17 @@ aptupchange() {
 
    echo "packages to be upgraded:"
    local package
-   for package in ${packages[@]}; do
+   for package in "${packages[@]}"; do
       echo "${package}"
    done
    echo
 
-   for package in ${packages[@]}; do
+   for package in "${packages[@]}"; do
       echo -n "view changelog for '${package}'? [y/N]: "
 
       read
 
-      [[ ${REPLY} = "y" ]] &&
+      [[ "${REPLY}" = "y" ]] &&
        aptchangelog "${package}" &&
        echo
    done

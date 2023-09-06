@@ -28,7 +28,7 @@ REBASE=1
 
 declare -a DIRS
 
-for arg in ${@}; do
+for arg in "${@}"; do
    if [[ -d "${arg}" ]]; then
       DIRS+=("${arg}")
    elif [[ "${arg}" =~ ^-a( |$) ]]; then

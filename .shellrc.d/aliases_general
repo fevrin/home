@@ -121,7 +121,9 @@ alias apt-history='sed -re "s;\), ([a-z]);)\n\1;g" -e "s;^(Install|Upgrade): ;\1
 # from <https://unix.stackexchange.com/questions/152299/how-to-get-memory-usedram-used-using-linux-command/152301#152301>
 # this is obsolete in procps version >3.3.9.9, which shows an "available" column:
 # <https://bugzilla.redhat.com/show_bug.cgi?id=1158828>
+# shellcheck disable=SC2142
 alias calculate-free-mem='free | awk '\''FNR == 3 {printf "%0.2f%%\n",$4/($3+$4)*100}'\'''
+# shellcheck disable=SC2142
 alias calculate-used-mem='free | awk '\''FNR == 3 {printf "%0.2f%%\n",$3/($3+$4)*100}'\'''
 
 # make the output of 'dirs' more readable
@@ -167,6 +169,7 @@ alias kdev='export KUBECONFIG=${HOME}/.kube/dev_config; board-starship k8s-dev; 
 alias kprod='export KUBECONFIG=${HOME}/.kube/main_config; board-starship k8s-prod'
 alias kend='unset KUBECONFIG; if (vpn-list | grep -q "Client connected"); then vpn-stop; fi; board-starship main'
 
+# shellcheck disable=SC2142
 alias kcc='k config get-contexts | awk "NR==1{print \$2\"\t\"\$3\"\t\"\$5};{ if(\$1 ~ /\*/){print \$2\"\t\"\$3\"\t\"\$5} }" | column -t'
 
 # inspired by <https://kubernetes.io/docs/reference/kubectl/cheatsheet/>
@@ -183,8 +186,10 @@ alias vpn-start='if has openvpn3; then echo openvpn3 session-start --config ~/.c
 
 alias vpn-list='if has openvpn3; then { echo openvpn3 sessions-list; openvpn3 sessions-list; }; else echo "${BOLD}${RED}error:${END_COLOR} \"openvpn3\" not found"; fi'
 
+# shellcheck disable=SC2142
 alias vpn-stop='if has openvpn3; then for session_path in $(openvpn3 sessions-list | awk "{ if(\$0 ~ /Path:/){print \$2} else if(\$0 ~ /No sessions available/){print \"none\"} }"); do if [[ "${session_path}" =~ ^none$ ]]; then echo "No sessions available"; else echo openvpn3 session-manage --disconnect --session-path ${session_path}; openvpn3 session-manage --disconnect --session-path "${session_path}"; fi; done; echo openvpn3 session-manage --cleanup; openvpn3 session-manage --cleanup; unset session_path; else echo "${BOLD}${RED}error:${END_COLOR} \"openvpn3\" not found"; fi'
 
+# shellcheck disable=SC2142
 alias vpn-reset='if has openvpn3; then session_path="$(openvpn3 sessions-list | awk "{ if(\$0 ~ /Path:/){print \$2} else if(\$0 ~ /No sessions available/){print \"none\"} }")"; if [[ $(echo "${session_path}" | wc -l) -eq 0 ]]; then vpn-start; elif [[ $(echo "${session_path}" | wc -l) -eq 1 ]]; then echo openvpn3 session-manage --restart --path "${session_path}"; openvpn3 session-manage --restart --path "${session_path}"; else vpn-stop && vpn-start; fi; unset session_path; else echo "${BOLD}${RED}error:${END_COLOR} \"openvpn3\" not found"; fi'
 
 ##########################################################

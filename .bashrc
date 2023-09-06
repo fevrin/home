@@ -46,6 +46,7 @@ for completion_file in \
             [[ "${REPLY}" =~ ^n$ ]] || {
                sudo ln -s "${completion_file}" "${completion_link}" || {
                   # or source it directly if that doesn't work
+                  # shellcheck source=/dev/null
                   . "${completion_file}"
                }
             }

@@ -31,7 +31,7 @@ _verify_reqs() {
    #		verbose
    #	EOF
 
-   if [[ -n "${@}" ]]; then
+   if [[ "${#@}" -gt 0 ]]; then
       declare -a requirements=(${@})
    elif [[ ! -t 0 ]]; then
       # input isn't a terminal, i.e., use stdin
