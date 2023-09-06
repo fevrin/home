@@ -12,7 +12,7 @@ PRINT_ALL_FILES: true
 
 ACTION_ACTIONLINT_ARGUMENTS: -shellcheck= -ignore 'property "get-changed-files" is not defined in object type {}'
 
-BASH_SHELLCHECK_ARGUMENTS: -W 20 --color=always -S error
+BASH_SHELLCHECK_ARGUMENTS: -W 20 --color=always --severity=error
 BASH_SHELLCHECK_FILE_NAMES_REGEX:
   - "[-a-z_.0-9]+"
 BASH_SHELLCHECK_FILTER_REGEX_INCLUDE: (scripts|\.(shellrc\.d/|gitconfig\.d/git-sync.sh|githooks|(bash|mac|apple_keyboard_mod\.)rc))

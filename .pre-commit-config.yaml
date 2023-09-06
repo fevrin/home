@@ -62,7 +62,7 @@ repos:
           - zsh
         args:
           # more args in .shellcheckrc
-          - --severity=warning
+          - --severity=error
           - --color=always
   - repo: https://github.com/scop/pre-commit-shfmt
     rev: v3.7.0-1
