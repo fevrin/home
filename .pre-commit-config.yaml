@@ -52,7 +52,7 @@ repos:
         args:
           - --config
           - .prettierrc.yaml
-          - --list-different
+          - --write
           - --ignore-unknown
   - repo: https://github.com/koalaman/shellcheck-precommit
     rev: v0.9.0
