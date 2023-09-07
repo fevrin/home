@@ -45,7 +45,7 @@ yessh() {
       while [[ $# -ge 1 ]]; do
          local arg="$1"
          verbose 8 "arg = $arg"
-         verbose 8 "\$@ = '$@'"
+         verbose 8 "\$* = '$*'"
          case $arg in
             -p|--port)
                shift
