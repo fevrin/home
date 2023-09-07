@@ -120,7 +120,8 @@ get_ssl_cert() {
 }
 
 generate_luks_keyfile() {
-   # from <https://github.com/thrdroom/ManualFullSystemEncryption/blob/master/encryptinstallation#L1165>
+   # this link now returns a 404, as of 2023
+   # from <https://github.com/thrdroom/ManualFullSystemEncryption/blob/fb60c955355960d7a9411d318e651afc6e9012a8/encryptinstallation#L1165>
 
    local outfile="${1}"
    local count="${2:-1}"
