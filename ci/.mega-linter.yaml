@@ -1,10 +1,10 @@
 ---
 ENABLE_LINTERS:
-   - ACTION_ACTIONLINT
-   - SPELL_MISSPELL
-   - YAML_V8R
-   - BASH_SHELLCHECK
-   - BASH_SHFMT
+  - ACTION_ACTIONLINT
+  - SPELL_MISSPELL
+  - YAML_V8R
+  - BASH_SHELLCHECK
+  - BASH_SHFMT
 DISABLE_LINTERS:
   - SPELL_CSPELL
 
@@ -14,16 +14,16 @@ ACTION_ACTIONLINT_ARGUMENTS: -shellcheck= -ignore 'property "get-changed-files" 
 
 BASH_SHELLCHECK_ARGUMENTS: -W 50 --color=always --severity=error
 BASH_SHELLCHECK_FILE_NAMES_REGEX:
-  - "[-a-z_.0-9]+"
+  - '[-a-z_.0-9]+'
 BASH_SHELLCHECK_FILTER_REGEX_INCLUDE: (scripts|\.(shellrc\.d/|gitconfig\.d/git-sync.sh|githooks|(bash|mac|apple_keyboard_mod\.)rc))
 BASH_SHELLCHECK_PRE_COMMANDS:
   - command: ln -s ci/.shellcheckrc . # necessary since shellcheck doesn't let you speconfig the config file
-    cwd: "workspace"
+    cwd: 'workspace'
 
 MAKEFILE_CHECKMAKE_CONFIG_FILE: ci/.checkmake.ini
 MARKDOWN_MARKDOWNLINT_CONFIG_FILE: ci/.markdownlint.yaml
 
-REPOSITORY_CHECKOV_ARGUMENTS: "--skip-check CKV_GHA_7"
+REPOSITORY_CHECKOV_ARGUMENTS: '--skip-check CKV_GHA_7'
 REPOSITORY_CHECKOV_CONFIG_FILE: ci/.checkov.yaml
 
 YAML_V8R_FILTER_REGEX_EXCLUDE: pre-commit.ya?ml
