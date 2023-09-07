@@ -18,14 +18,6 @@ on:
         options:
           - true
           - false
-#     LINT:
-#       description: 'Enables MegaLinter linting'
-#       required: false
-#       default: false
-#       type: choice
-#       options:
-#         - true
-#         - false
   push:
     branches:
       - $GITHUB_BASE_REF
@@ -94,7 +86,6 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
-#   if: github.event.inputs.LINT == 'true' || github.event.inputs.LINT == 1
     steps:
       - uses: actions/checkout@v4
         env:
