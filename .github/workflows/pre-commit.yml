@@ -94,7 +94,7 @@ jobs:
           fetch-depth: $CHECKOUT_DEPTH
 
       - name: MegaLinter
-        uses: oxsecurity/megalinter/flavors/cupcake@fda6ac3a38be0e969820709ac16e442464e5a035 # v6.19.0
+        uses: oxsecurity/megalinter/flavors/cupcake@fda6ac3a38be0e969820709ac16e442464e5a035 # v7.3.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MEGALINTER_CONFIG: ci/.mega-linter.yaml
