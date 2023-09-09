@@ -78,6 +78,11 @@ repos:
             #          - --simplify         # simplify the code
             #          - --minify           # minify the code to reduce its size (implies -s)
             #          - --diff             # error with a diff when the formatting differs
+  - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
+    rev: b3e3a39d35aee80c3ed21255fd5816f3752039d1 # v2.7.2
+    hooks:
+      - id: editorconfig-checker
+        alias: ec
   - repo: https://github.com/hadolint/hadolint # for linting Dockerfiles
     # there's a breaking issue:
     # https://github.com/hadolint/hadolint/issues/886
