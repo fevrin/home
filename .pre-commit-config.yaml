@@ -83,6 +83,9 @@ repos:
     hooks:
       - id: editorconfig-checker
         alias: ec
+        args:
+          - -config
+          - ci/.ecrc.json
   - repo: https://github.com/hadolint/hadolint # for linting Dockerfiles
     # there's a breaking issue:
     # https://github.com/hadolint/hadolint/issues/886

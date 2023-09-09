@@ -73,7 +73,7 @@ indent_size = 4
 indent_size = 4
 
 # documentation, utils
-[*.{md,mdx,diff}]
+[*.{md{,.tpl},mdx,diff}]
 trim_trailing_whitespace = false
 
 # windows shell scripts
