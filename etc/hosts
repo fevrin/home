@@ -4,7 +4,7 @@
 # basic measure against some common ads
 0.0.0.0     demdex.net # needed for parts of cvs.com
 #0.0.0.0     tags.tiqcdn.com # needed for cvs.com
-#0.0.0.0     4ess7j1u2mby13zged3ijufo-wpengine.netdna-ssl.com # needed for https://www.financialplanningfortcollins.com/nso-iso-rsu-espp-esop-equity-compensation/
+#0.0.0.0     4ess7j1u2mby13zged3ijufo-wpengine.netdna-ssl.com # needed for https://www.financialplanningfortcollins.com/nso-iso-rsu-espp-esop-equity-compensation/ # editorconfig-checker-disable-line
 0.0.0.0     0cf.io
 0.0.0.0     1040.com
 0.0.0.0     25.at.atwola.com
@@ -147,7 +147,8 @@
 
 # added 2022-11-11
 # from <https://github.com/d3ward/toolz/blob/master/resources/adblock/data.js>
-# curl -sL https://raw.githubusercontent.com/d3ward/toolz/master/resources/adblock/data.js | sed -e 's;,;\n;g' | sed -rne 's;.*https://([^/:"]+).*;\1;p' | sort -u
+# curl -sL https://raw.githubusercontent.com/d3ward/toolz/master/resources/adblock/data.js | sed -e 's;,;\n;g' | \
+# sed -rne 's;.*https://([^/:"]+).*;\1;p' | sort -u
 0.0.0.0     ads.google.com
 0.0.0.0     adservetx.media.net
 0.0.0.0     adtago.s3.amazonaws.com

@@ -13,7 +13,8 @@ These files set up functions that offer ways to automate some repetitive work ta
 
 * Bash version 4.4.19 or higher
 
-If used within OSX/macOS, you may have to install equivalent Linux equivalents of core utilities (such as via Homebrew) and alias them to be callable via their typical name (rather than what Homebrew may install, like `ggrep` instead of just `grep`).
+If used within OSX/macOS, you may have to install equivalent Linux equivalents of core utilities (such as via Homebrew) and alias them to be callable
+via their typical name (rather than what Homebrew may install, like `ggrep` instead of just `grep`).
 
 ## Usage
 

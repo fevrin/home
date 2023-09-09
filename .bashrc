@@ -28,7 +28,8 @@ shopt -s checkwinsize
 # the default per-user bash completion files go in ~/.local/share/bash-completions/
 # https://github.com/scop/bash-completion/blob/master/README.md#faq
 
-# it seems the `git` package sets up only /etc/bash_completion.d/git-prompt (which sources /usr/lib/git-core/git-sh-prompt), but not an equivalent for git-completion.bash, which is needed for additional completions, like branch names
+# it seems the `git` package sets up only /etc/bash_completion.d/git-prompt (which sources /usr/lib/git-core/git-sh-prompt), but not an equivalent for
+# git-completion.bash, which is needed for additional completions, like branch names
 for completion_file in \
    /usr/lib/git-core/git-sh-prompt \
    /usr/local/git/contrib/completion/git-prompt.sh \
@@ -87,8 +88,8 @@ for file in ${files_to_source[*]}; do
    # account for the special config file named "remote", which should
    # be sourced only on remote systems accessed via ssh
    [[ "${file}" =~ remote ]] &&
-    [[ -z "${SSH_CLIENT}" || -z "${SSH_TTY}" || -z "${SSH_CONNECTION}" ]] &&
-    continue
+      [[ -z "${SSH_CLIENT}" || -z "${SSH_TTY}" || -z "${SSH_CONNECTION}" ]] &&
+      continue
 
    [[ -d "${file}" ]] && continue
 
@@ -173,7 +174,8 @@ shopt -s histappend
 
 export HISTFILE="${HOME}"/.bash_history
 
-# this must be set really high or not set at all; it seems as of bash version 4.4.19(1)-release, having the history file larger than this size causes a segfault
+# this must be set really high or not set at all; it seems as of bash version 4.4.19(1)-release, having the history file larger than this size causes
+# a segfault
 export HISTFILESIZE="${HISTSIZE}"
 
 # ignore same successive entries and delete duplicate lines in history.
@@ -186,16 +188,19 @@ export HISTTIMEFORMAT="%Y-%m-%d %H:%M:%S "
 # the `ls -lO` part is a Mac OS X compatibility crutch
 if [[ "${MAC_OS_X}" -eq 0 ]]; then
    [[ $(has lsattr) && $(lsattr "${HOME}"/.bash_history) =~ ^.....a.*$ ]] ||
+      # editorconfig-checker-disable
       cat <<-EOF
-		warning: "${HOME}"/.bash_history is not in append-only mode!
+		warning: ${HOME}/.bash_history is not in append-only mode!
 
 		enable that with this command:
 
-		   sudo chattr +a "${HOME}"/.bash_history
+		   sudo chattr +a ${HOME}/.bash_history
 
 		EOF
+      # editorconfig-checker-enable
 else
    [[ ! $(ls -lO "${HOME}"/.bash_history) =~ uappnd ]] ||
+      # editorconfig-checker-disable
       cat <<-EOF
 		warning: "${HOME}"/.bash_history is not in append-only mode!
 
@@ -204,14 +209,17 @@ else
 		   sudo chflags uappend "${HOME}"/.bash_history
 
 		EOF
+      # editorconfig-checker-enable
 fi
 
 # inform the user if the ~/.bash_history file is greater than or equal to the ${HISTFILESIZE} value for rotation
-[[ $(wc -l "${HOME}"/.bash_history | cut -d' ' -f1) -ge "${HISTFILESIZE}" ]] && echo "consider making a new ${HOME}/.bash_history file, as it's >= to ${HISTFILESIZE} lines"
+[[ $(wc -l "${HOME}"/.bash_history | cut -d' ' -f1) -ge "${HISTFILESIZE}" ]] &&
+   echo "consider making a new ${HOME}/.bash_history file, as it's >= to ${HISTFILESIZE} lines"
 
 # don't remember basic/common commands, including all bash aliases
-# i really need to make a level 0/level 6 script using perl or something to have greater control over regexes; plus, it can be annoying to have the commands immediately removed; lastly, duplicates aren't always removed like they should be
-HISTIGNORE="bg:cd *:crontab -?:df -h:echo:edit-history:fg*:git co master:jobs:kill*:ls:list -tr:ping 8.8.8.8:popd:pushd:pwd:screen -r:screen -t *:vim:vim nodes:w"
+# i really need to make a level 0/level 6 script using perl or something to have greater control over regexes; plus, it can be annoying to have the
+# commands immediately removed; lastly, duplicates aren't always removed like they should be
+HISTIGNORE="bg:cd *:crontab -?:df -h:echo:edit-history:fg*:git co master:jobs:kill*:ls:list -tr:ping 8.8.8.8:popd:pushd:pwd:screen -r:screen -t *:vim:vim nodes:w" # editorconfig-checker-disable-line
 
 # add git aliases
 HISTIGNORE+=":$(
@@ -238,8 +246,8 @@ HISTIGNORE+=":$(
    )"
    trailing_char="*" # ignore all aliases
    alias |
-    # list aliases to exclude from HISTIGNORE
-    grep -vf <(cat <<-EOF | xargs -I{} echo ^alias {}
+   # list aliases to exclude from HISTIGNORE
+   grep -vf <(cat <<-EOF | xargs -I{} echo ^alias {}
 		aptinstall
 		aptsearch
 		aptshow
@@ -262,7 +270,7 @@ HISTIGNORE+=":$(
 )"
 
 export HISTIGNORE
-#export HISTIGNORE="bg:cd *:crontab -?:df -h:echo:edit-history:fg*:$([[ -x $(which git) ]] && { for i in $(git config -l | sed -rne 's;^alias\.([^=]+)=.*;\1;p'); do value+="git ${i}:"; done; echo "${value%:}"; }):git co master:jobs:kill*:ls:list -tr:ping 8.8.8.8:popd:pushd:pwd:screen -r:screen -t *:vim:vim nodes:w:$(alias | sed -rne 's;^alias ([^=]*)=.*;:\1?;p' | sort | tr -d '\n' | sed -e 's;^:;;')"
+#export HISTIGNORE="bg:cd *:crontab -?:df -h:echo:edit-history:fg*:$([[ -x $(which git) ]] && { for i in $(git config -l | sed -rne 's;^alias\.([^=]+)=.*;\1;p'); do value+="git ${i}:"; done; echo "${value%:}"; }):git co master:jobs:kill*:ls:list -tr:ping 8.8.8.8:popd:pushd:pwd:screen -r:screen -t *:vim:vim nodes:w:$(alias | sed -rne 's;^alias ([^=]*)=.*;:\1?;p' | sort | tr -d '\n' | sed -e 's;^:;;')" # editorconfig-checker-disable-line
 
 ##########################################################
 
@@ -277,7 +285,7 @@ fi
 
 # Comment in the above and uncomment this below for a color prompt
 if [[ $(id -u) -eq 0 ]]; then
-   PS1='\n${debian_chroot:+(${debian_chroot})}\033[00;00m\[\033[01;31m\]\u\[\033[01;33m\]@\H\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\n\[\033[01;34m\]\!\[\033[00m\]\$ '
+   PS1='\n${debian_chroot:+(${debian_chroot})}\033[00;00m\[\033[01;31m\]\u\[\033[01;33m\]@\H\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\n\[\033[01;34m\]\!\[\033[00m\]\$ ' # editorconfig-checker-disable-line
 else
    if [[ -f /usr/lib/git-core/git-sh-prompt || -f /usr/local/git/contrib/completion/git-prompt.sh ]]; then
       export GIT_PS1_SHOWDIRTYSTATE=true
@@ -307,7 +315,8 @@ else
 
       # append history commands to ~/.bash_history as they are executed;
       #from <http://www.ukuug.org/events/linux2003/papers/bash_tips/>.  also, read in latest bash history
-      # inspired by <https://unix.stackexchange.com/questions/18212/bash-history-ignoredups-and-erasedups-setting-conflict-with-common-history/18443#18443>
+      # inspired by
+      # <https://unix.stackexchange.com/questions/18212/bash-history-ignoredups-and-erasedups-setting-conflict-with-common-history/18443#18443>
       # that recommends the following, which seems to just endlessly add duplicate commands to individual entries:
       # per the git-sh-prompt file notes, __git_ps1 automatically sets PS1 with the provided values
       # history -n;
@@ -327,14 +336,14 @@ else
       unset hostname_color
 
       read -r -d '' PROMPT_COMMAND <<-EOF
-			history -n; # Read the history lines not already read from the history file into the current history list. These are lines appended to the history file since the beginning of the current bash session.
+			history -n; # Read the history lines not already read from the history file into the current history list. These are lines appended to the history file since the beginning of the current bash session. # editorconfig-checker-disable-line
 			history -w; # Write the current history list to the history file, overwriting the history file's contents.
 			history -c; # Clear the history list by deleting all the entries.
 			history -r; # Read the contents of the history file and append them to the current history list.
 			${PROMPT_COMMAND}
 		EOF
       # originally:
-      # history -a; # Append the 'new' history lines to the history file. These are history lines entered since the beginning of the current bash session, but not already appended to the history file.
+      # history -a; # Append the 'new' history lines to the history file. These are history lines entered since the beginning of the current bash session, but not already appended to the history file. # editorconfig-checker-disable-line
       # history -c; # Clear the history list by deleting all the entries.
       # history -r; # Read the contents of the history file and append them to the current history list.
       # history -w; # Write the current history list to the history file, overwriting the history file's contents.

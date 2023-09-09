@@ -34,7 +34,8 @@ ifeq ($(notdir $(CURDIR)), .ssh)
       echo $(DIR) "doesn't exist!"; \
    fi
 else
-   @# Makefile path determination from <https://stackoverflow.com/questions/18136918/how-to-get-current-relative-directory-of-your-makefile/18137056#18137056>
+   @# Makefile path determination from
+   @#<https://stackoverflow.com/questions/18136918/how-to-get-current-relative-directory-of-your-makefile/18137056#18137056>
    @$(MAKE) -sC .ssh -f $(abspath $(lastword $(MAKEFILE_LIST))) ssh
 endif
 
@@ -64,7 +65,8 @@ ifeq ($(notdir $(CURDIR)), .gitconfig.d)
       echo $(DIR) "doesn't exist!"; \
    fi
 else
-   @# Makefile path determination from <https://stackoverflow.com/questions/18136918/how-to-get-current-relative-directory-of-your-makefile/18137056#18137056>
+   @# Makefile path determination from
+   @#<https://stackoverflow.com/questions/18136918/how-to-get-current-relative-directory-of-your-makefile/18137056#18137056>
    @$(MAKE) -sC .gitconfig.d -f $(abspath $(lastword $(MAKEFILE_LIST))) git
 endif
 
@@ -139,7 +141,7 @@ check-md-links: $(shell find -regex '.*\.md\(\.tpl\)?') ## Miscellaneous: checks
    fi
 
 .PHONY: generate-docs
-generate-docs: check-md-links $(shell find -regex '.*\.md\(\.tpl\)?') ## Generators: Regenerates Markdown files (including table of contents and sourcing Makefile help)
+generate-docs: check-md-links $(shell find -regex '.*\.md\(\.tpl\)?') ## Generators: Regenerates Markdown files (including ToC and 'make help' output)
    -@echo
    -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
    -@echo $(shell echo '$@' | tr '[:lower:]' '[:upper:]')
