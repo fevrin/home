@@ -32,7 +32,7 @@ dev              runs 'git-hooks'
 .git/hooks/%     creates symlinks for all git hooks from '.githooks' to '.git/hooks'
 
 [Generators]
-generate-docs    Regenerates Markdown files (including table of contents and sourcing Makefile help)
+generate-docs    Regenerates Markdown files (including ToC and 'make help' output)
 git              generates "${HOME}/.gitconfig" file using 'includes' directives
 ssh              generates "${HOME}/.ssh/config" file using 'includes' directives
 
