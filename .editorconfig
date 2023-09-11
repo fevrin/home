@@ -57,6 +57,7 @@ quote_type = single
 
 [*.js{,on}]
 indent_size = 2
+max_line_length = unset
 quote_type = single
 
 # go
@@ -74,6 +75,7 @@ indent_size = 4
 
 # documentation, utils
 [*.{md{,.tpl},mdx,diff}]
+indent_size = unset
 trim_trailing_whitespace = false
 
 # windows shell scripts
