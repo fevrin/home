@@ -172,11 +172,18 @@ format_external_luks_lvm() {
    declare -A drive_info=(
       [device]="/dev/$(echo "${drive}" | sed 's;[0-9]+$;;')"
       [path]="/dev/$(if [[ "${drive}" =~ [A-Za-z][0-9]$ ]]; then echo "${drive}"; else echo "${drive}1";fi)"
-      [vendor]="$(if [[ -s /sys/block/${drive}/device/vendor ]]; then cat /sys/block/${drive}/device/vendor | sed -re 's; +$;;'; else echo 'unknown_vendor'; fi)"
+      [vendor]="$(
+         if [[ -s /sys/block/${drive}/device/vendor ]]; then
+            cat /sys/block/${drive}/device/vendor | sed -re 's; +$;;'
+         else
+            echo 'unknown_vendor'
+         fi
+      )"
       [model]="$(cat /sys/block/${drive}/device/model | sed -re 's; +$;;' -e 's; ;_;g')"
    )
    drive_info[size_actual]="$(lsblk --nodeps --noheadings --output SIZE "${drive_info[device]}" | tr -d ' ' | sed -re 's;$;B;')"
-   drive_info[size]="$(echo "${drive_info[size_actual]}" | egrep -o '[0-9.]+' | awk '{ print int($1 + 0.5) }')$(echo "${drive_info[size_actual]}" | egrep -o '[A-Za-z]+$')"
+   drive_info[size]="$(echo "${drive_info[size_actual]}" | egrep -o '[0-9.]+' | awk '{ print int($1 + 0.5) }')"
+   drive_info[size]+="$(echo "${drive_info[size_actual]}" | egrep -o '[A-Za-z]+$')"
    local keyfile_name
    local fs_label
    for i in vendor size model; do
@@ -246,13 +253,13 @@ format_external_luks_lvm() {
       cryptsetup open --verbose --type=luks2 "${drive_info[path]}" "${keyfile_name}" &&
       echo cryptsetup luksDump "${drive_info[path]}" &&
       cryptsetup luksDump "${drive_info[path]}" &&
-      #   sudo cryptsetup luksAddKey "${drive_info[path]}" /etc/crypt."${keyfile_name}"
-      #   sudo chown "${USER}" /etc/crypt."${keyfile_name}"
-      #   sudo cryptsetup luksHeaderBackup "${drive_info[path]}" --header-backup-file=/etc/crypt."${keyfile_name}".header
-      #   echo "${keyfile_name} UUID=$(blkid -o value -s PARTUUID ${drive_info[path]}) /etc/crypt.${keyfile_name} luks,discard,noearly" #   >>/etc/crypttab
-      #   echo pvcreate /dev/mapper/"${keyfile_name}"
-      #   echo vgcreate "${keyfile_name}-vg" /dev/mapper/"${keyfile_name}"
-      #   echo lvcreate -L 100%FREE -n "${keyfile_name}-lv" "${keyfile_name}-vg"
+      # sudo cryptsetup luksAddKey "${drive_info[path]}" /etc/crypt."${keyfile_name}"
+      # sudo chown "${USER}" /etc/crypt."${keyfile_name}"
+      # sudo cryptsetup luksHeaderBackup "${drive_info[path]}" --header-backup-file=/etc/crypt."${keyfile_name}".header
+      # echo "${keyfile_name} UUID=$(blkid -o value -s PARTUUID ${drive_info[path]}) /etc/crypt.${keyfile_name} luks,discard,noearly" #>>/etc/crypttab
+      # echo pvcreate /dev/mapper/"${keyfile_name}"
+      # echo vgcreate "${keyfile_name}-vg" /dev/mapper/"${keyfile_name}"
+      # echo lvcreate -L 100%FREE -n "${keyfile_name}-lv" "${keyfile_name}-vg"
       echo mkfs.ext4 -vL "${fs_label}" /dev/mapper/"${keyfile_name}" &&
       mkfs.ext4 -vL "${fs_label}" /dev/mapper/"${keyfile_name}" &&
       echo udisksctl mount -b /dev/mapper/"${keyfile_name}" /media/${USER}/"${keyfile_name}" &&

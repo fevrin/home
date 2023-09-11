@@ -98,7 +98,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MEGALINTER_CONFIG: ci/.mega-linter.yaml
-          VALIDATE_ALL_CODEBASE: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }} # Validates all source when push on main, else just the git diff with main. Override with true if you always want to lint all sources
+          # Validates all source when push on main, else just the git diff with main. Override with true if you always want to lint all sources
+          VALIDATE_ALL_CODEBASE: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
 
   pre-commit:
     runs-on: ubuntu-latest
@@ -238,7 +239,7 @@ jobs:
           --decorate
           --date=relative
           --color
-          --format=format:'%C(bold blue)%h%C(reset) - %C(bold yellow)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(auto)%d%C(reset)'
+          --format=format:'%C(bold blue)%h%C(reset) - %C(bold yellow)(%ar)%C(reset) %C(white)%s %C(dim white)- %an%C(auto)%d' --all
           --all
           -50
 

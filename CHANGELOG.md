@@ -17,7 +17,8 @@
 ### 2023-07-04 (Tue, Jul 04, 2023)
 * refactor: update 'board-starship()' logic and add upcoming zsh config change
 
-* 'cmd_hist_num_zsh' needs 1 or 2 subtracted from it to get the accurate history number, but the present command isn't cooperating when executed by starship
+* 'cmd_hist_num_zsh' needs 1 or 2 subtracted from it to get the accurate history number, but the present command isn't cooperating when executed by
+  starship
 
 ### 2023-07-06 (Thu, Jul 06, 2023)
 * fix: update 'refresh-main-branch' to set the main branch if needed
@@ -1132,7 +1133,8 @@ committing
     \* simplified duplicate directory check  
     \+ added another conditional to short circuit exit if the user provides an invalid directory  
      yessh():  
-    \+ added functionality to just copy the config over to the target server as a temporary file if it's of a certain size (as was done before the base64 technique, though we now use base64 for it, too)  
+    \+ added functionality to just copy the config over to the target server as a temporary file if it's of a certain size (as was done before the
+       base64 technique, though we now use base64 for it, too)  
     \* updated config transfer to incorporate bzip2 compression to further reduce network bandwidth usage  
   \+ sql-tab-to-jira-tab(): added  
   \+ generate_luks_keyfile(): moved from lib_sec  
@@ -1249,7 +1251,8 @@ committing
   \* yessh(): updated to include additional usage information
 
    .bashrc  
-  \- removed HISTFILESIZE assignment since that seems to bomb out Bash in some cases; it seems as of bash version 4.4.19(1)-release, having the history file larger than this size causes a segfault
+  \- removed HISTFILESIZE assignment since that seems to bomb out Bash in some cases; it seems as of bash version 4.4.19(1)-release, having the
+     history file larger than this size causes a segfault
 
 
 ## v1.6.3
@@ -1315,7 +1318,8 @@ committing
 ### Wed Mar 6 23:36:26 2019 -0500
 
    .bash_aliases  
-  \* changed the find-broken-links alias to be seek-broken-links() for more flexibility (Bash doesn't like a function starting with the name of a command when it's separated by dashes instead of underscores, it seems)
+  \* changed the find-broken-links alias to be seek-broken-links() for more flexibility (Bash doesn't like a function starting with the name of a
+     command when it's separated by dashes instead of underscores, it seems)
 
 
 ## v.1.5.7

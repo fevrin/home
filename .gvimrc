@@ -6,7 +6,8 @@ nmap <c-q> :q<cr> # make closing tabs more easy
 
 highlight normal guifg=#00ff00
 
-source $VIMRUNTIME/mswin.vim " from <https://superuser.com/questions/10588/how-to-make-cut-copy-paste-in-gvim-on-ubuntu-work-with-ctrlx-ctrlc-ctrlv#answer-10604>
+" from <https://superuser.com/questions/10588/how-to-make-cut-copy-paste-in-gvim-on-ubuntu-work-with-ctrlx-ctrlc-ctrlv#answer-10604>
+source $VIMRUNTIME/mswin.vim
 behave mswin
 
 
@@ -17,7 +18,8 @@ if has("gui")
   iunmap <C-F>
   cunmap <C-F>
 
-" the below can't be used since apparently, vim receives the same key codes for the letters, regardless if Shift was pressed, so it can't distinguish this
+" the below can't be used since apparently, vim receives the same key codes for the letters, regardless if Shift was pressed, so it can't distinguish
+" between them
 " <https://vi.stackexchange.com/questions/4290/can-i-map-a-ctrl-upper-case-letter-separately-from-ctrl-lower-case-letter/4291#4291>
 
 "  " CTRL-Shift-X is Cut
@@ -36,7 +38,10 @@ if has("gui")
 "  imap <C-S-V>		"+gP
 endif
 
-"au BufWritePre /tmp/pentadactyl.txt write! $HOME/documents/work-related/tmp/pentadactyl-lastedit " from <https://code.google.com/p/dactyl/issues/detail?id=435> so that computer freezes do not permanently lose pentadactyl drafts.  this is a work-around for changing pentadactyl's tmp directory since I haven't found a way to do so yet.  TODO: update this so multiple drafts can be saved in separate files
+" from <https://code.google.com/p/dactyl/issues/detail?id=435> so that computer freezes do not permanently lose pentadactyl drafts.
+" this is a work-around for changing pentadactyl's tmp directory since I haven't found a way to do so yet.
+" TODO: update this so multiple drafts can be saved in separate files
+"au BufWritePre /tmp/pentadactyl.txt write! $HOME/documents/work-related/tmp/pentadactyl-lastedit
 
 " set window size since the default is woefully small
 let &lines = 60

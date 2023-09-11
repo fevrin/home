@@ -22,7 +22,8 @@ set incsearch " is; enable incremental searching
 " 4 displaying text
 set linebreak " lbr; break/wrap lines at a space (not in the middle of a word)
 "set list " ; show non-printable characters
-set listchars=eol:$,tab:^_,trail:_,multispace:\┊\ \  " lcs; strings to use in 'list' mode; 'multispace' acts as a built-in indentation guide when ':set list' is used (assuming shiftwidth=3); from <https://www.baeldung.com/linux/vim-indentation-guides#2-using-spaces-as-indentations>
+set listchars=eol:$,tab:^_,trail:_,multispace:\┊\ \  " lcs; strings to use in 'list' mode; 'multispace' acts as a built-in indentation guide when
+    "':set list' is used (assuming shiftwidth=3); from <https://www.baeldung.com/linux/vim-indentation-guides#2-using-spaces-as-indentations>
 set number " nu; enable line numbering
 au FileType help set nu " enable line number for :help windows, too, since that doesn't seem to happen automatically
 
@@ -59,9 +60,9 @@ set nospell " automatically spell-check; okay, I give up: no spell-check by defa
 set laststatus=2 "ls; statusline will always be displayed, showing modification status; Ctrl+G shows status regardless if
 "this is set or not
 
-set statusline=%f\ (bf\ #%n)\ %m\ \ ft=%y\ \ char=%b,\ %B,\ #%o,\ #%O%<%=(line\ %l/%L),(chars\ %{wordcount().chars}),%v\ \ \ \ \ \ \ %p%% "stl; determines what to show in the
-"status line; the default is:
-"statusline=%-f\ %-m%=%l,%c\ \ \ \ \ \ \ %P; help default is: statusline=%-t\ %-h%-r%=%l,%c%V\ \ \ \ \ \ \ %P
+set statusline=%f\ (bf\ #%n)\ %m\ \ ft=%y\ \ char=%b,\ %B,\ #%o,\ #%O%<%=(line\ %l/%L),(chars\ %{wordcount().chars}),%v\ \ \ \ \ \ \ %p%% "stl;
+    "determines what to show in the status line; the default is:
+    "statusline=%-f\ %-m%=%l,%c\ \ \ \ \ \ \ %P; help default is: statusline=%-t\ %-h%-r%=%l,%c%V\ \ \ \ \ \ \ %P
 
 set splitbelow "sb; new window is put below current one
 set splitright "spr; new v-window is put right of current one
@@ -83,7 +84,8 @@ map <a-v> "+gP
 set showcmd " sc; show commands in the lower-right as they are typed
 set ruler " ru; show cursor position below each window
 
-set novisualbell "vb; sets the visual bell to nothing, so no audible or visible bells are rung after an error (like Backspacing when you're at the beginning of a line)
+set novisualbell "vb; sets the visual bell to nothing, so no audible or visible bells are rung after an error (like Backspacing when you're at the
+    "beginning of a line)
 "set t_vb=        " sets the visual bell to nothing, but needs to be in a '~/.vim/after' file
 
 " 14 editing text
@@ -343,63 +345,63 @@ endif
 " plugins:
 " https://vimawesome.com/
 call plug#begin(s:vim_home_dir . '/plugged')
-"   Plug 'airblade/vim-gitgutter'                                                       "
-"   Plug 'AndrewRadev/linediff.vim'                                                     "
-"   Plug 'arp242/undofile_warn.vim'                                                     "
-"   Plug 'catppuccin/vim', { 'as': 'catppuccin' }                                       " pastel themes
-"   Plug 'dense-analysis/ale'                                                           " live linting; possibly slows vim down
-   Plug 'editorconfig/editorconfig-vim'                                                " https://github.com/editorconfig/editorconfig/wiki/EditorConfig-Properties
-   Plug 'ekalinin/Dockerfile.vim'                                                       " adds syntax highlighting for Dockerfiles
-"   Plug 'ervandew/supertab'                                                            " smart tab completion (old)
-   Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries', 'frozen': 'true' }                "
-   Plug 'hashivim/vim-terraform'                                                        " syntax highlighting for terraform
-"   Plug 'https://github.com/ElmCast/elm-vim'                                           "
-   Plug 'https://github.com/fevrin/AnsiEsc.vim', { 'branch': 'main', 'frozen': 'true' } " converts ANSI escape codes to colors
-"   Plug 'inkarkat/vim-AdvancedDiffOptions'                                             "
-"   Plug 'inkarkat/vim-ConflictMotions'                                                 " older conflict marker jumper
-"   Plug 'janko/vim-test'                                                               "
-"   Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }                                 "
-"   Plug 'junegunn/fzf.vim'                                                             "
-   Plug 'junegunn/vim-easy-align'                                                       " easily align lines based on a common character expression
-"   Plug 'kana/vim-textobj-user'                                                        "
-"   Plug 'glts/vim-textobj-comment'                                                     "
-"   Plug 'Konfekt/FastFold'                                                             " fixes slow folding
-"   Plug 'mbbill/undotree'                                                              " lets you visualize a file's undo history
-"   Plug 'mhinz/vim-signify'                                                            "
-"   for jump-to-definition functionality without ctags:
-"   https://stackoverflow.com/questions/635770/jump-to-function-definition/51195409#51195409
-"   Plug 'neoclide/coc.nvim', {'branch': 'release'}                                     "
-"   Plug 'neoclide/coc-prettier'                                                        " prettier formatter for Coc
-   Plug 'pearofducks/ansible-vim', { 'branch': 'master', 'frozen': 'true' }
-"   Plug 'powerline/powerline'                                                          " power statusline
-"   Plug 'preservim/nerdtree'                                                           "
-"   Plug 'prettier/vim-prettier'                                                        " code formatter
-"   Plug 'puremourning/vimspector'                                                      "
-"   Plug 'python-mode/python-mode', { 'for': 'python', 'branch': 'develop' }            "
-"   Plug 'rhysd/conflict-marker.vim'                                                    " lets you quickly jump to and resolve conflicts diff'ed files and colors conflict areas
-"   Plug 'rickhowe/spotdiff.vim'                                                        "
-"   Plug 'scrooloose/nerdcommenter'                                                     "
-"   Plug 'scrooloose/nerdtree'                                                          "
-"   Plug 'sheerun/vim-polyglot'                                                         "
-"   Plug 'sjl/gundo.vim'                                                                " lets you visualize a file's undo history
-"   Plug 'tmhedberg/SimpylFold'                                                         " python code folding
-"   let g:SimpylFold_docstring_preview=1
-   Plug 'tpope/vim-commentary'                                                          " adds commands to comment and uncomment lines
-   Plug 'tpope/vim-eunuch'                                                              " filesystem commands within vim
-"   Plug 'tpope/vim-fugitive'                                                           " git commands within vim
-"   Plug 'tpope/vim-repeat'                                                             " repeat last map in whole
-"   Plug 'tpope/vim-sensible'                                                           " sensible option defaults
-"   Plug 'tpope/vim-sleuth'                                                             " automatically adjusts formatting and encoding options based on the current file
-"   Plug 'tpope/vim-surround'                                                           " adds commands for surrounding arbitrary text with quotes, parentheses, etc.
-   Plug 'tpope/vim-unimpaired'                                                          " lets you quickly jump to and resolve conflicts diff'ed files, among other things
-"   Plug 'vim-airline/vim-airline'                                                      "
-"   Plug 'vim-scripts/vcscommand.vim'                                                   "
-"   Plug 'vim-syntastic/syntastic'                                                      " code syntax checker
-"   Plug 'Vimjas/vim-python-pep8-indent'                                                 " make python code comply with PEP8 recommendation
-   Plug 'vito/booklit.vim'                                                              " syntax highlighting for Booklit files
-"   Plug 'ycm-core/YouCompleteMe'                                                       " fast, as-you-type, fuzzy-search code completion, comprehension and refactoring engine
-"   Plug 'yggdroot/indentline'                                                          "
-"   Plug 'zhimsel/vim-stay'                                                             " (old) automated view session creation and restoration
+"   Plug 'airblade/vim-gitgutter'                                            "
+"   Plug 'AndrewRadev/linediff.vim'                                          "
+"   Plug 'arp242/undofile_warn.vim'                                          "
+"   Plug 'catppuccin/vim', { 'as': 'catppuccin' }                            " pastel themes
+"   Plug 'dense-analysis/ale'                                                " live linting; possibly slows vim down
+   Plug 'editorconfig/editorconfig-vim'                                      " enforces editorconfig styles
+   Plug 'ekalinin/Dockerfile.vim'                                            " adds syntax highlighting for Dockerfiles
+"   Plug 'ervandew/supertab'                                                 " smart tab completion (old)
+   Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries', 'frozen': 'true' }     " go development
+   Plug 'hashivim/vim-terraform'                                             " syntax highlighting for terraform
+"   Plug 'https://github.com/ElmCast/elm-vim'                                "
+   Plug 'https://github.com/fevrin/AnsiEsc.vim', { 'frozen': 'true' }        " converts ANSI escape codes to colors
+"   Plug 'inkarkat/vim-AdvancedDiffOptions'                                  "
+"   Plug 'inkarkat/vim-ConflictMotions'                                      " older conflict marker jumper
+"   Plug 'janko/vim-test'                                                    "
+"   Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }                      "
+"   Plug 'junegunn/fzf.vim'                                                  "
+   Plug 'junegunn/vim-easy-align'                                            " easily align lines based on a common character expression
+"   Plug 'kana/vim-textobj-user'                                             "
+"   Plug 'glts/vim-textobj-comment'                                          "
+"   Plug 'Konfekt/FastFold'                                                  " fixes slow folding
+"   Plug 'mbbill/undotree'                                                   " lets you visualize a file's undo history
+"   Plug 'mhinz/vim-signify'                                                 "
+"   for jump-to-definition functionality without ctags:                      "
+"   https://stackoverflow.com/questions/635770/jump-to-function-definition/51195409#51195409 "
+"   Plug 'neoclide/coc.nvim', {'branch': 'release'}                          "
+"   Plug 'neoclide/coc-prettier'                                             " prettier formatter for Coc
+   Plug 'pearofducks/ansible-vim'                                            " ansible syntax highlighting
+"   Plug 'powerline/powerline'                                               " power statusline
+"   Plug 'preservim/nerdtree'                                                "
+"   Plug 'prettier/vim-prettier'                                             " code formatter
+"   Plug 'puremourning/vimspector'                                           "
+"   Plug 'python-mode/python-mode', { 'for': 'python', 'branch': 'develop' } "
+"   Plug 'rhysd/conflict-marker.vim'                                         " highlight, jump to, and resolve conflict markers in diff'ed files
+"   Plug 'rickhowe/spotdiff.vim'                                             "
+"   Plug 'scrooloose/nerdcommenter'                                          "
+"   Plug 'scrooloose/nerdtree'                                               "
+"   Plug 'sheerun/vim-polyglot'                                              "
+"   Plug 'sjl/gundo.vim'                                                     " lets you visualize a file's undo history
+"   Plug 'tmhedberg/SimpylFold'                                              " python code folding
+"   let g:SimpylFold_docstring_preview=1                                     "
+   Plug 'tpope/vim-commentary'                                               " adds commands to comment and uncomment lines
+   Plug 'tpope/vim-eunuch'                                                   " filesystem commands within vim
+"   Plug 'tpope/vim-fugitive'                                                " git commands within vim
+"   Plug 'tpope/vim-repeat'                                                  " repeat last map in whole
+"   Plug 'tpope/vim-sensible'                                                " sensible option defaults
+"   Plug 'tpope/vim-sleuth'                                                  " automatically adjusts formatting and encoding options
+"   Plug 'tpope/vim-surround'                                                " adds commands for surrounding arbitrary text with tags, quotes, etc.
+   Plug 'tpope/vim-unimpaired'                                               " add handy mappings for toggling options, jumping, formatting, etc.
+"   Plug 'vim-airline/vim-airline'                                           "
+"   Plug 'vim-scripts/vcscommand.vim'                                        "
+"   Plug 'vim-syntastic/syntastic'                                           " code syntax checker
+"   Plug 'Vimjas/vim-python-pep8-indent'                                     " make python code comply with PEP8 recommendation
+   Plug 'vito/booklit.vim'                                                   " syntax highlighting for Booklit files
+"   Plug 'ycm-core/YouCompleteMe'                                            " speedy code completion, comprehension, and refactoring engine
+"   Plug 'yggdroot/indentline'                                               "
+"   Plug 'zhimsel/vim-stay'                                                  " (old) automated view session creation and restoration
 call plug#end()
 
 let g:go_fmt_command = "goimports"

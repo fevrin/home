@@ -136,7 +136,7 @@ setopt no_always_last_prompt
 # have the redirect operator '>' null a file instead of act as catting into it
 # from:
 # <https://zsh.sourceforge.io/Doc/Release/Redirection.html#Redirection:~:text=7.3%20Redirections%20with%20no%20command>
-# <https://zsh.sourceforge.io/Doc/Release/Options.html#Description-of-Options:~:text=%E2%80%99%20will%20work.-,SH_NULLCMD%20%3CK%3E%20%3CS%3E,-Do%20not%20use>
+# <https://zsh.sourceforge.io/Doc/Release/Options.html#:~:text=%E2%80%99%20will%20work.-,SH_NULLCMD%20%3CK%3E%20%3CS%3E,-Do%20not%20use>
 set -o shnullcmd
 #export NULLCMD=:
 

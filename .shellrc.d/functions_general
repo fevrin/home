@@ -148,9 +148,15 @@ kgetall() {
    has kubecolor && force_colors='--force-colors'
 
    time (
-      # shellcheck disable=SC2145
-      echo "k get ${namespace[@]} ${force_colors} \$(k api-resources ${api_resource_namespaced[@]} --verbs=list -o name | sort | tr '\\\n' ',' | sed -re 's;,$;;g') -o wide 2> /dev/null"
-      k get "${namespace[@]}" "${force_colors}" $(k api-resources "${api_resource_namespaced[@]}" --verbs=list -o name | sort | tr '\n' ',' | sed -re 's;,$;;g') -o wide 2> /dev/null
+      echo -n "k get ${namespace[@]} ${force_colors} \$(k api-resources ${api_resource_namespaced[@]} --verbs=list -o name | "
+      echo -n "sort | "
+      echo -n "tr '\\\n' ',' | "
+      echo "sed -re 's;,$;;g') -o wide 2> /dev/null"
+      k get "${namespace[@]}" "${force_colors}" $(k api-resources "${api_resource_namespaced[@]}" --verbs=list -o name |
+         sort |
+         tr '\n' ',' |
+         sed -re 's;,$;;g'
+         ) -o wide 2> /dev/null
       echo
    )
 }
