@@ -20,7 +20,7 @@ via their typical name (rather than what Homebrew may install, like `ggrep` inst
 
 The following the available Makefile commands:
 
-```plaintext
+```editorconfig
 $ make help
 
 ${MAKEFILE_HELP}
