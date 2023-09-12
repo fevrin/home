@@ -76,10 +76,19 @@ alias mkdir='mkdir -p'
 # have qrencode take standard input
 # OMG this caused me so much headache before I realized I'd aliased this a while ago >_<
 #alias qrencode='qrencode -o /tmp/$$.png && eog /tmp/$$.png'
-#'temp_file=/tmp/temp_ssh_key && { [[ -r ${temp_file} ]] || touch ${temp_file} && chmod 600 ${temp_file}; } && cat /media/${USER}-1gb/key >${temp_file} && ssh-add ${temp_file} && rm -f ${temp_file}'
+# 'temp_file=/tmp/temp_ssh_key && {
+# if [[ -r ${temp_file} ]]; then
+#    chmod 600 ${temp_file}
+# else
+#    touch ${temp_file} &&
+# fi
+# } &&
+# cat /media/${USER}-1gb/key >${temp_file} &&
+# ssh-add ${temp_file} &&
+# rm -f ${temp_file}'
 
 # for connecting to a remote desktop
-alias wconnect='vncviewer -truecolor -depth 24 -compresslevel 9 -quality 9 10.110.0.197:5900 && sshfs ${USER@10}.110.0.197:/ /tmp/casper'
+alias wconnect='vncviewer -truecolor -depth 24 -compresslevel 9 -quality 9 10.110.0.197:5900 && sshfs ${USER}@10.110.0.197:/ /tmp/casper'
 alias wdisconnect='pkill vncviewer && sudo umount /tmp/casper'
 
 # to easily upload standard config files to a new server
@@ -98,8 +107,11 @@ alias grep-config='grep -Ev "^(\s*|#.*|\s*#.*)$"'
 # easier editing of ~/.bash_history when it's chattr'ed to prevent anything but appending
 #actually, this may not work if there are changes to the live file when editing the temp copy :(
 # shopt -s histappend replaces the chattr modifications
-# "history -a; ... history -c; history -r should append to the history file the current shell's commands that haven't already been written to it, then once done editing, replace the current in-memory history list with what's in the file
-# add something like these lines to a file in /etc/sudoers.d/ if you want to avoid having to sudo every time (use a username instead of '%sudo' to enable just one user to do this, and replace ${HOME} with the hard-coded version since sudo doesn't support ${HOME})
+# "history -a; ... history -c; history -r should append to the history file the current shell's commands that haven't already been written to it, then
+# once done editing, replace the current in-memory history list with what's in the file
+
+# add something like these lines to a file in /etc/sudoers.d/ if you want to avoid having to sudo every time (use a username instead of '%sudo' to
+# enable just one user to do this, and replace ${HOME} with the hard-coded version since sudo doesn't support ${HOME})
 # %sudo   ALL=(ALL:ALL)NOPASSWD: /usr/bin/chattr -a ${HOME}/.bash_history
 # %sudo   ALL=(ALL:ALL)NOPASSWD: /usr/bin/chattr +a ${HOME}/.bash_history
 if [[ "${SHELL}" =~ zsh$ || "${SHELL_TYPE}" =~ ^zsh$ ]]; then
@@ -111,7 +123,12 @@ alias eh='edit-history'
 
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
-#alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
+#alias alert='
+#   notify-send \
+#   --urgency=low \
+#   -i "$([ $? = 0 ] && echo terminal || echo error)" \
+#   "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"
+#'
 
 alias parse-json='python -mjson.tool'
 
@@ -132,7 +149,7 @@ alias dirs='dirs -v'
 # number the lines of a file on standard output
 alias num-file='nl -bp -w3'
 
-if [[ ${TMUX} =~ (tmate|tmux) ]]; then
+if [[ "${TMUX}" =~ (tmate|tmux) ]]; then
    alias tsm='tmate show-messages'
 else
    alias tsm='echo "this alias works only when run in a tmate session!"'
@@ -182,14 +199,60 @@ alias kgn='k get namespaces'
 ######## VPN ########
 #####################
 
-alias vpn-start='if has openvpn3; then echo openvpn3 session-start --config ~/.config/openvpn3/vpn.ovpn; openvpn3 session-start --config ~/.config/openvpn3/vpn.ovpn; else echo "${BOLD}${RED}error:${END_COLOR} \"openvpn3\" not found"; fi'
+alias vpn-start='
+if has openvpn3; then
+   echo "openvpn3 session-start --config ~/.config/openvpn3/vpn.ovpn"
+   openvpn3 session-start --config ~/.config/openvpn3/vpn.ovpn
+else
+   echo "${BOLD}${RED}error:${END_COLOR} \"openvpn3\" not found"
+fi
+'
 
-alias vpn-list='if has openvpn3; then { echo openvpn3 sessions-list; openvpn3 sessions-list; }; else echo "${BOLD}${RED}error:${END_COLOR} \"openvpn3\" not found"; fi'
+alias vpn-list='
+if has openvpn3; then
+   echo "openvpn3 sessions-list"
+   openvpn3 sessions-list
+else
+   echo "${BOLD}${RED}error:${END_COLOR} \"openvpn3\" not found"
+fi
+'
 
 # shellcheck disable=SC2142
-alias vpn-stop='if has openvpn3; then for session_path in $(openvpn3 sessions-list | awk "{ if(\$0 ~ /Path:/){print \$2} else if(\$0 ~ /No sessions available/){print \"none\"} }"); do if [[ "${session_path}" =~ ^none$ ]]; then echo "No sessions available"; else echo openvpn3 session-manage --disconnect --session-path ${session_path}; openvpn3 session-manage --disconnect --session-path "${session_path}"; fi; done; echo openvpn3 session-manage --cleanup; openvpn3 session-manage --cleanup; unset session_path; else echo "${BOLD}${RED}error:${END_COLOR} \"openvpn3\" not found"; fi'
+alias vpn-stop='
+if has openvpn3; then
+   for session_path in $(openvpn3 sessions-list | awk "{ if(\$0 ~ /Path:/){print \$2} else if(\$0 ~ /No sessions available/){print \"none\"} }"); do
+      if [[ "${session_path}" =~ ^none$ ]]; then
+         echo "No sessions available"
+      else
+         echo "openvpn3 session-manage --disconnect --session-path ${session_path}"
+         openvpn3 session-manage --disconnect --session-path "${session_path}"
+      fi
+   done
+
+   echo "openvpn3 session-manage --cleanup"
+   openvpn3 session-manage --cleanup
+   unset session_path
+else
+   echo "${BOLD}${RED}error:${END_COLOR} \"openvpn3\" not found"
+fi
+'
 
 # shellcheck disable=SC2142
-alias vpn-reset='if has openvpn3; then session_path="$(openvpn3 sessions-list | awk "{ if(\$0 ~ /Path:/){print \$2} else if(\$0 ~ /No sessions available/){print \"none\"} }")"; if [[ $(echo "${session_path}" | wc -l) -eq 0 ]]; then vpn-start; elif [[ $(echo "${session_path}" | wc -l) -eq 1 ]]; then echo openvpn3 session-manage --restart --path "${session_path}"; openvpn3 session-manage --restart --path "${session_path}"; else vpn-stop && vpn-start; fi; unset session_path; else echo "${BOLD}${RED}error:${END_COLOR} \"openvpn3\" not found"; fi'
+alias vpn-reset='
+if has openvpn3; then
+   session_path="$(openvpn3 sessions-list | awk "{ if(\$0 ~ /Path:/){print \$2} else if(\$0 ~ /No sessions available/){print \"none\"} }")"
+   if [[ $(echo "${session_path}" | wc -l) -eq 0 ]]; then
+      vpn-start
+   elif [[ $(echo "${session_path}" | wc -l) -eq 1 ]]; then
+      echo "openvpn3 session-manage --restart --path ${session_path}"
+      openvpn3 session-manage --restart --path "${session_path}"
+   else
+      vpn-stop && vpn-start
+   fi
+   unset session_path
+else
+   echo "${BOLD}${RED}error:${END_COLOR} \"openvpn3\" not found"
+fi
+'
 
 ##########################################################

@@ -7,7 +7,11 @@ check-scripts() {
    git rev-parse --is-inside-work-tree &>/dev/null && maxdepth=""
 
    echo "running \`shellcheck\` in ${path} ..."
-   shellcheck --color -o all -x $(find ${path} ${maxdepth} \( -name '.git' -o -name '*\.md' \) -prune -o -name '*' -print0 | xargs -0 mimetype | awk -F: '/shellscript/ { print $1 }')
+   shellcheck --color -o all -x $(
+      find ${path} ${maxdepth} \( -name '.git' -o -name '*\.md' \) -prune -o -name '*' -print0 |
+         xargs -0 mimetype |
+         awk -F: '/shellscript/ { print $1 }'
+   )
    echo -n "continue to next check? [Y/n] "; read
    [[ $REPLY =~ [Nn] ]] && {
       return

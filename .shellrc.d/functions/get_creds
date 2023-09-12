@@ -16,7 +16,8 @@ get_creds() {
    # lpass is required for this. you can get it with:
 
    #    mkdir /tmp/lpass
-   #    curl -sLo /tmp/lpass/lpass.tar.gz "$(curl -sL https://github.com/lastpass/lastpass-cli/releases/latest | sed -rne 's;.* href\="([^"]+\/download\/[^"]+\.tar\.gz)" .*;https://github.com\1;p')"
+   #    curl -sLo /tmp/lpass/lpass.tar.gz "$(curl -sL https://github.com/lastpass/lastpass-cli/releases/latest |
+   #       sed -rne 's;.* href\="([^"]+\/download\/[^"]+\.tar\.gz)" .*;https://github.com\1;p')"
 
 
    # you may need to install these packages:
@@ -288,7 +289,15 @@ get_creds() {
 
          # attempt to retrieve the values from LastPass if the local cache is incomplete
          # FIXME: find missing templates with this and automatically create those templates:
-         # for file in ~/digitalocean/.creds/keys/*; do orig_file="$file"; file="${file/keys/templates}"; [[ -f "$file" ]] || { echo "$file template missing"; sed -rne 's;^([^=]+\=["'\''])[^"'\'']+(["'\''])$;\1\2;p' "$orig_file"; echo; }; done
+         # for file in ~/digitalocean/.creds/keys/*; do
+         #    orig_file="$file"
+         #    file="${file/keys/templates}"
+         #    [[ -f "$file" ]] || {
+         #    echo "$file template missing"
+         #    sed -rne 's;^([^=]+\=["'\''])[^"'\'']+(["'\''])$;\1\2;p' "$orig_file"
+         #    echo
+         #    }
+         # done
          if [[ $is_from_file -eq 1 && -z "${entry_array[$i]}" ]]; then
             # one of the cached entries is empty, and we cannot trust the
             # overall accuracy of the local cache, so re-run this after

@@ -5,7 +5,10 @@
 get-public-ip() {
 # returns the public ip of the local computer.  help from <http://www.go2linux.org/what-is-my-public-ip-address-with-linux>
 #   curl ifconfig.me/all/json
-   wget -q -O - icanhazip.com || wget -q -O - ifconfig.co || wget -q -O - checkip.dyndns.org | grep -oE '[0-9.]{7,15}' || curl -s checkip.dyndns.org | grep -oE '[0-9.]{7,15}'
+   wget -q -O - icanhazip.com ||
+      wget -q -O - ifconfig.co ||
+      wget -q -O - checkip.dyndns.org | grep -oE '[0-9.]{7,15}' ||
+      curl -s checkip.dyndns.org | grep -oE '[0-9.]{7,15}'
    #if [[ $(which curl) ]]; then
    #   #curl http://www.whatismyip.com/automation/n09230945.asp ||
    #   curl http://automation.whatismyip.com/n09230945.asp ||

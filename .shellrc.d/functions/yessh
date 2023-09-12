@@ -2,18 +2,19 @@
 
 yessh() {
 
-   # handy for ssh'ing into servers and getting some common basic environmental modifications without having to copy ~/.bashrc, ~/.bash_aliases, etc. to each server first; it's all done over one connection, if possible
+   # handy for ssh'ing into servers and getting some common basic environmental modifications without having to copy ~/.bashrc, ~/.bash_aliases, etc.
+   # to each server first; it's all done over one connection, if possible
    # inspired by <https://superuser.com/a/503785>
 
    # input: server name and optional arguments passed to 'ssh'
-   # output: connects to the specific node and sets up the environment contained in the ~/.bashrc.d/remote/* files
+   # output: connects to the specific node and sets up the environment contained in the ~/.shellrc.d/remote/* files
 
    # examples:
    # yessh reg1node22
    # yessh reg1node22 'cat /proc/cmdline'
 
-   # any files or symlinks in the ~/.bashrc.d/remote/ directory will be dereferenced and passed as contents of the bashrc
-   # file from the local to the remote host.
+   # any files or symlinks in the ~/.shellrc.d/remote/ directory will be passed as-is from the local to the remote host as if they were the contents
+   # of .bashrc
 
    # they should be directly executable by bash on the remote host
 
@@ -22,7 +23,7 @@ yessh() {
    # to define functions available locally on the remote host, you can run a
    # command like this to combine existing functions into a single file
    # just replace the paths, as needed:
-   # cat ~/.bashrc.d/functions/* >~/.bashrc.d/remote/functions
+   # cat ~/.shellrc.d/functions/* >~/.shellrc.d/remote/functions
 
    _verify_reqs <<-EOF || return 1
    base64
@@ -112,12 +113,12 @@ yessh() {
    verbose 8 "final COPY_CONFIG = '$COPY_CONFIG'"
 
    if [[ "$hostname" ]]; then
-      [[ -d "$HOME/.bashrc.d" ]] ||
-         verbose "$HOME/.bashrc.d doesn't exist!"
+      [[ -d "$HOME/.shellrc.d" ]] ||
+         verbose "$HOME/.shellrc.d doesn't exist!"
 
       # inspired by <https://superuser.com/a/1078431>
       local bashrc_contents="$(
-         ls -1 ~/.bashrc.d/remote/* 2>/dev/null |
+         ls -1 ~/.shellrc.d/remote/* 2>/dev/null |
             grep -v \.md$ | # do not include markdown files
             xargs cat |
             egrep -v '^ +#' | # remove all commented lines
@@ -167,7 +168,8 @@ yessh() {
          command="$command -ic ${orig_command}\" |
          tr '\n' '\2' |                         # convert all newlines to octal #2 so the output is a single line
          sed -re 's;^;\o3;'\" |                 # insert an octal #3 at the beginning of the command output's one line
-         sed -rne 's;.*\o3;;' -e 's;\o2;\n;gp'" # now with the command's output alongside any other output from the rcfile, delete everything before the command output marker (octal #3) and convert back all octal #2s to newlines
+         sed -rne 's;.*\o3;;' -e 's;\o2;\n;gp'" # now with the command's output alongside any other output from the rcfile, delete everything before
+                                                # the command output marker (octal #3) and convert back all octal #2s to newlines
 
       [[ $(echo "$bashrc_contents" | wc -c) -le 20480 && "${COPY_CONFIG}" -ne 1 ]] || command="$command; rm '$tempbashrc'"
 

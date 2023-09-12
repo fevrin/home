@@ -7,7 +7,10 @@ find-dupes() {
    # then get the basename of each file, sort, remove duplicates, and ensure they have at least one letter
    # then loop through the filenames, searching against the full filenames in the temp file
    # if there is more than 1 match for the filename (there will always be at least one match, for the file itself), then print it out
+
+   # editorconfig-checker-disable
    sudo find "$dirname" -type f \! -iregex '.*\(\/\(\/\.[^/]+\|\.\(config\|mozilla\|config\|purple\|git\|fontconfig\|cache\|compiz-1\|thumbnail\|wine\)\/\)\|maverick-root\|\/lfs\/\|livedvd\|\.unison\.[^/]+\.unison\.tmp\/\).*' >"$tempfile"
+   # editorconfig-checker-enable
 
    echo "using temp file $tempfile"
 

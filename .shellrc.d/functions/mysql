@@ -193,9 +193,9 @@ mysql() {
 #				s;(^| +|\()$word([=;, \(]);\
 #				$newline\1${word^^*}\2;gi
 #				SED_SCRIPT
-##            |    # first, capture any leading blank characters and any trailing left parentheses
-##                                              # next, output a newline (if applicable), the word transformed to uppercase, and any trailing parentheses
-##            sed -e 's;^ \+;;'                 # lastly, remove leading blank characters
+##            |                 # first, capture any leading blank characters and any trailing left parentheses
+##                              # next, output a newline (if applicable), the word transformed to uppercase, and any trailing parentheses
+##            sed -e 's;^ \+;;' # lastly, remove leading blank characters
 #         )
 
          # for the below sed commands:
@@ -210,7 +210,7 @@ mysql() {
          query=$(
             echo "$query" |
             sed -re "{
-               s;^(\()?((left|right|outer|inner) $word|$word)([=;, \(]);\U&;gi             # don't add ${newline} if the word already starts at the beginning of the line
+               s;^(\()?((left|right|outer|inner) $word|$word)([=;, \(]);\U&;gi  # don't add ${newline} if word is already at the beginning of the line
                s;(\(| )((left|right|outer|inner) $word|$word)([=;, \(]);${newline}\U&;gi   # add a newline and convert to uppercase
             }"
          )
@@ -256,7 +256,8 @@ mysql() {
       fi
 
       verbose 2 mysql $flags -h "${db_creds[hostname]}" -u "${db_creds[username]}" -p"${db_creds[password]}" "${db_creds[database]}" -e "${query@Q}"
-      command mysql $flags -h "${db_creds[hostname]}" -u "${db_creds[username]}" -p"${db_creds[password]}" "${db_creds[database]}" -e "$query" 2>&1 | sed -e 's;.*Warning.*;;'
+      command mysql $flags -h "${db_creds[hostname]}" -u "${db_creds[username]}" -p"${db_creds[password]}" "${db_creds[database]}" -e "$query" 2>&1 |
+         sed -e 's;.*Warning.*;;'
 
       # this ensures we get the exit code of the MySQL command, rather than the sed one
       # note that mysql returns a non-zero exit code only if there's a syntax error

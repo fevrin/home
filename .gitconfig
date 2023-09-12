@@ -1,3 +1,4 @@
+# editorconfig-checker-disable
 [alias]
   # inspired by <https://www.atlassian.com/blog/git/advanced-git-aliases>
 #  bclean = "!git branch --merged HEAD | sed -re 's;^\\*?\\s+;;' | egrep -v \"^($(git rev-parse --abbrev-ref HEAD)|master)$\" -Z | xargs -0 -I{} echo -e 'these branches would be cleared:\n{}'"

@@ -8,10 +8,26 @@ get-logs-for() {
 
    if [[ -n "$service" ]]; then
       if which gawk &>/dev/null; then
-         sudo journalctl -xf -t "$service" | tee >(awk 'm=gensub(/^.*\{.*timestamp":([0-9]+)[^0-9].*$/,"\\1","g",$0) { if (m != $0) print gensub(/^.*(\{.*timestamp":)([0-9]+)([^[0-9].*)$/,sprintf("%s\"%s\"%s","\\1",strftime("%Y-%m-%d %H:%M:%S",m),"\\3"),"g") }' | jq --unbuffered .) >(egrep -v '^$') >/dev/null
+         sudo journalctl -xf -t "$service" |
+            tee >(
+                  awk '
+                  m=gensub(/^.*\{.*timestamp":([0-9]+)[^0-9].*$/,"\\1","g",$0)
+                  {
+                     if (m != $0) {
+                        print gensub(/^.*(\{.*timestamp":)([0-9]+)([^[0-9].*)$/,sprintf("%s\"%s\"%s","\\1",strftime("%Y-%m-%d %H:%M:%S",m),"\\3"),"g")
+                     }
+                  }' |
+                     jq --unbuffered .
+                 ) >(egrep -v '^$') >/dev/null
       else
-#         sudo journalctl -xo json-pretty -f -t haproxy | tee >(sed -urne 's;\\;;g; s;^.*MESSAGE[^{]+(\{.*\})",$;\1;p' | jq --unbuffered '.timestamp |= strftime("%Y-%m-%d %H:%M:%S %Z")') >(egrep -v '^$') >/dev/null
-         sudo journalctl -xf -t "$service" | tee >(sed -urne 's;^.*(\{.*)$;\1;p' | jq --unbuffered '.timestamp |= strftime("%Y-%m-%d %H:%M:%S %Z")') >(egrep -v '^$') >/dev/null
+#         sudo journalctl -xo json-pretty -f -t haproxy |
+#         tee \
+#            >(sed -urne 's;\\;;g; s;^.*MESSAGE[^{]+(\{.*\})",$;\1;p' | jq --unbuffered '.timestamp |= strftime("%Y-%m-%d %H:%M:%S %Z")') \
+#            >(egrep -v '^$') >/dev/null
+         sudo journalctl -xf -t "$service" |
+            tee \
+               >(sed -urne 's;^.*(\{.*)$;\1;p' | jq --unbuffered '.timestamp |= strftime("%Y-%m-%d %H:%M:%S %Z")') \
+               >>(egrep -v '^$') >/dev/null
       fi
 #      sudo journalctl -xf -t "$service" | sed -rne 's;^.*(\{.*)$;\1;p' | { jq . 2>/dev/null || cat; }
    else

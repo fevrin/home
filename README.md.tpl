@@ -37,8 +37,8 @@ There is also a `pre-commit` make target that can be used to run a subset of Meg
 
 The configuration files for most of the tools MegaLinter uses are located in `ci/`. You can make adjustments there, as needed.
 
-If the repo on GitHub is configured with GitHub Actions enabled, simply uploading the workflow file as part of a `git push` to a PR should kick off the
-workflow.
+If the repo on GitHub is configured with GitHub Actions enabled, simply uploading the workflow file as part of a `git push` to a PR should kick off
+the workflow.
 
 Alternatively, the workflow can be run locally using `nektos/act`.
 
