@@ -6,8 +6,9 @@
   "SpacesAftertabs": false,
   "NoColor": false,
   "Exclude": [
-     "\\.vim\\/autoload\\/Align\\.vim",
-     "\\.vim\\/doc\\/Align\\.txt"
+    "\\.vim\\/autoload\\/pathogen\\.vim",
+    "\\.vim\\/autoload\\/Align\\.vim",
+    "\\.vim\\/doc\\/Align\\.txt"
   ],
   "AllowedContentTypes": [],
   "PassedFiles": [],
