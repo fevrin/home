@@ -70,11 +70,11 @@ repos:
       - id: shfmt
         args:
           # more args in .editorconfig (though it seems shfmt doesn't actually honor those...)
-          - --indent=3         # 0 for tabs (default), >0 for number of spaces
+          - --indent=3 # 0 for tabs (default), >0 for number of spaces
           - --binary-next-line # binary ops like && and | may start a line
-          - --case-indent      # switch cases will be indented
-          - --keep-padding     # keep column alignment paddings
-          - --list             # list files whose formatting differs from shfmt's
+          - --case-indent # switch cases will be indented
+          - --keep-padding # keep column alignment paddings
+          - --list # list files whose formatting differs from shfmt's
             #          - --simplify         # simplify the code
             #          - --minify           # minify the code to reduce its size (implies -s)
             #          - --diff             # error with a diff when the formatting differs

@@ -186,7 +186,7 @@ jobs:
             [column]=bsdextrautils
           )
           for pkg in ${!pkgs_to_install[*]}; do
-             which "${pkg}" &>/dev/null && unset pkgs_to_install["${pkg}"]
+            which "${pkg}" &>/dev/null && unset pkgs_to_install["${pkg}"]
           done
           apt-get update &&
           apt-get install ${pkgs_to_install[*]}
