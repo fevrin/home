@@ -29,7 +29,6 @@ quote_type = auto
 
 # Tab indentation
 indent_brace_style = K&R
-indent_style = space
 indent_size = 3
 
 # Make sure every file has a blank line at the end
@@ -46,38 +45,45 @@ spaces_around_brackets = false
 max_line_length = 150
 
 [.git/COMMIT_EDITMSG]
+indent_style = space
 max_line_length = 72
 
-[{*.sh,.bashrc**}]
+[{*.sh,.shellrc.d**}]
 indent_size = 3
 
 [*.y{,a}ml]
 indent_size = 2
+indent_style = space
 quote_type = single
 
 [*.js{,on}]
 indent_size = 2
+indent_style = space
 max_line_length = unset
 quote_type = single
 
 # go
 [*.go]
 indent_size = 4
-indent_style = tab
+indent_style = space
 
 # python
 [*.{ini,py,py.tpl,rst}]
 indent_size = 4
+indent_style = space
 
 # rust
 [*.rs]
 indent_size = 4
+indent_style = space
 
 # documentation, utils
 [*.{md{,.tpl},mdx,diff}]
 indent_size = unset
+indent_style = space
 trim_trailing_whitespace = false
 
 # windows shell scripts
 [*.{cmd,bat,ps1}]
 end_of_line = crlf
+indent_style = space
