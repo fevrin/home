@@ -127,6 +127,7 @@ set -o vi
 grep -q 10 /proc/sys/vm/swappiness || {
    sudo sysctl vm.swappiness=10
    SOURCE="${BASH_SOURCE}"
+   # shellcheck disable=SC2296
    is_zsh && SOURCE="${(%):-%x}"
    cat <<-EOF | sudo tee /etc/sysctl.d/local-swappiness.conf &>/dev/null
 		# set via $([[ -L "$SOURCE" ]] && readlink "$SOURCE" || echo "$SOURCE")

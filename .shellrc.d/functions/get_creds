@@ -104,7 +104,7 @@ get_creds() {
 		$template_location/db_template_example
 		$template_location/site_template_example
 
-		afterward, rerun $SELF_NAME() $@
+		afterward, rerun $SELF_NAME() ${*}
 
 		" | tr -d '\t' >&2
 	}
@@ -176,8 +176,8 @@ get_creds() {
 
 		" | tr -d '\t' >&2
 
-      if [[ -n "${available_creds[@]}" ]]; then
-         echo ${available_creds[@]} | sort | tr ' ' '\n' >&2
+      if [[ -n "${available_creds}" ]]; then
+         echo "${available_creds[@]}" | sort | tr ' ' '\n' >&2
          verbose 1
       else
          verbose 1 "none available"
@@ -252,7 +252,7 @@ get_creds() {
          verbose 1
          verbose 1 "'$entry_field' doesn't match an available field:"
          verbose 1
-         verbose 1 "$(echo ${!entry_array[@]} | tr ' ' '\n' | grep -v 'field' | sort)"
+         verbose 1 "$(echo "${!entry_array[@]}" | tr ' ' '\n' | grep -v 'field' | sort)"
          verbose 1
 
          _print_usage

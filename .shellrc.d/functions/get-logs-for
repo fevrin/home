@@ -27,7 +27,7 @@ get-logs-for() {
          sudo journalctl -xf -t "$service" |
             tee \
                >(sed -urne 's;^.*(\{.*)$;\1;p' | jq --unbuffered '.timestamp |= strftime("%Y-%m-%d %H:%M:%S %Z")') \
-               >>(egrep -v '^$') >/dev/null
+               >(egrep -v '^$') >/dev/null
       fi
 #      sudo journalctl -xf -t "$service" | sed -rne 's;^.*(\{.*)$;\1;p' | { jq . 2>/dev/null || cat; }
    else

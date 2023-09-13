@@ -70,7 +70,8 @@ mysql() {
    verbose 8 "\${FUNCNAME[*]}=${FUNCNAME[*]}"
    verbose 8 "CRED_NAME=$CRED_NAME"
    verbose 8 "PERMITTED_OPS=${PERMITTED_OPS[*]}"
-   verbose 8 "\$@='$@'"
+   # shellcheck disable=SC2145
+   verbose 8 "\$@='${@}'"
 
    local PERMITTED_OPS_REGEX="^[ "$'\n'"]*("
    for i in $(seq 0 ${#PERMITTED_OPS[*]}); do
