@@ -82,7 +82,8 @@ To run a specific job:
 
 ### Local `pre-commit` linting
 
-If `pip` is installed, `make pre-commit` will run all `pre-commit` hooks on all changed files. Note that the `pre-commit` linting is a subset of what 
+If `pip` is installed, `make pre-commit` will run all `pre-commit` hooks on all changed files. Note, however, that the `pre-commit` linting is a
+subset of what the GitHub Action includes.
 
 When working through large amounts of linting changes, it can be helpful to use a split pane in tmux (or a separate terminal window) so you can make
 changes in one pane/window while running a linter command in the other.
