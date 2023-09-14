@@ -52,6 +52,6 @@ SHELL=/bin/bash
 */30 00-10,20-23 * * * sudo chmod 640 /full/path/to/service/bin/binary && sudo chmod 600 /full/path/to/service/bin/binary && sudo /bin/systemctl stop service_d 2>&1 && sudo pkill -9 -f service_d >>/tmp/2 && sudo pkill -9 -f /full/path/to/service/bin/binary >>/tmp/2
 #
 # keep password session open
-#  */25   12-20  *   *   Mon-Fri   tempfile="$(mktemp -up "${HOME}")"; tac /home/cweeks/passman.log >"${tempfile}" && truncate -s 1k "${tempfile}" && tac "${tempfile}" >/home/cweeks/passman.log && echo >>/home/cweeks/passman.log && echo "$(date): " >>/home/cweeks/passman.log && source /home/cweeks/.config/op/session && op account get &>>/home/cweeks/passman.log
+#  */25   12-20  *   *   Mon-Fri   tempfile="$(mktemp -up "${HOME}")"; tac /home/user/passman.log >"${tempfile}" && truncate -s 1k "${tempfile}" && tac "${tempfile}" >/home/user/passman.log && echo >>/home/user/passman.log && echo "$(date): " >>/home/user/passman.log && source /home/user/.config/op/session && op account get &>>/home/user/passman.log
 # truncate the first entry
-#  */25   12-20  *   *   Mon-Fri   start_entry="$(grep -E '([0-9]{2}:){2} *$' ~/passman.log | head -n2 | tail -n1)" && sed -i -rne '/'"${start_entry}"'/,$p' ~/passman.log && echo >>/home/cweeks/passman.log && echo "$(date '+\%F \%R'): " >>/home/cweeks/passman.log && source /home/cweeks/.config/op/session && op account get &>>/home/cweeks/passman.log
+#  */25   12-20  *   *   Mon-Fri   start_entry="$(grep -E '([0-9]{2}:){2} *$' ~/passman.log | head -n2 | tail -n1)" && sed -i -rne '/'"${start_entry}"'/,$p' ~/passman.log && echo >>/home/user/passman.log && echo "$(date '+\%F \%R'): " >>/home/user/passman.log && source /home/user/.config/op/session && op account get &>>/home/user/passman.log
