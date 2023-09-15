@@ -100,7 +100,9 @@ You can modify the command to run any or all of the other `pre-commit` hooks, as
 Similarly, you could run nektos/act with this:
 
 ```bash
-while inotifywait --exclude '(\.swp$|^\./\.git/)' --format '%f:%e%0' -e modify -r .; do gh act --rm push -j lint -W .github/workflows/pre-commit.yml; done
+while inotifywait --exclude '(\.swp$|^\./\.git/)' --format '%f:%e%0' -e modify -r .; do \
+   gh act --rm push -j lint -W .github/workflows/pre-commit.yml; \
+done
 ```
 
 
