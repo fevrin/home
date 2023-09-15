@@ -7,9 +7,9 @@
 
 is_zsh || {
    SOURCE="${BASH_SOURCE}"
-   for funcfile in $(realpath $(dirname "$SOURCE"))/functions/*; do
-      [[ -d "$funcfile" ]] && continue
-      funcname="$(sed -rne '3 s;^(function\s+)?([^#( ]+)\(\) \{$;\2;p' "$funcfile")"
+   for funcfile in $(realpath $(dirname "${SOURCE}"))/functions/*; do
+      [[ -d "${funcfile}" ]] && continue
+      funcname="$(sed -rne '3 s;^(function\s+)?([^#( ]+)\(\) \{$;\2;p' "${funcfile}")"
 
       # export all the functions here so subshells can utilize them, if needed
       # for some reason, exported pushd() causes issues in direnv-allowed directories
@@ -17,24 +17,24 @@ is_zsh || {
       # we don't want to source and export files with functions that don't match their filenames
       {
          # test conditions
-         [[ "$funcname" =~ ^${funcfile//*\/}$ ]] &&
-         [[ -r "$funcfile" ]] &&
-         file -L --mime-type "$funcfile" | grep -q 'text/x-shellscript' &&
-         bash -n "$funcfile" 2>/dev/null
+         [[ "${funcname}" =~ ^${funcfile//*\/}$ ]] &&
+         [[ -r "${funcfile}" ]] &&
+         file -L --mime-type "${funcfile}" | grep -q 'text/x-shellscript' &&
+         bash -n "${funcfile}" 2>/dev/null
       } && {
          # unset the function if it already exists so we start fresh
          # then export the function
          if is_zsh; then
-            TYPE="$(whence -w $funcname | awk '{print $2}')"
+            TYPE="$(whence -w ${funcname} | awk '{print $2}')"
             EXPORT=(export)
          else
-            TYPE="$(type -t $funcname)"
+            TYPE="$(type -t ${funcname})"
             EXPORT=(export -f)
          fi
          [[ "${TYPE}" =~ ^function$ ]] && unset -f funcname
-         . "$funcfile" &&
-         [[ ! "$funcfile" =~ pushd ]] &&
-         ${EXPORT[@]} "$funcname"
+         . "${funcfile}" &&
+         [[ ! "${funcfile}" =~ pushd ]] &&
+         "${EXPORT[@]}" "${funcname}"
       }
    done
    unset funcfile funcname SOURCE TYPE EXPORT
@@ -47,7 +47,7 @@ is_zsh || {
 board-starship() {
    # this assumes there are multiple starship configuration files in the config directory
    local starship_to_board="${1}"
-   local starship_config_dir="$HOME/.config"
+   local starship_config_dir="${HOME}/.config"
    local starship_config_file="${starship_config_dir}/starship${starship_to_board}.toml"
    [[ -n "${starship_to_board}" ]] && starship_config_file="${starship_config_dir}/starship-${starship_to_board}.toml"
    local starships="$(ls -1 "${starship_config_dir}/"*starship*toml | sed -Ene 's;.*starship-([^.]+)\.toml;\1;p' | sort -u)"
@@ -95,7 +95,7 @@ gist() {
       fi
 
       if [[ "${gist_file}" =~ ^- ]]; then
-         gh gist ${gist_action} "${gist_file}"
+         gh gist "${gist_action}" "${gist_file}"
          return
       fi
 
@@ -109,7 +109,7 @@ gist() {
          else
             echo "'${gist_file}' not found:"
          fi
-      elif [[ $(echo ${found_file} | wc -l) -gt 1 ]]; then
+      elif [[ $(echo "${found_file}" | wc -l) -gt 1 ]]; then
 
          # clear out file list so 'gh gist view' lists them all
          found_file=""
@@ -119,7 +119,7 @@ gist() {
       echo
       echo "found_file = ${found_file}"
       echo gh gist "${gist_action}" "${found_file}"
-      gh gist ${gist_action} "${found_file}"
+      gh gist "${gist_action}" "${found_file}"
    else
       echo "error: 'gh' client not installed"
       return 1
@@ -148,8 +148,16 @@ kgetall() {
    has kubecolor && force_colors='--force-colors'
 
    time (
-      echo "k get "${namespace[@]}" ${force_colors} \$(k api-resources "${api_resource_namespaced[@]}" --verbs=list -o name | sort | tr '\\\n' ',' | sed -re 's;,$;;g') -o wide 2> /dev/null"
-      k get "${namespace[@]}" ${force_colors} $(k api-resources "${api_resource_namespaced[@]}" --verbs=list -o name | sort | tr '\n' ',' | sed -re 's;,$;;g') -o wide 2> /dev/null
+      # shellcheck disable=SC2145
+      echo -n "k get ${namespace[@]} ${force_colors} \$(k api-resources ${api_resource_namespaced[@]} --verbs=list -o name | "
+      echo -n "sort | "
+      echo -n "tr '\\\n' ',' | "
+      echo "sed -re 's;,$;;g') -o wide 2> /dev/null"
+      k get "${namespace[@]}" "${force_colors}" $(k api-resources "${api_resource_namespaced[@]}" --verbs=list -o name |
+         sort |
+         tr '\n' ',' |
+         sed -re 's;,$;;g'
+         ) -o wide 2> /dev/null
       echo
    )
 }
@@ -184,16 +192,16 @@ kc() {
    fi
 
    if [[ "${1}" =~ ^(edit)$ ]]; then
-      echo kubectl ${command} ${output_format}
+      echo "kubectl ${command} ${output_format}"
       kubectl ${command} ${output_format}
    elif has yq && [[ "${USE_YAML}" =~ ^TRUE$ ]]; then
-      echo yq -C \<\(kubectl ${command} ${output_format} \) \| less
+      echo "yq -C <(kubectl ${command} ${output_format}) | less"
       yq -C <(kubectl ${command} ${output_format}) | less
    elif has kubecolor; then
-      echo kubecolor ${command} ${output_format} --force-colors \| less
+      echo "kubecolor ${command} ${output_format} --force-colors \| less"
       kubecolor ${command} ${output_format} --force-colors | less
    else
-      echo kubectl ${command} ${output_format} \| less
+      echo "kubectl ${command} ${output_format} \| less"
       kubectl ${command} ${output_format} | less
    fi
 }
@@ -210,7 +218,7 @@ kc() {
 #   echo "command = ${command}"
 #   shift
 #
-#   if [[ $# -eq 1 && $1 =~ ^[-0-9]+$ ]]; then
+#   if [[ $# -eq 1 && ${1} =~ ^[-0-9]+$ ]]; then
 #      builtin "${command}" %"${1}"
 #   elif [[ "${command}" =~ ^fg$ ]]; then
 #      builtin "${command}" %$(jobs | sed -rne 's;^\[([0-9])\] *\+.*;\1;p')
@@ -226,17 +234,20 @@ kc() {
 #}
 if is_zsh; then
    fg() {
-      if [[ $# -eq 1 && $1 =~ ^[-0-9]+$ ]]; then
+      if [[ $# -eq 1 && "${1}" =~ ^[-0-9]+$ ]]; then
          builtin fg %"${1}"
       else
          # for some reason, 'jobs' sometimes doesn't print output even though it should
          # using it once before we need to parse its output seems to relatively consistently work around that
-         builtin fg %$({ jobs &>/dev/null; jobs | sed -Ene 's;^\[([0-9])\] *+.*;\1;p'; })
+         local JOBS="$(jobs | sed -Ene 's;^\[([0-9]+)\] *\+.*;\1;p')"
+         if [[ -n "${JOBS}" ]]; then
+            builtin fg %$({ jobs &>/dev/null; echo "${JOBS}"; })
+         fi
       fi
    }
 
    kill() {
-      if [[ $# -eq 1 && $1 =~ ^[-0-9]+$ ]]; then
+      if [[ $# -eq 1 && "${1}" =~ ^[-0-9]+$ ]]; then
          builtin kill -KILL %"${1}"
       else
          builtin kill
@@ -244,19 +255,19 @@ if is_zsh; then
    }
 
    pushd() {
-      if [[ $@ =~ ^[0-9]+$ ]]; then
-         builtin pushd -q +"$@"
+      if [[ "${1}" =~ ^[0-9]+$ ]]; then
+         builtin pushd -q +"${1}"
       else
-         builtin pushd -q "$@"
+         builtin pushd -q "${1}"
       fi
       dirs
    }
 
    popd() {
-      if [[ $@ =~ ^[0-9]+$ ]]; then
-         builtin popd -q +"$@"
+      if [[ "${1}" =~ ^[0-9]+$ ]]; then
+         builtin popd -q +"${1}"
       else
-         builtin popd -q "$@"
+         builtin popd -q "${1}"
       fi
       dirs
    }

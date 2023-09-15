@@ -26,7 +26,8 @@ pushd() {
 #            if [[ -n ${dirstack["$(realpath "${path}")"]} ]]; then
 #               verbose 2 "$(($LINENO + 2)): [[ -n \${dirstack["\$\(realpath "\${path}"\)"]} ]]; [[ -n ${dirstack["$(realpath "${path}")"]} ]]"
 #               [[ ${dirstack["$(realpath "${path}")"]} != "$position" ]] &&
-#                  verbose 2 "$(($LINENO + 2)): [[ \${dirstack["\$\(realpath "\${path}"\)"]} != "\$position" ]]; [[ ${dirstack["$(realpath "${path}")"]} != "$position" ]]" &&
+#                  verbose -n 2 "$(($LINENO + 2)): [[ \${dirstack["\$\(realpath "\${path}"\)"]} != "\$position" ]]; " &&
+#                  verbose -n 2 "[[ ${dirstack["$(realpath "${path}")"]} != "$position" ]]" &&
 #                  verbose 2 "$(($LINENO + 2)): popd +$position" &&
 #                  builtin popd "+$position"
 #            else

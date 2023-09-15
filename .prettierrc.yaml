@@ -1,0 +1,8 @@
+---
+trailingComma: 'es5'
+overrides:
+  - files: '*.ya?ml'
+    options:
+      trailingComma: all
+      arrowParens: avoid
+      semi: false

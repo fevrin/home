@@ -1,0 +1,23 @@
+{
+  "AllowedContentTypes": [],
+  "Debug": false,
+  "Disable": {
+    "EndOfLine": false,
+    "IndentSize": false,
+    "Indentation": false,
+    "InsertFinalNewline": false,
+    "MaxLineLength": false,
+    "TrimTrailingWhitespace": false
+  },
+  "Exclude": [
+    "\\.vim\\/autoload\\/pathogen\\.vim",
+    "\\.vim\\/autoload\\/Align\\.vim",
+    "\\.vim\\/doc\\/Align\\.txt"
+  ],
+  "IgnoreDefaults": false,
+  "NoColor": false,
+  "PassedFiles": [],
+  "SpacesAftertabs": false,
+  "Verbose": false,
+  "Version": "2.7.0"
+}

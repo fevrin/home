@@ -89,7 +89,8 @@ if [[ "$TERM_PROGRAM" = "Apple_Terminal" || "$TERM_PROGRAM" =~ iTerm ]]; then
    # from <http://osxdaily.com/2012/02/13/remove-finder-from-the-commandtab-application-switcher-in-mac-os-x/>
    # it seems impossible to edit the file under Mac OS X Sierra due to System Integrity Protection
    #if [[ ! $(grep '<key>NSUIElement</key>\n\s+<string>1</string>' /System/Library/CoreServices/Finder.app/Contents/Info.plist) ]]; then
-   #   sudo sed '0,/<dict>/s;<dict>;<dict>\n        <key>NSUIElement</key>\n        <string>1</string>;' /System/Library/CoreServices/Finder.app/Contents/Info.plist
+   #   sudo sed '0,/<dict>/s;<dict>;<dict>\n        <key>NSUIElement</key>\n        <string>1</string>;' \
+   #   /System/Library/CoreServices/Finder.app/Contents/Info.plist
    #fi
 
 fi

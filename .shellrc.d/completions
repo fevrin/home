@@ -1,43 +1,50 @@
 #!/usr/bin/env bash
 
 # 1password
-has op && . <(op completion ${SHELL_TYPE})
+has op && . <(op completion "${SHELL_TYPE}")
 is_zsh && compdef _op op
 
 # docker
 if has docker; then
+   COMPLETION_DIR="${HOME}/.local/completions"
+   [[ -d "${COMPLETION_DIR}" ]] || mkdir -p "${COMPLETION_DIR}"
+
+   # default to Bash completion
+   DOCKER_COMPLETION_FILE="${COMPLETION_DIR}/_docker.sh"
+   DOCKER_COMPLETION_FILE_URL="https://raw.githubusercontent.com/docker/cli/master/contrib/completion/bash/docker"
+
    if is_zsh; then
-      docker_completion_file="${HOME}/.local/completions/_docker.zsh"
-      [[ -s "${docker_completion_file}" ]] || {
-         curl -sLo "${docker_completion_file}" https://raw.githubusercontent.com/docker/cli/master/contrib/completion/zsh/_docker
-      }
+      DOCKER_COMPLETION_FILE="${COMPLETION_DIR}/_docker.zsh"
+      DOCKER_COMPLETION_FILE_URL="https://raw.githubusercontent.com/docker/cli/master/contrib/completion/zsh/_docker"
+
       zstyle ':completion:*:*:docker:*' option-stacking yes
       zstyle ':completion:*:*:docker-*:*' option-stacking yes
-      . "${docker_completion_file}"
-   else
-      docker_completion_file="${HOME}/.local/completions/_docker.sh"
-      [[ -s ${HOME}/.local/completions/_docker.sh ]] || {
-         curl -sLo ${HOME}/.local/completions/_docker.sh https://raw.githubusercontent.com/docker/cli/master/contrib/completion/bash/docker
-      }
-      . "${docker_completion_file}"
    fi
-   unset docker_completion_file
+
+   [[ -s "${DOCKER_COMPLETION_FILE}" ]] || {
+      curl -sLo "${DOCKER_COMPLETION_FILE}" "${DOCKER_COMPLETION_FILE_URL}"
+   }
+
+   . "${DOCKER_COMPLETION_FILE}"
+   unset DOCKER_COMPLETION_FILE
+   unset DOCKER_COMPLETION_FILE_URL
+   unset COMPLETION_DIR
 fi
 
 # dotfile manager
-has chezmoi && . <(chezmoi completion ${SHELL_TYPE})
+has chezmoi && . <(chezmoi completion "${SHELL_TYPE}")
 is_zsh && compdef _chezmoi chezmoi
 
 # github-cli
-has gh && . <(gh completion -s ${SHELL_TYPE})
+has gh && . <(gh completion -s "${SHELL_TYPE}")
 is_zsh && compdef _gh gh
 
 # gitlab-cli
-has glab && . <(glab completion -s ${SHELL_TYPE})
+has glab && . <(glab completion -s "${SHELL_TYPE}")
 is_zsh && compdef _glab glab
 
 # helm
-has helm && . <(helm completion ${SHELL_TYPE})
+has helm && . <(helm completion "${SHELL_TYPE}")
 
 # k8s
 has kubectl && {
@@ -47,7 +54,7 @@ has kubectl && {
       alias k='kubectl'
    fi
 
-   . <(kubectl completion ${SHELL_TYPE})
+   . <(kubectl completion "${SHELL_TYPE}")
 
    if is_zsh; then
       # k alias hack TODO: remember compdef load order
@@ -59,13 +66,13 @@ has kubectl && {
 
 # minikube
 has minikube && {
-   . <(minikube completion ${SHELL_TYPE})
+   . <(minikube completion "${SHELL_TYPE}")
    alias mk='minikube kubectl --'
 }
 
 # starship
-has starship && . <(starship completions ${SHELL_TYPE})
+has starship && . <(starship completions "${SHELL_TYPE}")
 
 # glow
 # https://github.com/charmbracelet/glow
-has glow && . <(glow completion ${SHELL_TYPE})
+has glow && . <(glow completion "${SHELL_TYPE}")

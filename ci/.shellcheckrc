@@ -42,3 +42,6 @@ enable=require-double-brackets
 # example: var=hello; echo $var
 # fix:     var=hello; echo ${var}
 enable=require-variable-braces
+
+# Set whether or not to follow arbitrary file paths in source statements
+external-sources=true

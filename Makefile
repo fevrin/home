@@ -1,12 +1,14 @@
 MAKEFILE := $(lastword $(MAKEFILE_LIST))
 MAKE_COMMAND := $(MAKE) -C $(abspath $(dir $(MAKEFILE))) -f $(abspath $(MAKEFILE))
+CHANGED_FILES ?= $(shell git diff --name-only origin/HEAD)
+REPO_ROOT ?= $(shell git rev-parse --show-toplevel)
 
 .PHONY: ssh git
 # from <https://stackoverflow.com/questions/2131213/can-you-make-valid-makefiles-without-tab-characters/60363121#60363121>
 .RECIPEPREFIX := $(.RECIPEPREFIX) # switch to using spaces instead of tabs for recipe separators
 
 CONFIG_FILE := "config.new.$$$$"
-ssh:
+ssh: ## Generators: generates "${HOME}/.ssh/config" file using 'includes' directives
 ifeq ($(notdir $(CURDIR)), .ssh)
    $(info running $@)
 
@@ -32,11 +34,12 @@ ifeq ($(notdir $(CURDIR)), .ssh)
       echo $(DIR) "doesn't exist!"; \
    fi
 else
-   @# Makefile path determination from <https://stackoverflow.com/questions/18136918/how-to-get-current-relative-directory-of-your-makefile/18137056#18137056>
+   @# Makefile path determination from
+   @#<https://stackoverflow.com/questions/18136918/how-to-get-current-relative-directory-of-your-makefile/18137056#18137056>
    @$(MAKE) -sC .ssh -f $(abspath $(lastword $(MAKEFILE_LIST))) ssh
 endif
 
-git:
+git: ## Generators: generates "${HOME}/.gitconfig" file using 'includes' directives
 ifeq ($(notdir $(CURDIR)), .gitconfig.d)
    $(info running $@)
 
@@ -62,21 +65,22 @@ ifeq ($(notdir $(CURDIR)), .gitconfig.d)
       echo $(DIR) "doesn't exist!"; \
    fi
 else
-   @# Makefile path determination from <https://stackoverflow.com/questions/18136918/how-to-get-current-relative-directory-of-your-makefile/18137056#18137056>
+   @# Makefile path determination from
+   @#<https://stackoverflow.com/questions/18136918/how-to-get-current-relative-directory-of-your-makefile/18137056#18137056>
    @$(MAKE) -sC .gitconfig.d -f $(abspath $(lastword $(MAKEFILE_LIST))) git
 endif
 
 .PHONY: dev
-dev:
+dev: ## Aliases: runs 'git-hooks'
    @$(MAKE_COMMAND) git-hooks
 
 git-hooks:
    @$(MAKE_COMMAND) $(subst .githooks, .git/hooks, $(wildcard .githooks/*))
-.git/hooks/%: .githooks/%
+.git/hooks/%: .githooks/% ## Automatic: creates symlinks for all git hooks from '.githooks' to '.git/hooks'
    @[ -h $@ ] || ln -siv ../../$< $@
 
 .PHONY: check-defs
-check-defs: $(shell find -name '*.md')
+check-defs: $(shell find -regex '.*\.md\(\.tpl\)?') ## Miscellaneous: checks all Markdown files for unused definitions
    @/bin/bash -c '\
       for file in $^; do \
          for footnote in $$(\
@@ -118,7 +122,72 @@ check-defs: $(shell find -name '*.md')
       done; \
    '
 
+.PHONY: check-md-links
+check-md-links: $(shell find -regex '.*\.md\(\.tpl\)?') ## Miscellaneous: checks all Markdown files for unused definitions
+   -@echo
+   -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   -@echo $(shell echo '$@' | tr '[:lower:]' '[:upper:]')
+   -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   @for file in $^; do \
+      refs="$$(grep -Eo '\[[^]]+\]\[[^]]*\]' $${file} | sort -u | wc -l)"; \
+      defs="$$(grep -Eo '^\[[^]]+\]: ' $${file} | sort -u | wc -l)"; \
+      if [ "$${refs}" != "$${defs}" ]; then \
+         errors="$$((errors + 1))"; \
+         echo "$${file} has $${refs} reference(s) but $${defs} definition(s)"; \
+      fi; \
+   done; \
+   if [ -n "$${errors}" ]; then \
+      echo "$${errors} error(s) found"; \
+   fi
 
+.PHONY: generate-docs
+generate-docs: check-md-links $(shell find -regex '.*\.md\(\.tpl\)?') ## Generators: Regenerates Markdown files (including ToC and 'make help' output)
+   -@echo
+   -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   -@echo $(shell echo '$@' | tr '[:lower:]' '[:upper:]')
+   -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   @echo "Generating docs..."
+   @for file in $^; do \
+      [ -s $${file} ] || continue; \
+      TEMP_FILE="$$(mktemp -p $(REPO_ROOT))"; \
+      OUTPUT_FILENAME="$${file%%.tpl}"; \
+      MAKEFILE_HELP="$$($(REPO_ROOT)/scripts/makefile_help.sh $(MAKEFILE_LIST))" \
+      TOC="$$( \
+         sed -rne 's;^(##+) (.*);\1- [\2](\#\L\2);p' $(REPO_ROOT)/$${file} | \
+         sed -Ee 's;^(#+);\1\1;' | \
+         awk 'BEGIN{FS=OFS="-"} {gsub(/#/, " ", $$1)} $$1' | \
+         awk 'BEGIN{FS="[]][(]"; OFS="]("} {gsub(/[ ]/, "-", $$2)} {gsub(/[/()`.]/, "", $$2)}; $$2=$$2")"' | \
+         sed -e 's;^    ;;' \
+      )" \
+      envsubst \
+      '\
+      $${MAKEFILE_HELP} \
+      $${TOC} \
+      ' \
+      < $(REPO_ROOT)/$${file} \
+      | grep -v '^ *<!-- # vim:' | tee $${TEMP_FILE} >/dev/null; \
+      if diff $${TEMP_FILE} $(REPO_ROOT)/$${OUTPUT_FILENAME} >/dev/null 2>&1; then \
+         echo "no changes for $${file}"; \
+         rm $${TEMP_FILE}; \
+      else \
+         mv -fu $${TEMP_FILE} $(REPO_ROOT)/$${OUTPUT_FILENAME}; \
+      fi; \
+   done
+
+
+.PHONY: pre-commit
+pre-commit: ## Lints all files changed between the default branch and the current branch
+   -@echo
+   -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   -@echo $(shell echo '$@' | tr '[:lower:]' '[:upper:]')
+   -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   -@command -v -- pipenv >/dev/null 2>&1 || pip3 install pipenv
+   -@pipenv run pre-commit -V >/dev/null 2>&1 || pipenv install pre-commit
+   -pipenv run pre-commit run -v --show-diff-on-failure --color=always --files $(CHANGED_FILES)
+
+.PHONY: help
+help: ## Miscellaneous: returns this Makefile's commands and their descriptions in a formatted table
+   @scripts/makefile_help.sh $(MAKEFILE_LIST) 1
 
 #test:
 #   @DIR="config.d"; \

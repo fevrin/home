@@ -6,7 +6,8 @@ man() {
    # without messing up the formatting (the '$(($(tput cols) - 6))') accounts for `less`'s current default line number column
    # width of 7, though it seems 6 works here just as well
 
-   # once we're on `less` version 571+, we can add the `-N -J --line-num-width=4 --status-col-width=2` options to `$MANPAGER` to print line numbers and a status column while not affecting formatting/wrapping
+   # once we're on `less` version 571+, we can add the `-N -J --line-num-width=4 --status-col-width=2` options to `${MANPAGER}` to print line numbers
+   # and a status column while not affecting formatting/wrapping
    # we could possibly remove this function at that point, as well, if the behavior is the same
 
    # the `--line-num-width` option was added in `less` v571:
@@ -16,16 +17,17 @@ man() {
    # https://github.com/gwsw/less/compare/v569...v570
    # https://github.com/gwsw/less/compare/v570...v571
 
-   local MANPAGER="$MANPAGER -N"
+   local MANPAGER="${MANPAGER} -N"
    local MANWIDTH
-   if [[ "$MANPAGER" =~ -N ]]; then
-      # we're numbering lines in man pages, so we need to accomodate `less`'s line number column width
-      # `man` seems to already subtract 6 columns from the terminal window width, so any value above 1 here should work (6 + 1 = `less`'s current default line number column width of 7)
+   if [[ "${MANPAGER}" =~ -N ]]; then
+      # we're numbering lines in man pages, so we need to accommodate `less`'s line number column width
+      # `man` seems to already subtract 6 columns from the terminal window width, so any value above 1 here should work (6 + 1 = `less`'s current
+      # default line number column width of 7)
       # anything higher than 1 will add a margin to the right
-      export MANWIDTH="$(($COLUMNS - 6))"
+      export MANWIDTH="$((${COLUMNS} - 6))"
    else
       # partially cancel out the 6 columns that `man` already subtracts
-      export MANWIDTH="$(($COLUMNS + 2 ))"
+      export MANWIDTH="$((${COLUMNS} + 2 ))"
    fi
-   command man "$@"
+   command man "${@}"
 }

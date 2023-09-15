@@ -5,7 +5,10 @@
 get-public-ip() {
 # returns the public ip of the local computer.  help from <http://www.go2linux.org/what-is-my-public-ip-address-with-linux>
 #   curl ifconfig.me/all/json
-   wget -q -O - icanhazip.com || wget -q -O - checkip.dyndns.org | grep -oE '[0-9.]{7,15}' || curl -s checkip.dyndns.org | grep -oE '[0-9.]{7,15}'
+   wget -q -O - icanhazip.com ||
+      wget -q -O - ifconfig.co ||
+      wget -q -O - checkip.dyndns.org | grep -oE '[0-9.]{7,15}' ||
+      curl -s checkip.dyndns.org | grep -oE '[0-9.]{7,15}'
    #if [[ $(which curl) ]]; then
    #   #curl http://www.whatismyip.com/automation/n09230945.asp ||
    #   curl http://automation.whatismyip.com/n09230945.asp ||
@@ -17,28 +20,28 @@ get-public-ip() {
 }
 
 get-ip-location() {
-   local ip="$(get-public-ip)"
-   local data="$(curl -sw "%{response_code}" http://api.db-ip.com/v2/free/$ip)"
-   local location="$(echo "$data" | sed -re 's;(.*[^0-9])[0-9]+$;\1;')"
-   local resp_code="$(echo "$data" | sed -re 's;.*[^0-9]([0-9]+)$;\1;')"
+   local data="$(curl -sw "%{response_code}" ifconfig.co/json)"
+   local location="$(echo "${data}" | sed -re 's;(.*[^0-9])[0-9]+$;\1;')"
+   local resp_code="$(echo "${data}" | sed -re 's;.*[^0-9]([0-9]+)$;\1;')"
 
-   [[ ! "$resp_code" =~ 200 ]] && {
+   [[ ! "${resp_code}" =~ 200 ]] && {
+      local ip="$(get-public-ip)"
       location="$(curl -s -H "User-Agent: keycdn-tools:https://www.example.com" "https://tools.keycdn.com/geo.json?host=${ip}")"
    }
 
-   echo "$location"
+   echo "${location}"
 }
 
 get-ip-city() {
-   local data="$(curl -sw "%{response_code}" https://ipinfo.io/city 2> /dev/null | tr ' ' '+')"
-   local city="$(echo "$data" | sed -re 's;(.*[^0-9])[0-9]+$;\1;')"
-   local resp_code="$(echo "$data" | sed -re 's;.*[^0-9]([0-9]+)$;\1;')"
+   local data="$(curl -sw "%{response_code}" https://ifconfig.co/city 2> /dev/null | tr ' ' '+')"
+   local city="$(echo "${data}" | sed -re 's;(.*[^0-9])[0-9]+$;\1;')"
+   local resp_code="$(echo "${data}" | sed -re 's;.*[^0-9]([0-9]+)$;\1;')"
 
-   [[ ! "$resp_code" =~ 200 ]] && {
+   [[ ! "${resp_code}" =~ 200 ]] && {
       city="$(get-ip-location | jq -r '.city')"
    }
 
-   echo "$city"
+   echo "${city}"
 }
 
 count-ips-from-tcpdump() {
@@ -46,7 +49,78 @@ count-ips-from-tcpdump() {
    # first run something like this on the server to get good sample data:
    # tcpdump -i eth0 -nnc 1000
 
-   local file="$1"
-   [[ -r "$file" ]] || { echo "file doesn't exist or is unreadable!"; return 1; }
-   sed -rne "s;.*IP $IP_REGEX\.?.*;\1;p" "$file" | sort | uniq -c | sort -h
+   local file="${1}"
+   [[ -r "${file}" ]] || { echo "file doesn't exist or is unreadable!"; return 1; }
+   sed -rne "s;.*IP ${IP_REGEX}\.?.*;\1;p" "${file}" | sort | uniq -c | sort -h
 }
+
+##########################################################
+######## VPN ########
+#####################
+
+vpn-start() {
+   if has openvpn3; then
+      echo "openvpn3 session-start --config ~/.config/openvpn3/vpn.ovpn"
+      openvpn3 session-start --config ~/.config/openvpn3/vpn.ovpn
+   else
+      echo "${BOLD}${RED}error:${END_COLOR} \"openvpn3\" not found"
+   fi
+}
+
+vpn-list() {
+   if has openvpn3; then
+      echo "openvpn3 sessions-list"
+      openvpn3 sessions-list
+   else
+      echo "${BOLD}${RED}error:${END_COLOR} \"openvpn3\" not found"
+   fi
+}
+
+# shellcheck disable=SC2142
+vpn-stop() {
+   if has openvpn3; then
+      for session_path in $(
+         openvpn3 sessions-list |
+            awk "{
+               if(\$0 ~ /Path:/) {
+                  print \$2
+               } else if(\$0 ~ /No sessions available/) {
+                  print \"none\"
+               }
+            }"
+         ); do
+         if [[ "${session_path}" =~ ^none$ ]]; then
+            echo "No sessions available"
+         else
+            echo "openvpn3 session-manage --disconnect --session-path ${session_path}"
+            openvpn3 session-manage --disconnect --session-path "${session_path}"
+         fi
+      done
+
+      echo "openvpn3 session-manage --cleanup"
+      openvpn3 session-manage --cleanup
+      unset session_path
+   else
+      echo "${BOLD}${RED}error:${END_COLOR} \"openvpn3\" not found"
+   fi
+}
+
+# shellcheck disable=SC2142
+vpn-reset() {
+   if has openvpn3; then
+      session_path="$(openvpn3 sessions-list | awk "{ if(\$0 ~ /Path:/){print \$2} else if(\$0 ~ /No sessions available/){print \"none\"} }")"
+      if [[ $(echo "${session_path}" | wc -l) -eq 0 ]]; then
+         vpn-start
+      elif [[ $(echo "${session_path}" | wc -l) -eq 1 ]]; then
+         echo "openvpn3 session-manage --restart --path ${session_path}"
+         openvpn3 session-manage --restart --path "${session_path}"
+      else
+         vpn-stop && vpn-start
+      fi
+      unset session_path
+   else
+      echo "${BOLD}${RED}error:${END_COLOR} \"openvpn3\" not found"
+   fi
+}
+
+##########################################################

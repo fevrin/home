@@ -1,6 +1,477 @@
-# TODO
-
 # CHANGELOG
+
+## v3.0.0
+
+### 2023-09-14 (Thu, Sep 14, 2023)
+* style: shorten command lines to pass editorconfig-checker
+
+### 2023-09-14 (Thu, Sep 14, 2023)
+* refactor: move vpn functions to 'functions_net'
+
+### 2023-09-14 (Thu, Sep 14, 2023)
+* docs: add another example of 'inotifywait' for quick, iterative updates
+
+### 2023-09-14 (Thu, Sep 14, 2023)
+* feat: enable 'lychee' linter (link checker)
+
+### 2023-09-13 (Wed, Sep 13, 2023)
+* fix: explicitly specify editorconfig-checker config file location
+
+### 2023-09-13 (Wed, Sep 13, 2023)
+* fix: make corrections for shellcheck
+
+### 2023-09-13 (Wed, Sep 13, 2023)
+* style: update whitespace formatting
+
+### 2023-09-13 (Wed, Sep 13, 2023)
+* fix: update `.bashrc.d` references to be '.shellrc.d'
+
+### 2023-09-13 (Wed, Sep 13, 2023)
+* style: correct some formatting
+
+### 2023-09-13 (Wed, Sep 13, 2023)
+* style: finish a sentence about linting
+
+### 2023-09-13 (Wed, Sep 13, 2023)
+* style: prettify json
+
+### 2023-09-13 (Wed, Sep 13, 2023)
+* style: fix end of files
+
+### 2023-09-13 (Wed, Sep 13, 2023)
+* feat: update editorconfig-checker's excluded files
+
+### 2023-09-13 (Wed, Sep 13, 2023)
+* style: update editorconfig to not prescribe a default indent style
+
+### 2023-09-13 (Wed, Sep 13, 2023)
+* fix: update toprc values
+
+### 2023-09-13 (Wed, Sep 13, 2023)
+* fix: move '.toprc' to modern location
+
+### 2023-09-12 (Tue, Sep 12, 2023)
+* style: fix long line lengths
+
+### 2023-09-11 (Mon, Sep 11, 2023)
+* style: add syntax highlighting for 'make help' documentation
+
+### 2023-09-11 (Mon, Sep 11, 2023)
+* docs(README): add linting documentation
+
+### 2023-09-11 (Mon, Sep 11, 2023)
+* style: updated regenerated README.md
+
+### 2023-09-11 (Mon, Sep 11, 2023)
+* feat: change tmux pane resize keybinding increments to be 5
+
+### 2023-09-11 (Mon, Sep 11, 2023)
+* style: update editorconfig styles for specific filetypes
+
+### 2023-09-11 (Mon, Sep 11, 2023)
+* style: fix long line lengths
+
+### 2023-09-09 (Sat, Sep 09, 2023)
+* feat: add editorconfig-checker configuration and update editorconfig
+
+### 2023-09-09 (Sat, Sep 09, 2023)
+* style: some style updates to match editorconfig config
+
+### 2023-09-09 (Sat, Sep 09, 2023)
+* feat: add editorconfig-checker pre-commit hook
+
+### 2023-09-08 (Fri, Sep 08, 2023)
+* fix: correct version of MegaLinter noted
+
+### 2023-09-07 (Thu, Sep 07, 2023)
+* feat: update prettier to write changes
+
+### 2023-09-07 (Thu, Sep 07, 2023)
+* feat: pin versions of GitHub Actions
+
+### 2023-09-07 (Thu, Sep 07, 2023)
+* feat: remove toggle for enabling MegaLinter; now, it always runs
+
+### 2023-09-07 (Thu, Sep 07, 2023)
+* feat: enable more MegaLinter linters
+
+### 2023-09-07 (Thu, Sep 07, 2023)
+* style: prettier linting
+
+### 2023-09-07 (Thu, Sep 07, 2023)
+* fix: argument mixture of string and array (SC2145)
+
+### 2023-09-07 (Thu, Sep 07, 2023)
+* fix: some bugs from adding support for zsh in 16549d4
+
+### 2023-09-07 (Thu, Sep 07, 2023)
+* fix: change GitHub link to be a permalink
+
+### 2023-09-06 (Wed, Sep 06, 2023)
+* feat: increase shellcheck's wiki link count to 50
+
+### 2023-09-06 (Wed, Sep 06, 2023)
+* feat: have shellcheck fail only on error
+
+### 2023-09-06 (Wed, Sep 06, 2023)
+* feat: enable more linters and ignore an actionlint error
+
+### 2023-09-06 (Wed, Sep 06, 2023)
+* fix: various corrections, per shellcheck
+
+### 2023-09-06 (Wed, Sep 06, 2023)
+* fix: update MegaLinter regex filter for shellcheck
+
+### 2023-09-05 (Tue, Sep 05, 2023)
+* style: add quotes and whitespace
+
+### 2023-09-05 (Tue, Sep 05, 2023)
+* feat: update actions/checkout to v4
+
+### 2023-09-04 (Mon, Sep 04, 2023)
+* feat: have shellcheck show only errors
+
+### 2023-09-04 (Mon, Sep 04, 2023)
+* fix: double quote variables (SC2086)
+
+### 2023-09-04 (Mon, Sep 04, 2023)
+* style: prefer putting braces around Bash variable names (SC2250)
+
+### 2023-09-04 (Mon, Sep 04, 2023)
+* fix: test braces (SC2292)
+
+### 2023-09-04 (Mon, Sep 04, 2023)
+* style: add comment for a shellcheckrc directive
+
+### 2023-09-04 (Mon, Sep 04, 2023)
+* feat: update MegaLint shellcheck configuration to include more files
+
+### 2023-09-04 (Mon, Sep 04, 2023)
+* fix: remove unnecessary dependency for MegaLint
+
+### 2023-09-04 (Mon, Sep 04, 2023)
+* refactor: optimize determining the file list that MegaLinter should use
+
+### 2023-09-04 (Mon, Sep 04, 2023)
+* fix: environment variable used by MegaLinter
+
+### 2023-09-04 (Mon, Sep 04, 2023)
+* feat: add shellcheck wiki links and sort MegaLinter options
+
+### 2023-09-04 (Mon, Sep 04, 2023)
+* style: wrap yaml lines to meet desired text width
+
+### 2023-09-04 (Mon, Sep 04, 2023)
+* fix: exclude 'zsh' files again since shellcheck otherwise complains
+
+### 2023-09-04 (Mon, Sep 04, 2023)
+* feat: move shellcheckrc and update MegaLinter to support new location
+
+### 2023-09-04 (Mon, Sep 04, 2023)
+* feat: add basic zshrc linting
+
+### 2023-09-04 (Mon, Sep 04, 2023)
+* feat: update MegaLinter to lint only changed files
+
+### 2023-09-04 (Mon, Sep 04, 2023)
+* fix: source necessary file
+
+### 2023-09-04 (Mon, Sep 04, 2023)
+* fix: update filename path
+
+### 2023-09-04 (Mon, Sep 04, 2023)
+* style: add double quotes around variable references
+
+### 2023-09-04 (Mon, Sep 04, 2023)
+* style: add curly braces around variable references
+
+### 2023-09-03 (Sun, Sep 03, 2023)
+* feat: update Mega-Linter and related configs
+
+### 2023-09-03 (Sun, Sep 03, 2023)
+* fix: change env dump syntax
+
+### 2023-09-03 (Sun, Sep 03, 2023)
+* fix: some misspellings
+
+### 2023-09-02 (Sat, Sep 02, 2023)
+* style: remove unnecessary semicolons
+
+### 2023-09-02 (Sat, Sep 02, 2023)
+* fix: bug in for loop
+
+### 2023-09-01 (Fri, Sep 01, 2023)
+* feat: add initial Mega Linter configuration
+
+### 2023-09-01 (Fri, Sep 01, 2023)
+* style: add document headers to YAML files
+
+### 2023-09-01 (Fri, Sep 01, 2023)
+* feat: enable editorconfig plugin for vim
+
+### 2023-09-01 (Fri, Sep 01, 2023)
+* style: add max line length for git commit message
+
+### 2023-09-01 (Fri, Sep 01, 2023)
+* style: update headings and remove TODO from CHANGELOG files
+
+### 2023-09-01 (Fri, Sep 01, 2023)
+* feat: utilize vim modelines in templates but strip them from output
+
+### 2023-09-01 (Fri, Sep 01, 2023)
+* style: give python installation step a name
+
+### 2023-09-01 (Fri, Sep 01, 2023)
+* fix: remove unused pre-commit 'double-quote-string-fixer' hook
+
+### 2023-09-01 (Fri, Sep 01, 2023)
+* style: reorganize editorconfig and update based on Super-Linter's
+
+### 2023-08-31 (Thu, Aug 31, 2023)
+* style: rename step to install packages for nektos/act
+
+### 2023-08-31 (Thu, Aug 31, 2023)
+* style: remove some whitespace
+
+### 2023-08-30 (Wed, Aug 30, 2023)
+* fix: remove 'pretty-format-json' option that was overriding another
+
+* Also remove some unnecessary comments
+
+### 2023-08-30 (Wed, Aug 30, 2023)
+* style: update error message if .pre-commit-config.yaml is unstaged
+
+### 2023-08-30 (Wed, Aug 30, 2023)
+* style: add a line of separation
+
+### 2023-08-30 (Wed, Aug 30, 2023)
+* fix: step to stop execution if .pre-commit-config.yaml is unstaged
+
+### 2023-08-30 (Wed, Aug 30, 2023)
+* feat: make pre-commit verbose an correct 'check-readme' output
+
+### 2023-08-30 (Wed, Aug 30, 2023)
+* feat: add explanatory comments to commitlint config
+
+### 2023-08-29 (Tue, Aug 29, 2023)
+* refactor: move .commitlintrc to yaml and update preferences
+
+### 2023-08-29 (Tue, Aug 29, 2023)
+* feat: update style config and add more pre-commit configs
+
+### 2023-08-29 (Tue, Aug 29, 2023)
+* fix: grammar mistake
+
+### 2023-08-29 (Tue, Aug 29, 2023)
+* style: update more whitespacing
+
+### 2023-08-29 (Tue, Aug 29, 2023)
+* feat: add .prettierignore
+
+### 2023-08-29 (Tue, Aug 29, 2023)
+* style: update quoting
+
+### 2023-08-29 (Tue, Aug 29, 2023)
+* style: update whitespacing
+
+### 2023-08-29 (Tue, Aug 29, 2023)
+* fix: rearrange editorconfig sections for proper precedence
+
+### 2023-08-29 (Tue, Aug 29, 2023)
+* style: add some 'prettier' config options
+
+### 2023-08-29 (Tue, Aug 29, 2023)
+* feat: add 'pre-commit' target for running on changed files only
+
+### 2023-08-29 (Tue, Aug 29, 2023)
+* feat: update 'prettier' version and don't exclude 'zsh' files checks
+
+### 2023-08-29 (Tue, Aug 29, 2023)
+* docs: add a comment noting a useful blog post regarding GHA SHAs
+
+### 2023-08-29 (Tue, Aug 29, 2023)
+* style: sort options
+
+### 2023-08-29 (Tue, Aug 29, 2023)
+* style: enforce K&R-style braces
+
+### 2023-08-29 (Tue, Aug 29, 2023)
+* style: update some style configs
+
+### 2023-08-28 (Mon, Aug 28, 2023)
+* style: fix some indenting
+
+### 2023-08-28 (Mon, Aug 28, 2023)
+* feat: exit early if .pre-commit-config.yaml is unstaged
+
+### 2023-08-26 (Sat, Aug 26, 2023)
+* fix: update references to 'readme' to be 'generate-docs'
+
+### 2023-08-26 (Sat, Aug 26, 2023)
+* fix: update CHANGELOG.md.tpl to be compatible with 'generate-docs'
+
+### 2023-08-26 (Sat, Aug 26, 2023)
+* feat: rename 'readme' to 'generate-docs' and iterate through all '.tpl's
+
+### 2023-08-26 (Sat, Aug 26, 2023)
+* refactor: fully move over to simplified 'check-readme' method
+
+### 2023-08-26 (Sat, Aug 26, 2023)
+* refactor: change back from matrix
+
+### 2023-08-26 (Sat, Aug 26, 2023)
+* refactor: update 'check-readme' to use a matrix
+
+### 2023-08-25 (Fri, Aug 25, 2023)
+* fix: change static file reference in 'sed' command to use a variable
+
+* Also space out 'envsubst' arguments for readability
+
+### 2023-08-25 (Fri, Aug 25, 2023)
+* style: move 'help' target
+
+### 2023-08-25 (Fri, Aug 25, 2023)
+* feat: add more official pre-commit hooks
+
+### 2023-08-24 (Thu, Aug 24, 2023)
+* fix: update 'awk' command to more accurately create table of contents
+
+* Also fix the 'envsubst' command's 'SHELL-FORMAT' variables
+
+### 2023-08-22 (Tue, Aug 22, 2023)
+* test: see if quotes fix error
+
+### 2023-08-22 (Tue, Aug 22, 2023)
+* feat: give 'check-md-links' a header and error count
+
+### 2023-08-22 (Tue, Aug 22, 2023)
+* feat: add 'make check-md-links' to check for undefined links
+
+* As well as unlinked definitions
+
+### 2023-08-22 (Tue, Aug 22, 2023)
+* feat: update 'make readme' to support processing multiple files
+
+### 2023-08-21 (Mon, Aug 21, 2023)
+* refactor: dynamically determine the checkout fetch-depth
+
+### 2023-08-21 (Mon, Aug 21, 2023)
+* fix: correct a couple of conditionals' syntax
+
+### 2023-08-21 (Mon, Aug 21, 2023)
+* feat: conditionally fetch all of commits (only for workflow_dispatch)
+
+### 2023-08-21 (Mon, Aug 21, 2023)
+* feat: add DEBUG to available user inputs
+
+### 2023-08-20 (Sun, Aug 20, 2023)
+* fix: fetch all commits to avoid issues with missing commits
+
+* Also, update number of commits for 'git log' to show in 'dump-env'
+
+### 2023-08-20 (Sun, Aug 20, 2023)
+* feat: add input box for default branch SHA for workflow_dispatch
+
+### 2023-08-19 (Sat, Aug 19, 2023)
+* refactor: 'fg()' to not output anything if there are no jobs
+
+### 2023-08-19 (Sat, Aug 19, 2023)
+* feat: add a shellcheck disable directive and create symlink for go
+
+### 2023-08-19 (Sat, Aug 19, 2023)
+* fix: rename workflow and correct issues with some steps
+
+### 2023-08-19 (Sat, Aug 19, 2023)
+* docs: update some comments
+
+### 2023-08-19 (Sat, Aug 19, 2023)
+* feat: utilize the 'pre-commit' GH Action
+
+### 2023-08-19 (Sat, Aug 19, 2023)
+* refactor: update how the 'pre-commit' job is run
+
+### 2023-08-19 (Sat, Aug 19, 2023)
+* feat: miscellaneous changes and fixes to the workflow
+
+### 2023-08-19 (Sat, Aug 19, 2023)
+* feat: add 'get-changed-files' job to make a list of changed files
+
+### 2023-08-19 (Sat, Aug 19, 2023)
+* feat: add 'dump-env' job
+
+### 2023-08-19 (Sat, Aug 19, 2023)
+* feat: add 'check-readme' job
+
+* Signed-off-by: Fevrin <5051062+fevrin@users.noreply.github.com>
+
+### 2023-08-19 (Sat, Aug 19, 2023)
+* feat: update pre-commit hook versions, add prettier, and fix hadolint
+
+### 2023-08-19 (Sat, Aug 19, 2023)
+* feat: add support for Makefile to generate the README
+
+### 2023-08-16 (Wed, Aug 16, 2023)
+* fix: add step to install golang due to nektos/act image having old 'go'
+
+### 2023-08-16 (Wed, Aug 16, 2023)
+* fix: gitconfig 'cl' alias
+
+### 2023-08-10 (Thu, Aug 10, 2023)
+* style: update 'make help' output style
+
+### 2023-08-09 (Wed, Aug 09, 2023)
+* feat: add 'help' command to Makefile
+
+* This outputs the Makefile's commands and their descriptions in a
+formatted table
+
+### 2023-07-25 (Tue, Jul 25, 2023)
+* fix: update 'fg' function again for zsh compatibility
+
+* .shellrc.d/functions_general
+* re-add escape in regex
+
+### 2023-07-25 (Tue, Jul 25, 2023)
+* fix: fixes for zsh compatibility/optimization and a 'gh' extension
+
+* increase FUNCNEST to 45 since some autocompletion necessitated that
+
+* .shellrc.d/aliases_general
+* add 'poi' alias if the associated 'gh' extension is installed to
+  compensate for undocumented behavior
+
+* .shellrc.d/aliases_laptop
+* make some aliases compatible with zsh by calling them via bash
+
+### 2023-07-25 (Tue, Jul 25, 2023)
+* feat: update functions for zsh support, IP accuracy, and starship format
+
+* .config/starship.toml
+* add repo format and style
+
+* .shellrc.d/00_vars
+* update '$SHELL' variable to be that of the current shell
+
+* .shellrc.d/functions/_verify_reqs
+* update logic to support zsh
+
+* .shellrc.d/functions/aptupchange
+* update logic to support zsh
+
+* .shellrc.d/functions_net
+* use a more accurate website for IP info
+
+### 2023-07-13 (Thu, Jul 13, 2023)
+* refactor: conditional docker completion
+
+### 2023-07-13 (Thu, Jul 13, 2023)
+* fix: absent '$HISTFILE' value
+
+### 2023-07-13 (Thu, Jul 13, 2023)
+* fix: zsh shell detection and file source ordering in .zshrc
+
+### 2023-07-12 (Wed, Jul 12, 2023)
+* docs: update CHANGELOG
 
 ## v2.9.0
 
@@ -19,7 +490,8 @@
 ### 2023-07-04 (Tue, Jul 04, 2023)
 * refactor: update 'board-starship()' logic and add upcoming zsh config change
 
-* 'cmd_hist_num_zsh' needs 1 or 2 subtracted from it to get the accurate history number, but the present command isn't cooperating when executed by starship
+* 'cmd_hist_num_zsh' needs 1 or 2 subtracted from it to get the accurate history number, but the present command isn't cooperating when executed by
+  starship
 
 ### 2023-07-06 (Thu, Jul 06, 2023)
 * fix: update 'refresh-main-branch' to set the main branch if needed
@@ -824,7 +1296,7 @@
 * added commented out code that may fix the issue with tmux tabs not automatically getting renamed
 
 #### .vimrc
-* set formatting options explicitly so they're not as easily overriden
+* set formatting options explicitly so they're not as easily overridden
 
 ### Wed Apr 8 21:27:49 2020 -0400
 #### .bashrc.d/remote/remote_base
@@ -1134,7 +1606,8 @@ committing
     \* simplified duplicate directory check  
     \+ added another conditional to short circuit exit if the user provides an invalid directory  
      yessh():  
-    \+ added functionality to just copy the config over to the target server as a temporary file if it's of a certain size (as was done before the base64 technique, though we now use base64 for it, too)  
+    \+ added functionality to just copy the config over to the target server as a temporary file if it's of a certain size (as was done before the
+       base64 technique, though we now use base64 for it, too)  
     \* updated config transfer to incorporate bzip2 compression to further reduce network bandwidth usage  
   \+ sql-tab-to-jira-tab(): added  
   \+ generate_luks_keyfile(): moved from lib_sec  
@@ -1251,7 +1724,8 @@ committing
   \* yessh(): updated to include additional usage information
 
    .bashrc  
-  \- removed HISTFILESIZE assignment since that seems to bomb out Bash in some cases; it seems as of bash version 4.4.19(1)-release, having the history file larger than this size causes a segfault
+  \- removed HISTFILESIZE assignment since that seems to bomb out Bash in some cases; it seems as of bash version 4.4.19(1)-release, having the
+     history file larger than this size causes a segfault
 
 
 ## v1.6.3
@@ -1317,7 +1791,8 @@ committing
 ### Wed Mar 6 23:36:26 2019 -0500
 
    .bash_aliases  
-  \* changed the find-broken-links alias to be seek-broken-links() for more flexibility (Bash doesn't like a function starting with the name of a command when it's separated by dashes instead of underscores, it seems)
+  \* changed the find-broken-links alias to be seek-broken-links() for more flexibility (Bash doesn't like a function starting with the name of a
+     command when it's separated by dashes instead of underscores, it seems)
 
 
 ## v.1.5.7

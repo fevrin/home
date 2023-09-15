@@ -1,8 +1,3 @@
-[{*.sh,.bashrc**}]
-# like --indent=3
-indent_style = space
-indent_size  = 3
-
 # Generic options
 # list = true # List files whose formatting differs from shfmt's
 # diff = true # Error with a diff when the formatting differs
@@ -29,29 +24,66 @@ root = true
 
 [*]
 charset = utf-8
+end_of_line = lf
+quote_type = auto
+
+# Tab indentation
+indent_brace_style = K&R
+indent_size = 3
+
+# Make sure every file has a blank line at the end
+insert_final_newline = true
+
+# Remove any whitespace characters preceding newline characters
+trim_trailing_whitespace = true
+
+# Give operators breathing room, but not brackets
+spaces_around_operators = true
+spaces_around_brackets = false
+
+# Max line length (not supported by all editors)
+max_line_length = 150
+
+[.git/COMMIT_EDITMSG]
+indent_style = space
+max_line_length = 72
+
+[{*.sh,.shellrc.d**}]
+indent_size = 3
+
+[*.y{,a}ml]
 indent_size = 2
 indent_style = space
-end_of_line = lf
-insert_final_newline = true
-trim_trailing_whitespace = true
+quote_type = single
+
+[*.js{,on}]
+indent_size = 2
+indent_style = space
+max_line_length = unset
+quote_type = single
 
 # go
 [*.go]
-indent_style = tab
 indent_size = 4
+indent_style = space
 
 # python
 [*.{ini,py,py.tpl,rst}]
 indent_size = 4
+indent_style = space
 
 # rust
 [*.rs]
 indent_size = 4
+indent_style = space
 
 # documentation, utils
-[*.{md,mdx,diff}]
+[*.{md{,.tpl},mdx,diff}]
+indent_size = unset
+indent_style = space
 trim_trailing_whitespace = false
 
 # windows shell scripts
 [*.{cmd,bat,ps1}]
 end_of_line = crlf
+indent_style = space

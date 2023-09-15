@@ -1,30 +1,307 @@
-name: pre-commit
+---
+name: 'Pre-Commit tests'
 
 # Controls when the workflow will run
 on:
-  push:
-    paths:
-       - '.github/workflows/pre-commit.yml'
-       - '.pre-commit-config.yaml'
-  pull_request:
-    paths:
-       - '.github/workflows/pre-commit.yml'
-       - '.pre-commit-config.yaml'
-
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+    inputs:
+      default_branch:
+        description: 'The SHA of the default branch'
+        required: true
+        type: string
+      DEBUG:
+        description: 'Enables debug output'
+        required: false
+        default: false
+        type: choice
+        options:
+          - true
+          - false
+  push:
+    branches:
+      - $GITHUB_BASE_REF
+        #if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    paths:
+      - '.github/workflows/pre-commit.yml'
+      - '.pre-commit-config.yaml'
+  pull_request:
+    paths:
+      - '.github/workflows/pre-commit.yml'
+      - '.pre-commit-config.yaml'
+
+# from the example here:
+# https://docs.github.com/en/actions/examples/using-scripts-to-test-your-code-on-a-runner#example-workflow
+permissions:
+  contents: read
+  pull-requests: read
+concurrency:
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  cancel-in-progress: true
 
 jobs:
-  pre-commit:
+  get-changed-files:
+    runs-on: ubuntu-latest
+    outputs:
+      BASE_REF: ${{ steps.export_base_ref.outputs.BASE_REF }}
+      CHANGED_FILES: ${{ toJson(steps.changed_files.outputs.CHANGED_FILES) }}
+    steps:
+      - uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
+        env:
+          CHECKOUT_DEPTH: "${{ github.event_name == 'workflow_dispatch' && '0' || '2' }}"
+        with:
+          fetch-depth: $CHECKOUT_DEPTH
+
+      - name: Export BASE_REF
+        id: export_base_ref
+        run: |
+          # some useful GitHub Actions SHA information:
+          # https://www.kenmuse.com/blog/the-many-shas-of-a-github-pull-request/
+
+          if [[ -n "${{ github.event.pull_request.base.sha }}" ]]; then
+            # use GHA's variable
+            BASE_REF=${{ github.event.pull_request.base.sha }}
+          elif [[ -n "${{ inputs.default_branch }}" ]]; then
+            # trust user input for default branch SHA
+            BASE_REF=${{ inputs.default_branch }}
+          else
+            # assume 'origin/HEAD' can be referenced
+            BASE_REF='origin/HEAD'
+          fi
+          echo "BASE_REF=${BASE_REF}" >> $GITHUB_ENV # needed for the changed_files step
+          echo "BASE_REF=${BASE_REF}" >> $GITHUB_OUTPUT
+
+      - name: Generate Changed Files List
+        id: changed_files
+        run: |
+          #          readarray -t files < <(git diff --name-only $BASE_REF..HEAD)
+          #          {
+          #            echo "CHANGED_FILES<<EOF"
+          #            echo ${files[*]}
+          #            echo EOF
+          #          }  >> $GITHUB_OUTPUT
+          files="$(git diff --diff-filter=d --name-only $BASE_REF..HEAD | jq -cRn '[inputs | select(length>0)]')"
+          echo "CHANGED_FILES=${files}" >> $GITHUB_OUTPUT
+        shell: bash
+
+  lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repository code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
+        env:
+          CHECKOUT_DEPTH: "${{ github.event_name == 'workflow_dispatch' && '0' || '2' }}"
         with:
-          fetch-depth: 1
-      - name: Lint the repository with pre-commit
+          fetch-depth: $CHECKOUT_DEPTH
+
+      - name: MegaLinter
+        uses: oxsecurity/megalinter/flavors/cupcake@fda6ac3a38be0e969820709ac16e442464e5a035 # v7.3.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MEGALINTER_CONFIG: ci/.mega-linter.yaml
+          # Validates all source when push on main, else just the git diff with main. Override with true if you always want to lint all sources
+          VALIDATE_ALL_CODEBASE: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+
+  pre-commit:
+    runs-on: ubuntu-latest
+    needs: [get-changed-files]
+    steps:
+      - uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
+        env:
+          CHECKOUT_DEPTH: "${{ github.event_name == 'workflow_dispatch' && '0' || '2' }}"
+        with:
+          fetch-depth: $CHECKOUT_DEPTH
+
+      - name: Stop if .pre-commit-config.yaml is unstaged
+        if: env.ACT
+        run: git diff --quiet --exit-code .pre-commit-config.yaml
+        shell: bash {0}
+
+        # nektos/act seems to fail immediately in the last step if
+        # .pre-commit-config.yaml is found unstaged, so it doesn't output the
+        # following error
+      - name: Stop if .pre-commit-config.yaml is unstaged
+        if: env.ACT && failure()
         run: |
-          python3 -V
-          pip3 install --upgrade pip
-          pip3 install pre-commit==2.20.0
-          pre-commit run --verbose
+          printf '\033[31m%s\033[m %s\n' '[ERROR]' 'Your pre-commit configuration is unstaged.' &&
+          echo '`git add .pre-commit-config.yaml` to fix this.' &&
+          exit 1
+
+      - name: Install go
+        # 'nektos/act' requires this conditional step due to the following
+        # issue when running 'shfmt' from pre-commit-config.yaml:
+        # package mvdan.cc/sh/v3/cmd/shfmt@v3.7.0: can only use path@version syntax with 'go get'
+        # https://www.reddit.com/r/golang/comments/n628db/go_install_fails_with_can_only_use_pathversion/
+        if: env.ACT
+        uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # v4.1.0
+        with:
+          go-version: '>=1.21'
+          check-latest: true
+
+      - name: Install python
+        uses: actions/setup-python@61a6322f88396a6271a6ee3565807d608ecaddd1 # v4.7.0
+        with:
+          python-version: '3.11'
+
+      - uses: pre-commit/action@646c83fcd040023954eafda54b4db0192ce70507 # v3.0.0
+        with:
+          # this should run the pre-commit hooks only on the files changed between the default branch and the one in the PR
+          extra_args: --verbose --from-ref ${{ needs.get-changed-files.outputs.BASE_REF }} --to-ref HEAD
+
+  check-zshrc:
+    runs-on: ubuntu-latest
+    if: contains(needs.get-changed-files.outputs.CHANGED_FILES, '.zshrc')
+    steps:
+      - uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
+        env:
+          CHECKOUT_DEPTH: "${{ github.event_name == 'workflow_dispatch' && '0' || '2' }}"
+        with:
+          fetch-depth: $CHECKOUT_DEPTH
+
+      - name: Check zshrc syntax
+        run: |
+          apt-get update &&
+          apt-get install -y zsh
+          zsh -n .zshrc
+
+  # this only checks if the README had been generated; it can't itself commit
+  # the generated file
+  check-readme:
+    runs-on: ubuntu-latest
+    needs: [get-changed-files]
+    if: contains(needs.get-changed-files.outputs.CHANGED_FILES, '.md.tpl')
+    steps:
+      - uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
+        env:
+          CHECKOUT_DEPTH: "${{ github.event_name == 'workflow_dispatch' && '0' || '2' }}"
+        with:
+          fetch-depth: $CHECKOUT_DEPTH
+
+      - name: Install packages for nektos/act
+        # this is required when using nektos/act due to this sort of issue with
+        # act's ubuntu:latest image (it's still on 20.04):
+        if: env.ACT
+        run: |
+          declare -A pkgs_to_install=(
+            [envsubst]=gettext-base
+            [column]=bsdextrautils
+          )
+          for pkg in ${!pkgs_to_install[*]}; do
+            which "${pkg}" &>/dev/null && unset pkgs_to_install["${pkg}"]
+          done
+          apt-get update &&
+          apt-get install ${pkgs_to_install[*]}
+
+      - name: Ensure Documentation Was Generated
+        run: |
+          make generate-docs
+          echo
+          git diff --exit-code || {
+            echo
+            echo "Generate the documentation using this command, then commit and push:"
+            echo
+            echo "    make generate-docs"
+            echo
+            exit 1
+          }
+
+  dump-env:
+    # most of this inspired by:
+    # https://stackoverflow.com/questions/67503656/echo-github-action-environment-variables/72920652#72920652
+    #
+    # unfortunately, a matrix doesn't seem to work properly without hacky
+    # workarounds due to expression evaluation
+
+    if: github.event.inputs.DEBUG == 'true' || github.event.inputs.DEBUG == 1 || (always() && contains(needs.*.result, 'failure'))
+    needs:
+      - get-changed-files
+      - lint
+      - pre-commit
+      - check-readme
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
+        env:
+          CHECKOUT_DEPTH: "${{ github.event_name == 'workflow_dispatch' && '0' || '2' }}"
+        with:
+          fetch-depth: $CHECKOUT_DEPTH
+
+      - run: echo "BASE_REF = '${{ needs.get-changed-files.outputs.BASE_REF }}'"
+      - run: echo "CHANGED_FILES = '${{ needs.get-changed-files.outputs.CHANGED_FILES }}'"
+
+      - name: Git log
+        run: >
+          git
+          --no-pager
+          log
+          --graph
+          --abbrev-commit
+          --decorate
+          --date=relative
+          --color
+          --format=format:'%C(bold blue)%h%C(reset) - %C(bold yellow)(%ar)%C(reset) %C(white)%s %C(dim white)- %an%C(auto)%d' --all
+          --all
+          -50
+
+      - name: Dump 'env' context
+        run: echo "$ENV_CONTEXT"
+        env:
+          ENV_CONTEXT: ${{ toJson(env) }}
+
+      - name: Dump 'vars' context
+        run: echo "$VARS_CONTEXT"
+        env:
+          VARS_CONTEXT: ${{ toJson(vars) }}
+
+      - name: Dump 'secrets' context
+        run: echo "$SECRETS_CONTEXT"
+        env:
+          SECRETS_CONTEXT: ${{ toJson(secrets) }}
+
+      - name: Dump 'needs' context
+        run: echo "$NEEDS_CONTEXT"
+        env:
+          NEEDS_CONTEXT: ${{ toJson(needs) }}
+
+      - name: Dump 'inputs' context
+        run: echo "$INPUTS_CONTEXT"
+        env:
+          INPUTS_CONTEXT: ${{ toJson(inputs) }}
+
+      - name: Dump 'GitHub' context
+        run: echo "$GITHUB_CONTEXT"
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+
+      - name: Dump 'job' context
+        run: echo "$JOB_CONTEXT"
+        env:
+          JOB_CONTEXT: ${{ toJson(job) }}
+
+      - name: Dump 'steps' context
+        run: echo "$STEPS_CONTEXT"
+        env:
+          STEPS_CONTEXT: ${{ toJson(steps) }}
+
+      - name: Dump 'runner' context
+        run: echo "$RUNNER_CONTEXT"
+        env:
+          RUNNER_CONTEXT: ${{ toJson(runner) }}
+
+      - name: Dump 'strategy' context
+        run: echo "$STRATEGY_CONTEXT"
+        env:
+          STRATEGY_CONTEXT: ${{ toJson(strategy) }}
+
+      - name: Dump 'matrix' context
+        run: echo "$MATRIX_CONTEXT"
+        env:
+          MATRIX_CONTEXT: ${{ toJson(matrix) }}
+
+      - name: Show default environment variables
+        run: |
+          echo "The job_id is: $GITHUB_JOB"   # reference the default environment variables
+          echo "The id of this action is: $GITHUB_ACTION"   # reference the default environment variables
+          echo "The run id is: $GITHUB_RUN_ID"
+          echo "The GitHub Actor's username is: $GITHUB_ACTOR"
+          echo "GitHub SHA: $GITHUB_SHA"

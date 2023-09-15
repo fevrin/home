@@ -1,6 +1,7 @@
 # Contribution Guidelines
 
-Below are the contribution guidelines we should follow. In general, we should make use of the [GitHub Flow](https://guides.github.com/introduction/flow/) for contributions.
+Below are the contribution guidelines we should follow. In general, we should make use of the [GitHub
+Flow](https://guides.github.com/introduction/flow/) for contributions.
 
 Contributions to updating these guidelines are welcome and encouraged!
 
@@ -20,7 +21,8 @@ Contributions to updating these guidelines are welcome and encouraged!
 ## Coding Rules
 
 * Adhere to best practices in whichever language you use
-* Require the user install as little unique software as possible (ideally only software generally available in standard OS repositories, not fancy PPAs, specific vendors' sites, etc.)
+* Require the user install as little unique software as possible (ideally only software generally available in standard OS repositories, not fancy
+  PPAs, specific vendors' sites, etc.)
 * Include clear installation and usage instructions in a README.md, help output, etc.
 * Test your changes
 

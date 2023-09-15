@@ -1,3 +1,4 @@
+# editorconfig-checker-disable
 [alias]
   # inspired by <https://www.atlassian.com/blog/git/advanced-git-aliases>
 #  bclean = "!git branch --merged HEAD | sed -re 's;^\\*?\\s+;;' | egrep -v \"^($(git rev-parse --abbrev-ref HEAD)|master)$\" -Z | xargs -0 -I{} echo -e 'these branches would be cleared:\n{}'"
@@ -179,11 +180,19 @@
      } \
   '"
    cl = "!f() { \
+                local source; \
+                local repo_host; \
+                local repo_name; \
+                local repo_dir; \
+                local destination; \
+                repo_dir=\"${HOME}/repos\"; \
                 source=\"$1\"; \
+                repo_host=\"${source##*@}\"; \
+                repo_host=\"${repo_host%%:*}\"; \
                 repo_name=\"${source##*:}\"; \
                 repo_name=\"${repo_name%.git}\"; \
-                repo_dir=\"${HOME}/repos\"; \
-                destination=\"${repo_dir}/${repo_name}\"; \
+                repo_name=\"$(echo ${repo_name} | tr '[A-Z]' '[a-z]')\"; \
+                destination=\"${repo_dir}/${repo_host}/${repo_name}\"; \
                 git clone \"${source}\" \"${destination}\" && \
                 echo && \
                 echo \"cloned into ${destination}\"; \

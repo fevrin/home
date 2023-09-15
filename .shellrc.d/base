@@ -62,7 +62,8 @@ fi
 # start a terminal multiplexer upon login only if there isn't already one opened and there are no detached sessions
 SHLVL_threshold=1
 # always use just "screen" as the terminal so servers don't go ballistic
-# ugh, `export TERM=screen` causes weird stuff on the local machine, like italicizing text instead of highlighting it when copying using screen's commands
+# ugh, `export TERM=screen` causes weird stuff on the local machine, like italicizing text instead of highlighting it when copying using screen's
+# commands
 #export TERM=screen
 if has tmux; then
    TMUX_LIST=$(tmux ls 2>/dev/null)
@@ -91,16 +92,19 @@ if has tmux; then
          tmux new-window -t default -n work &&
          tmux attach -t default
 
-#        # this command would otherwise result in the following error if in ~/.tmux.conf since tmux seems to read and execute the conf file in full before creating a session:
-#        # .tmux.conf:117: no current target
-#        # more info at <https://superuser.com/questions/1413870/tmux-conf-doesnt-work-when-starting-but-does-with-source-file/1414127#1414127>
-#        tmux new-window top
+         # this command would otherwise result in the following error if in ~/.tmux.conf since tmux seems to read and execute the conf file in full
+         # before creating a session:
+         # .tmux.conf:117: no current target
+         # more info at <https://superuser.com/questions/1413870/tmux-conf-doesnt-work-when-starting-but-does-with-source-file/1414127#1414127>
+         tmux new-window top
       fi
    fi
    unset TMUX_LIST
 else
    SCREEN_LIST=$(screen -ls)
-   [[ ! $TERM =~ screen && $(env | sed -n "s;SHLVL=\([1-9][1-9]*\);\1;p") = $SHLVL_threshold && ! $(echo "$SCREEN_LIST" | grep -i detached) ]] && screen
+   [[ ! $TERM =~ screen && $(env | sed -n "s;SHLVL=\([1-9][1-9]*\);\1;p") = $SHLVL_threshold && ! $(echo "$SCREEN_LIST" | grep -i detached) ]] && {
+      screen
+   }
 
    # list detached screens, if any, to explain why screen wasn't started
    [[ $(echo "$SCREEN_LIST" | grep -i detached) ]] && echo "$SCREEN_LIST"
@@ -123,6 +127,7 @@ set -o vi
 grep -q 10 /proc/sys/vm/swappiness || {
    sudo sysctl vm.swappiness=10
    SOURCE="${BASH_SOURCE}"
+   # shellcheck disable=SC2296
    is_zsh && SOURCE="${(%):-%x}"
    cat <<-EOF | sudo tee /etc/sysctl.d/local-swappiness.conf &>/dev/null
 		# set via $([[ -L "$SOURCE" ]] && readlink "$SOURCE" || echo "$SOURCE")

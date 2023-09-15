@@ -1,7 +1,12 @@
-<!-- # vim: set ft=markdown: -->
 # Home files
 
-${TOC}
+- [Purpose](#purpose)
+- [Requirements](#requirements)
+- [Usage](#usage)
+  - [Makefile](#makefile)
+- [Linting](#linting)
+  - [GitHub Actions](#github-actions)
+  - [Local `pre-commit` linting](#local-pre-commit-linting)
 
 ## Purpose
 
@@ -23,7 +28,21 @@ The following the available Makefile commands:
 ```editorconfig
 $ make help
 
-${MAKEFILE_HELP}
+[Aliases]
+dev              runs 'git-hooks'
+
+[Automatic]
+.git/hooks/%     creates symlinks for all git hooks from '.githooks' to '.git/hooks'
+
+[Generators]
+generate-docs    Regenerates Markdown files (including ToC and 'make help' output)
+git              generates "${HOME}/.gitconfig" file using 'includes' directives
+ssh              generates "${HOME}/.ssh/config" file using 'includes' directives
+
+[Miscellaneous]
+check-defs       checks all Markdown files for unused definitions
+check-md-links   checks all Markdown files for unused definitions
+help             returns this Makefile's commands and their descriptions in a formatted table
 ```
 
 ## Linting

@@ -1,7 +1,17 @@
-.*sw[a-z]
 config
-*.pem
 .idea
+
+# history files
 .lesshst
+
+# vim persistent undo
 *.un~
+
+# git temporary
 *.orig
+
+# swap files
+.*s[a-z][a-z]
+
+# sensitive data
+*.pem

@@ -24,7 +24,7 @@ archive-emails() {
    }
 
    # calculate the beginning of the week of the given day
-   weekOf="$(date -d "$given_date - $(($(date -d "$given_date" +%${beginning_of_week_designation[$beginning_of_week]}) - $beginning_of_week)) days" +%F)"
+   weekOf="$(date -d "$given_date - $(($(date -d "$given_date" +%${beginning_of_week_designation[$beginning_of_week]}) - $beginning_of_week)) days" +%F)" # editorconfig-checker-disable-line
    _print_var_vals given_date weekOf beginning_of_week
 
    date -d "$weekOf" +%w &>/dev/null || return 1
@@ -33,5 +33,5 @@ archive-emails() {
    local weekEnd="$(date -d "$weekStart + 8 days")"
    _print_var_vals weekOf weekStart weekEnd
 
-   echo "https://mail.google.com/mail/u/0/#search/after%3A$(date -d "$weekStart" "+$dateFormat")+before%3A$(date -d "$weekEnd" "+$dateFormat")+in%3Ainbox"
+   echo "https://mail.google.com/mail/u/0/#search/after%3A$(date -d "$weekStart" "+$dateFormat")+before%3A$(date -d "$weekEnd" "+$dateFormat")+in%3Ainbox" # editorconfig-checker-disable-line
 }

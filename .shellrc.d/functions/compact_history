@@ -9,9 +9,12 @@ compact_history() {
    # input: optional file to compact (expected to be in the typical history file format, including timestamps
    # output: nothing on success, but the temporary file name for you to peruse if run with the simulate/dry-run option
 
-   # add something like these lines to a file in /etc/sudoers.d/ if you want to avoid having to sudo every time, assuming the history file is append-only (use a username instead of '%sudo' to enable just one user to do this, and replace $HOME with the hard-coded version since sudo doesn't support $HOME)
+   # add something like these lines to a file in /etc/sudoers.d/ if you want to avoid having to sudo every time:
    # %sudo   ALL=(ALL:ALL)NOPASSWD: /usr/bin/chattr -a $HOME/.bash_history
    # %sudo   ALL=(ALL:ALL)NOPASSWD: /usr/bin/chattr +a $HOME/.bash_history
+
+   # the above assumes the history file is append-only (use a username instead of '%sudo' to enable just one user to do this, and replace $HOME with
+   # the hard-coded version since sudo doesn't support $HOME)
 
    _verify_reqs <<-EOF || return 1
    _print_var_vals
@@ -55,13 +58,41 @@ compact_history() {
     REMOVAL_REGEX
    verbose 8
 
-#   cat ~/.bash_history | tr '\n' '^M' | sed -rne 's;^M(#[0-9]{10,11})^M([^^M]+);\1  \2^M;gp' | tr '^M' '\n' | egrep '^#[0-9]{10,11}' | sort -u -k 2 | sort | sed -rne 's;^(#[0-9]{10,11})   (.*)$;\1\n\2;p' >~/.bash_history.new
-#   sed -re 's;^(#[0-9]{10,11})$;\o0\1;' ~/.bash_history | tr '\n' '\1' | sed -rne 's;\o0(#[0-9]{10,11}[^\o0]+);\1\n;gp' | sort -uk2 | sort | tr -d '\n' | tr '\1' '\n' >~/.bash_history.new2
-#   sed -re 's;^(#[0-9]{10,11})$;\o0\1;' ~/.bash_history | tr '\n' '\1' | sed -rne 's;\o0([^\o0]+);\1\n;gp' | sort -uk2 | sort | tr -d '\n' | tr '\1' '\n' | less
-#   sed -re 's;^(#[0-9]{10,11})$;\o0\1;' ~/.bash_history | tr '\n' '\1' | sed -rne 's;\o0([^\o0]+);\1\n;gp' | sort -u -t$'\1' -k2 | sort | tr -d '\n' | tr '\1' '\n' | less
+#   cat ~/.bash_history |
+#      tr '\n' '^M' |
+#      sed -rne 's;^M(#[0-9]{10,11})^M([^^M]+);\1  \2^M;gp' |
+#      tr '^M' '\n' |
+#      egrep '^#[0-9]{10,11}' |
+#      sort -u -k 2 |
+#      sort |
+#      sed -rne 's;^(#[0-9]{10,11})   (.*)$;\1\n\2;p' >~/.bash_history.new
+#   sed -re 's;^(#[0-9]{10,11})$;\o0\1;' ~/.bash_history |
+#      tr '\n' '\1' |
+#      sed -rne 's;\o0(#[0-9]{10,11}[^\o0]+);\1\n;gp' |
+#      sort -uk2 |
+#      sort |
+#      tr -d '\n' |
+#      tr '\1' '\n' >~/.bash_history.new2
+#   sed -re 's;^(#[0-9]{10,11})$;\o0\1;' ~/.bash_history |
+#      tr '\n' '\1' |
+#      sed -rne 's;\o0([^\o0]+);\1\n;gp' |
+#      sort -uk2 |
+#      sort |
+#      tr -d '\n' |
+#      tr '\1' '\n' |
+#      less
+#   sed -re 's;^(#[0-9]{10,11})$;\o0\1;' ~/.bash_history |
+#      tr '\n' '\1' |
+#      sed -rne 's;\o0([^\o0]+);\1\n;gp' |
+#      sort -u -t$'\1' -k2 |
+#      sort |
+#      tr -d '\n' |
+#      tr '\1' '\n' |
+#      less
 
    # we might be able to change the octal characters used here so we can utilize sort's '-z' option, but that might not be as portable
 
+   # editorconfig-checker-disable
    sed -re 's;^(#[0-9]{10,11})$;\o0\1;' "$HISTORY_FILE" | # replace start of lines with a null character (000 octal) so we know the start of a history entry (assuming with a timestamp)
    tr '\n' '\1' |                                         # replace all newlines with a 001 octal character so we can keep track of where the newlines should later go, including in multi-line entries
    sed -rne 's;\o0([^\o0]+);\1\n;gp' |                    # re-insert newlines just at the end of each history entry so we can sort
@@ -71,6 +102,7 @@ compact_history() {
    egrep -v $'\1'" *$REMOVAL_REGEX *"$'\1' |              # remove all entries matching the provided regex, if any (this is safe to run, even if the regex isn't provided or is blank
    tr -d '\n' |                                           # remove the newlines we'd previously inserted so they don't double up
    tr '\1' '\n' >"$TEMP_FILE"                             # re-insert all newlines that were there from the beginning
+   # editorconfig-checker-enable
 
    # perform the actual move if the new temp file has data in it (after backing up the original history file)
    if [[ -s "$TEMP_FILE" ]]; then
