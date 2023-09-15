@@ -62,8 +62,11 @@ repos:
           - zsh
         args:
           # more args in .shellcheckrc
-          - --severity=error
+          - --check-sourced
           - --color=always
+          - --enable=all
+          - --severity=error
+          - --wiki-link-count=50
   - repo: https://github.com/scop/pre-commit-shfmt
     rev: v3.7.0-1
     hooks:
