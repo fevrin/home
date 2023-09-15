@@ -99,7 +99,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MEGALINTER_CONFIG: ci/.mega-linter.yaml
           # Validates all source when push on main, else just the git diff with main. Override with true if you always want to lint all sources
-          VALIDATE_ALL_CODEBASE: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          VALIDATE_ALL_CODEBASE: ${{ env.ACT || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
 
   pre-commit-local:
     if: github.event.act
