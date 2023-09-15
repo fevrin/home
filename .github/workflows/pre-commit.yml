@@ -233,7 +233,7 @@ jobs:
     # unfortunately, a matrix doesn't seem to work properly without hacky
     # workarounds due to expression evaluation
 
-    if: github.event.inputs.DEBUG == 'true' || github.event.inputs.DEBUG == 1 || (always() && contains(needs.*.result, 'failure'))
+    if: github.event.inputs.DEBUG == 'true' || github.event.inputs.DEBUG == 1 || (!cancelled() && contains(needs.*.result, 'failure'))
     needs:
       - get-changed-files
       - lint
