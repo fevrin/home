@@ -88,16 +88,18 @@ subset of what the GitHub Action includes.
 When working through large amounts of linting changes, it can be helpful to use a split pane in tmux (or a separate terminal window) so you can make
 changes in one pane/window while running a linter command in the other.
 
-If you have `inotifywait` installed, you can run the following command from the repo root in one pane/window to effectively get a live update on
-`editorconfig-checker` errors as you make changes in another pane/window:
+If you have `inotifywait` installed (`inotify-tools` in Ubuntu 22.04), you can run the following command from the repo root in one pane/window to
+effectively get a live update on `editorconfig-checker` errors as you make changes in another pane/window:
 
 ```bash
-while inotifywait --exclude '(\.swp$|^\./\.git/)' --no-newline --format '%0' -e modify -r .; do pipenv run pre-commit run --color=always ec -a; done
+while inotifywait --exclude '(\.swp$|^\./\.git/)' --no-newline --format '%0' -e modify -r .; do \
+   pipenv run pre-commit run --color=always ec -a; \
+done
 ```
 
 You can modify the command to run any or all of the other `pre-commit` hooks, as needed.
 
-Similarly, you could run nektos/act with this:
+Similarly, you could run `nektos/act` with this:
 
 ```bash
 while inotifywait --exclude '(\.swp$|^\./\.git/)' --format '%f:%e%0' -e modify -r .; do \
