@@ -92,10 +92,16 @@ If you have `inotifywait` installed, you can run the following command from the 
 `editorconfig-checker` errors as you make changes in another pane/window:
 
 ```bash
-while inotifywait --exclude '(\.swp$|^\./\.git/)' --format '%f:%e%0' -e modify -r .; do pipenv run pre-commit run --color=always ec -a; done
+while inotifywait --exclude '(\.swp$|^\./\.git/)' --no-newline --format '%0' -e modify -r .; do pipenv run pre-commit run --color=always ec -a; done
 ```
 
 You can modify the command to run any or all of the other `pre-commit` hooks, as needed.
+
+Similarly, you could run nektos/act with this:
+
+```bash
+while inotifywait --exclude '(\.swp$|^\./\.git/)' --format '%f:%e%0' -e modify -r .; do gh act --rm push -j lint -W .github/workflows/pre-commit.yml; done
+```
 
 
 [install `gh`]: https://github.com/cli/cli#installation
