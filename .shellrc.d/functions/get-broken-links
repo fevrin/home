@@ -18,7 +18,7 @@ get-broken-links() {
 
 	local arg
 	local new_args
-	for arg in ${@}; do
+	for arg in "${@}"; do
 
       # if the path isn't set, and the current arg fits the bill, set it
       # and remove it from the options list

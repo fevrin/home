@@ -23,7 +23,7 @@ _print_var_vals() {
 
    # if we got called via the command line or a script, set the index accordingly
    # this must be in a subshell in order to not overwrite a ${BASH_REMATCH} array the caller may have
-   if ([[ ! ${FUNCNAME[1]} =~ main ]]); then
+   if ([[ ! "${FUNCNAME[1]}" =~ main ]]); then
       LINE_OFFSET="+ 2"
    fi
 
@@ -53,16 +53,16 @@ _print_var_vals() {
             verbosity=8;;
            [0-9]*)
             verbosity="${1}"
-            [[ ${verbosity} -gt 8 ]] && verbosity=8;;
+            [[ "${verbosity}" -gt 8 ]] && verbosity=8;;
       esac
       shift
    fi
 
    local i
-   for i in ${@}; do
+   for i in "${@}"; do
       # ensure the given arg is actually a variable and has been set
-      [[ -v ${i} ]] || continue
+      [[ -v "${i}" ]] || continue
       declare -n _variable="${i}"
-      verbose ${flags} ${verbosity} "${FUNCNAME[1]} (line $((${BASH_LINENO[0]} ${LINE_OFFSET}))): ${i} = '${_variable}'"
+      verbose "${flags}" "${verbosity}" "${FUNCNAME[1]} (line $((${BASH_LINENO[0]} ${LINE_OFFSET}))): ${i} = '${_variable}'"
    done
 }

@@ -16,9 +16,9 @@ function get-ips() {
    [[ -n "${ints}" ]] || ints=($(ifconfig | sed -rne "s;^([^ :]+)[ :].*;\1;p"))
 
    local int
-   for int in ${ints[@]}; do
+   for int in "${ints[@]}"; do
       if [[ "${int}" =~ ^([-a-z_0-9]+)$ && $(ip address show "${int}" &>/dev/null; echo $?) -eq 0 ]]; then
-         ip="$(ip address show ${int} | grep -Po "inet \K${IP_REGEX}")"
+         ip="$(ip address show "${int}" | grep -Po "inet \K${IP_REGEX}")"
          if [[ -n "${ip}" ]]; then
             if [[ "${IP_ONLY}" -eq 1 ]]; then
                echo "${ip}"

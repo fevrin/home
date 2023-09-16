@@ -46,22 +46,22 @@ diff-home-files() {
          ACTION="cp -aiv"
          shift
          local file
-         for file in ${@}; do
+         for file in "${@}"; do
             file="${1##${HOME}/}"
             [[ -d "$(dirname "${HOME_DIR}/${file}")" ]] || {
                echo "making parent directories..."
                mkdir -p "$(dirname "${HOME_DIR}/${file}")"
             }
-            ${ACTION} "${HOME}/${file}" "${HOME_DIR}/${file}"
+            "${ACTION}" "${HOME}/${file}" "${HOME_DIR}/${file}"
          done
          return
          ;;
       file)
          shift
          unset ACTION
-         for file in ${@}; do
+         for file in "${@}"; do
             file="${1##${HOME}/}"
-            [[ ${file} =~ ^${HOME} ]] || file="${HOME_DIR}/${file}"
+            [[ "${file}" =~ ^${HOME} ]] || file="${HOME_DIR}/${file}"
             for i in ${!skip_files[*]}; do
                # if the file would normally be skipped, remove it from the
                # skip list since the user explicitly specified it
@@ -86,12 +86,12 @@ diff-home-files() {
       local file1="$(echo "${i}" | sed -re "s;${HOME_DIR}/(.*);${HOME}/\1;")"
 #      echo file1="${file1}"
 
-      local file2=${i}
+      local file2="${i}"
       _print_var_vals file1 file2
 #      echo file2="${file2}"
 #
       # check if the file should be skipped
-      { echo "${i}" | grep -qxf <(for i in  ${skip_files[*]}; do echo "${HOME_DIR}/${i}"; done) ||
+      { echo "${i}" | grep -qxf <(for i in ${skip_files[*]}; do echo "${HOME_DIR}/${i}"; done) ||
          [[ "${i}" =~ \.un\~$ ]]
       } && [[ $(echo "${FILE_LIST}" | wc -l 2>&1) -gt 1 ]] && {
          echo "skipping ignored file '${i}'..."
@@ -109,10 +109,10 @@ diff-home-files() {
          echo "you'll need to first copy the file to '${HOME_DIR}'"
          echo
          echo -n "would you like to copy '${file1}' to ${file2}? [Y/n] "; read
-         if [[ ${REPLY} =~ ^n$ ]]; then
+         if [[ "${REPLY}" =~ ^n$ ]]; then
             continue
          else
-            VERBOSE=${VERBOSE} ${FUNCNAME[0]} copy "${file1}"
+            VERBOSE="${VERBOSE}" ${FUNCNAME[0]} copy "${file1}"
 
             [[ -f "${file2}" ]] || {
                echo "could not copy successfully"
@@ -125,14 +125,14 @@ diff-home-files() {
 
       # and it isn't .toprc, and it's not a vim swap file
       [[ ! "${i}" =~ \.toprc &&
-      ! $(file ${i}) =~ "Vim swap file" ]] || continue
+      ! $(file "${i}") =~ "Vim swap file" ]] || continue
 #      ! "${i}" =~ \.md &&
 #      ! "${i}" =~ \.vim\/ ]]
 
       if [[ $(md5sum "${file1}" 2>/dev/null | cut -d" " -f1) != $(md5sum "${file2}" 2>/dev/null | cut -d" " -f1) ]]; then
-         echo ${ACTION} "${ACTION_OPTIONS}" ${file1} ${file2}
-         ${ACTION} "${ACTION_OPTIONS}" ${file1} ${file2}
-         [[ ${ACTION} =~ ^vimdiff$ ]] && {
+         echo "${ACTION}" "${ACTION_OPTIONS}" "${file1}" "${file2}"
+         "${ACTION}" "${ACTION_OPTIONS}" "${file1}" "${file2}"
+         [[ "${ACTION}" =~ ^vimdiff$ ]] && {
             echo "${file1}"
             echo "${file2}"
          }
@@ -141,15 +141,15 @@ diff-home-files() {
             cat <<-EOF
 
 					no differences between these files:
-					${file1}
-					${file2}
+					"${file1}"
+					"${file2}"
 				EOF
 #         }
       fi
    done
 
    local missed_files
-   for i in ${HOME}/.shellrc.d/*/*; do
+   for i in "${HOME}"/.shellrc.d/*/*; do
       [[ -h "${i}" ]] && continue
       [[ -f ${i/${HOME}\//${HOME_DIR}/} ]] || missed_files+=$'\1'"${i}"
    done
@@ -182,4 +182,4 @@ _diff_home_files_completions() {
    local COMPREPLY=($(compgen -W "${VALUES}" "${COMP_WORDS[-1]}"))
 }
 
-complete -F _diff_home_files_completions $(basename ${BASH_SOURCE})
+complete -F _diff_home_files_completions $(basename "${BASH_SOURCE}")
