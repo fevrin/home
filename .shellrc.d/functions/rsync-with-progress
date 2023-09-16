@@ -173,7 +173,7 @@ rsync-with-progress() {
       esac
       shift
    done
-   [[ -r "${SRC}" && ( -r "${DST}" || "${RSYNC_FLAGS[@]}" =~ --list-only ) ]] || {
+   [[ -r "${SRC}" && ( -r "${DST}" || "${RSYNC_FLAGS[*]}" =~ --list-only ) ]] || {
       echo "error: source and destination must be provided and exist"
       return 1
    }

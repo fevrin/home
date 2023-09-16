@@ -36,8 +36,9 @@ verbose() {
 
    # if we got called via the command line or a script, set the index accordingly
    # this must be in a subshell in order to not overwrite a ${BASH_REMATCH} array the caller may have
+   LINE_OFFSET="0"
    if ([[ ! "${FUNCNAME[1]}" =~ (main) ]]); then
-      LINE_OFFSET="+ 2"
+      LINE_OFFSET="2"
    fi
 
    # default verbosity threshold
@@ -74,8 +75,8 @@ verbose() {
    fi
 
    if [[ "${VERBOSE}" -ge "${verbosity}" ]]; then
-      [[ "${verbosity}" -eq 8 ]] && DEBUG="${FUNCNAME[1]} (line $((${BASH_LINENO[0]} ${LINE_OFFSET}))): "
+      [[ "${verbosity}" -eq 8 ]] && DEBUG="${FUNCNAME[1]} (line $(( ${BASH_LINENO[0]} + ${LINE_OFFSET} ))): "
 
-      echo ${flags} "${DEBUG}${@}" >&2
+      echo "${flags}" "${DEBUG}" "${@}" >&2
    fi
 }
