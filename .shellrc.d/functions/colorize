@@ -35,26 +35,26 @@ colorize() {
 
    local word
    for word in ${content}; do
-      if [[ -n "${colors[$word]}" ]]; then
-         color="$(tput setaf "${colors[$word]}")"
-      elif [[ -n "${styles[$word]}" ]]; then
-         style="$(tput "${styles[$word]}")"
-      elif [[ "$word" =~ ^none$ ]]; then
+      if [[ -n "${colors[${word}]}" ]]; then
+         color="$(tput setaf "${colors[${word}]}")"
+      elif [[ -n "${styles[${word}]}" ]]; then
+         style="$(tput "${styles[${word}]}")"
+      elif [[ "${word}" =~ ^none$ ]]; then
          color=
          style=
       else
-         text="$word"
+         text="${word}"
          output="${color}${style}${text}${color_off}"
 
-#         echo -en "$output"
-         printf "%b" "$output"
+#         echo -en "${output}"
+         printf "%b" "${output}"
 
          # reset the style and color
 #         style="0"
 #         color=
       fi
 
-#      case "$word" in
+#      case "${word}" in
 #         normal) ;;
 #         bold) style="1";;
 #         dark) style="2";;
@@ -64,26 +64,26 @@ colorize() {
 #         light|intense) color="$((color + 60))";;
 #
 #         none) color="0";;
-#         black) color="$(($color + 30))";;
-#         red) color="$(($color + 31))";;
-#         green) color="$(($color + 32))";;
-#         yellow) color="$(($color + 33))";;
-#         blue) color="$(($color + 34))";;
-#         purple) color="$(($color + 35))";;
-#         cyan) color="$(($color + 36))";;
-#         white) color="$(($color + 37))";;
+#         black) color="$((${color} + 30))";;
+#         red) color="$((${color} + 31))";;
+#         green) color="$((${color} + 32))";;
+#         yellow) color="$((${color} + 33))";;
+#         blue) color="$((${color} + 34))";;
+#         purple) color="$((${color} + 35))";;
+#         cyan) color="$((${color} + 36))";;
+#         white) color="$((${color} + 37))";;
 #
 #         *)
-#            text="$word"
+#            text="${word}"
 #            output="\e[${style};${color}m${text}${color_off}"
 #
-#            echo -en "$output"
+#            echo -en "${output}"
 #
 #            # reset the style and color
 #            style="0"
 #            color=
 #            ;;
 #      esac
-#   echo -e "color = $color\nstyle = $style\ntext = $text\n"
+#   echo -e "color = ${color}\nstyle = ${style}\ntext = ${text}\n"
    done
 }

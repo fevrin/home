@@ -10,11 +10,11 @@ _get_stdin() {
    #
    # examples:
    #
-   # $ echo $contents | test_script.sh -
+   # $ echo ${contents} | test_script.sh -
    #
    # $ test_script.sh /path/to/file
    #
-   # $ echo $contents | test_script.sh
+   # $ echo ${contents} | test_script.sh
    #
    # $ test_script.sh
    # > output
@@ -25,16 +25,16 @@ _get_stdin() {
    #
    # those all assume test_script.sh calls this helper function like so:
    #
-   # _get_stdin $1
+   # _get_stdin ${1}
 
    local input="${@}"
    local output_command
 
    # ensure the input isn't blank; otherwise, pull from /dev/stdin
    # account for if the user provides "-" (stdin) as the file
-   [[ -z "$input" || "$input" = "-" ]] && input="$(cat /dev/stdin)"
+   [[ -z "${input}" || "${input}" = "-" ]] && input="$(cat /dev/stdin)"
 
-   if [[ -f "$input" || -h "$input" || -p "$input" ]]; then
+   if [[ -f "${input}" || -h "${input}" || -p "${input}" ]]; then
       # use `cat` if the argument is a file, symbolic link, or pipe
       output_command="cat"
    else
@@ -43,5 +43,5 @@ _get_stdin() {
    fi
 
    # output the contents
-   $output_command "$input"
+   ${output_command} "${input}"
 }

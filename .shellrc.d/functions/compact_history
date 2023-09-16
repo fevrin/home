@@ -10,11 +10,11 @@ compact_history() {
    # output: nothing on success, but the temporary file name for you to peruse if run with the simulate/dry-run option
 
    # add something like these lines to a file in /etc/sudoers.d/ if you want to avoid having to sudo every time:
-   # %sudo   ALL=(ALL:ALL)NOPASSWD: /usr/bin/chattr -a $HOME/.bash_history
-   # %sudo   ALL=(ALL:ALL)NOPASSWD: /usr/bin/chattr +a $HOME/.bash_history
+   # %sudo   ALL=(ALL:ALL)NOPASSWD: /usr/bin/chattr -a ${HOME}/.bash_history
+   # %sudo   ALL=(ALL:ALL)NOPASSWD: /usr/bin/chattr +a ${HOME}/.bash_history
 
-   # the above assumes the history file is append-only (use a username instead of '%sudo' to enable just one user to do this, and replace $HOME with
-   # the hard-coded version since sudo doesn't support $HOME)
+   # the above assumes the history file is append-only (use a username instead of '%sudo' to enable just one user to do this, and replace ${HOME} with
+   # the hard-coded version since sudo doesn't support ${HOME})
 
    _verify_reqs <<-EOF || return 1
    _print_var_vals
@@ -27,9 +27,9 @@ compact_history() {
    local REMOVAL_REGEX
 
    while [[ $# -ge 1 ]]; do
-      local arg="$1"
-      verbose 8 "arg = $arg"
-      case $arg in
+      local arg="${1}"
+      verbose 8 "arg = ${arg}"
+      case ${arg} in
          -n|--dry-run)
             DRY_RUN="1"
             ;;
@@ -39,15 +39,15 @@ compact_history() {
             REMOVAL_REGEX="${REMOVAL_REGEX%$}"
             ;;
          *)
-            if [[ -s "$arg" ]]; then
-               HISTORY_FILE="$arg"
+            if [[ -s "${arg}" ]]; then
+               HISTORY_FILE="${arg}"
             fi
             ;;
       esac
       shift
    done
 
-   HISTORY_FILE="${HISTORY_FILE:-$HOME/.bash_history}"
+   HISTORY_FILE="${HISTORY_FILE:-${HOME}/.bash_history}"
    local HISTORY_FILE_BACKUP="${HISTORY_FILE}_$(date +'%F_%Hh%Mm%Ss').bak"
    local TEMP_FILE="$(mktemp)"
 
@@ -93,27 +93,27 @@ compact_history() {
    # we might be able to change the octal characters used here so we can utilize sort's '-z' option, but that might not be as portable
 
    # editorconfig-checker-disable
-   sed -re 's;^(#[0-9]{10,11})$;\o0\1;' "$HISTORY_FILE" | # replace start of lines with a null character (000 octal) so we know the start of a history entry (assuming with a timestamp)
+   sed -re 's;^(#[0-9]{10,11})$;\o0\1;' "${HISTORY_FILE}" | # replace start of lines with a null character (000 octal) so we know the start of a history entry (assuming with a timestamp)
    tr '\n' '\1' |                                         # replace all newlines with a 001 octal character so we can keep track of where the newlines should later go, including in multi-line entries
    sed -rne 's;\o0([^\o0]+);\1\n;gp' |                    # re-insert newlines just at the end of each history entry so we can sort
    sort -rt$'\1' -k2 |                                    # sort in reverse order so the `sort -u` removes all but the last occurrence (rather than all but the first occurrence)
    sort -u -t$'\1' -k2 |                                  # sort by command to remove duplicates
    sort |                                                 # sort again—this time by timestamp, the original order of the entries
-   egrep -v $'\1'" *$REMOVAL_REGEX *"$'\1' |              # remove all entries matching the provided regex, if any (this is safe to run, even if the regex isn't provided or is blank
+   egrep -v $'\1'" *${REMOVAL_REGEX} *"$'\1' |              # remove all entries matching the provided regex, if any (this is safe to run, even if the regex isn't provided or is blank
    tr -d '\n' |                                           # remove the newlines we'd previously inserted so they don't double up
-   tr '\1' '\n' >"$TEMP_FILE"                             # re-insert all newlines that were there from the beginning
+   tr '\1' '\n' >"${TEMP_FILE}"                             # re-insert all newlines that were there from the beginning
    # editorconfig-checker-enable
 
    # perform the actual move if the new temp file has data in it (after backing up the original history file)
-   if [[ -s "$TEMP_FILE" ]]; then
-      if [[ $DRY_RUN -eq 1 ]]; then
-         ls -halF "$TEMP_FILE"
+   if [[ -s "${TEMP_FILE}" ]]; then
+      if [[ ${DRY_RUN} -eq 1 ]]; then
+         ls -halF "${TEMP_FILE}"
       else
          local APPEND_ONLY=0
 
-         if lsattr -l "$HISTORY_FILE" | grep -qi append_only; then
-            verbose 0 "attempting to remove append-only mode for '$HISTORY_FILE'"
-            sudo chattr -a "$HISTORY_FILE" || {
+         if lsattr -l "${HISTORY_FILE}" | grep -qi append_only; then
+            verbose 0 "attempting to remove append-only mode for '${HISTORY_FILE}'"
+            sudo chattr -a "${HISTORY_FILE}" || {
                verbose 1 "error: couldn't remove file's append-only mode!"
                return 1
             }
@@ -122,25 +122,25 @@ compact_history() {
 
          # move the new history file to the default one
          {
-            mv "$HISTORY_FILE" "$HISTORY_FILE_BACKUP" 2>/dev/null &&
-            mv "$TEMP_FILE" "$HISTORY_FILE" 2>/dev/null
+            mv "${HISTORY_FILE}" "${HISTORY_FILE_BACKUP}" 2>/dev/null &&
+            mv "${TEMP_FILE}" "${HISTORY_FILE}" 2>/dev/null
          } || {
             verbose 1 "error: couldn't move files!"
             return 1
          }
 
-         if [[ $APPEND_ONLY -eq 1 ]]; then
-            verbose 0 "attempting to re-apply append-only mode for '$HISTORY_FILE'"
-            sudo chattr +a "$HISTORY_FILE" || {
+         if [[ ${APPEND_ONLY} -eq 1 ]]; then
+            verbose 0 "attempting to re-apply append-only mode for '${HISTORY_FILE}'"
+            sudo chattr +a "${HISTORY_FILE}" || {
                verbose 1 "error: couldn't re-apply file's append-only mode!"
                return 1
             }
          fi
       fi
    else
-      verbose 1 "error: '$TEMP_FILE' couldn't be made or is empty!"
+      verbose 1 "error: '${TEMP_FILE}' couldn't be made or is empty!"
       return 1
    fi
 }
 
-complete -W "--dry-run --regex" $(basename $BASH_SOURCE)
+complete -W "--dry-run --regex" $(basename ${BASH_SOURCE})

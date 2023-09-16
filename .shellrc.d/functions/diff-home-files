@@ -2,7 +2,7 @@
 
 diff-home-files() {
    local i
-   local HOME_DIR="$HOME/home"
+   local HOME_DIR="${HOME}/home"
    local ACTION="${1:-vimdiff}"
    local VIMDIFF_OPTIONS="-c :windo set wrap"
    local ACTION_OPTIONS
@@ -13,16 +13,16 @@ diff-home-files() {
       echo "
 		Commands:
 
-		[cp|copy|-a]      copy files from ~/ to $HOME_DIR non-interactively
+		[cp|copy|-a]      copy files from ~/ to ${HOME_DIR} non-interactively
 
-      [diff|vimdiff]    use vimdiff to compare each file that differs between ~/ and $HOME_DIR (this is the default)
+      [diff|vimdiff]    use vimdiff to compare each file that differs between ~/ and ${HOME_DIR} (this is the default)
 
       [file]            operate only on the specified file
 		" | tr -d '\t'
    }
 
    # list files that should be ignored
-   # filenames relative to $HOME_DIR
+   # filenames relative to ${HOME_DIR}
    declare -a skip_files=(
    ".shellrc.d/functions/_verify_reqs"
    ".shellrc.d/functions/yessh"
@@ -38,7 +38,7 @@ diff-home-files() {
    )
 
    _print_var_vals ACTION
-   case "$ACTION" in
+   case "${ACTION}" in
       diff|vimdiff)
          ACTION="vimdiff"
          ;;
@@ -46,28 +46,28 @@ diff-home-files() {
          ACTION="cp -aiv"
          shift
          local file
-         for file in $@; do
-            file="${1##$HOME/}"
-            [[ -d "$(dirname "$HOME_DIR/$file")" ]] || {
+         for file in ${@}; do
+            file="${1##${HOME}/}"
+            [[ -d "$(dirname "${HOME_DIR}/${file}")" ]] || {
                echo "making parent directories..."
-               mkdir -p "$(dirname "$HOME_DIR/$file")"
+               mkdir -p "$(dirname "${HOME_DIR}/${file}")"
             }
-            $ACTION "$HOME/$file" "$HOME_DIR/$file"
+            ${ACTION} "${HOME}/${file}" "${HOME_DIR}/${file}"
          done
          return
          ;;
       file)
          shift
          unset ACTION
-         for file in $@; do
-            file="${1##$HOME/}"
-            [[ $file =~ ^$HOME ]] || file="$HOME_DIR/$file"
+         for file in ${@}; do
+            file="${1##${HOME}/}"
+            [[ ${file} =~ ^${HOME} ]] || file="${HOME_DIR}/${file}"
             for i in ${!skip_files[*]}; do
                # if the file would normally be skipped, remove it from the
                # skip list since the user explicitly specified it
-               { echo "$file" | grep -q "${skip_files[$i]}"; } && unset skip_files[$i]
+               { echo "${file}" | grep -q "${skip_files[${i}]}"; } && unset skip_files[${i}]
             done
-            FILE_LIST+="$file "
+            FILE_LIST+="${file} "
             shift
          done
          ;;
@@ -77,109 +77,109 @@ diff-home-files() {
          ;;
    esac
 
-   [[ "$ACTION" || "$ACTION" =~ ^file$ ]] || ACTION="vimdiff"
-   [[ "$ACTION" =~ ^vimdiff$ ]] && ACTION_OPTIONS="$VIMDIFF_OPTIONS"
-   [[ "$FILE_LIST" ]] || FILE_LIST=$(find "$HOME_DIR" -type f ! -iregex '.*\/\.git\/.*')
+   [[ "${ACTION}" || "${ACTION}" =~ ^file$ ]] || ACTION="vimdiff"
+   [[ "${ACTION}" =~ ^vimdiff$ ]] && ACTION_OPTIONS="${VIMDIFF_OPTIONS}"
+   [[ "${FILE_LIST}" ]] || FILE_LIST=$(find "${HOME_DIR}" -type f ! -iregex '.*\/\.git\/.*')
    _print_var_vals ACTION ACTION_OPTIONS FILE_LIST
 
-   for i in $FILE_LIST; do
-      local file1="$(echo "$i" | sed -re "s;$HOME_DIR/(.*);$HOME/\1;")"
-#      echo file1="$file1"
+   for i in ${FILE_LIST}; do
+      local file1="$(echo "${i}" | sed -re "s;${HOME_DIR}/(.*);${HOME}/\1;")"
+#      echo file1="${file1}"
 
-      local file2=$i
+      local file2=${i}
       _print_var_vals file1 file2
-#      echo file2="$file2"
+#      echo file2="${file2}"
 #
       # check if the file should be skipped
-      { echo "$i" | grep -qxf <(for i in  ${skip_files[*]}; do echo "$HOME_DIR/$i"; done) ||
-         [[ "$i" =~ \.un\~$ ]]
-      } && [[ $(echo "$FILE_LIST" | wc -l 2>&1) -gt 1 ]] && {
-         echo "skipping ignored file '$i'..."
+      { echo "${i}" | grep -qxf <(for i in  ${skip_files[*]}; do echo "${HOME_DIR}/${i}"; done) ||
+         [[ "${i}" =~ \.un\~$ ]]
+      } && [[ $(echo "${FILE_LIST}" | wc -l 2>&1) -gt 1 ]] && {
+         echo "skipping ignored file '${i}'..."
          continue
       }
 
       # the item is within the .shellrc.d directory
-      if [[ -f "$file2" ]]; then
+      if [[ -f "${file2}" ]]; then
          [[ -f "${file1}" ]] || {
             echo "${file1} doesn't exist; skipping..."
             continue
          }
       else
          [[ -f "${file1}" ]] && {
-         echo "you'll need to first copy the file to '$HOME_DIR'"
+         echo "you'll need to first copy the file to '${HOME_DIR}'"
          echo
-         echo -n "would you like to copy '$file1' to $file2? [Y/n] "; read
-         if [[ $REPLY =~ ^n$ ]]; then
+         echo -n "would you like to copy '${file1}' to ${file2}? [Y/n] "; read
+         if [[ ${REPLY} =~ ^n$ ]]; then
             continue
          else
-            VERBOSE=${VERBOSE} ${FUNCNAME[0]} copy "$file1"
+            VERBOSE=${VERBOSE} ${FUNCNAME[0]} copy "${file1}"
 
-            [[ -f "$file2" ]] || {
+            [[ -f "${file2}" ]] || {
                echo "could not copy successfully"
                return 1
             }
          fi
-#         echo "i = '$i'"
+#         echo "i = '${i}'"
          }
       fi
 
       # and it isn't .toprc, and it's not a vim swap file
-      [[ ! "$i" =~ \.toprc &&
-      ! $(file $i) =~ "Vim swap file" ]] || continue
-#      ! "$i" =~ \.md &&
-#      ! "$i" =~ \.vim\/ ]]
+      [[ ! "${i}" =~ \.toprc &&
+      ! $(file ${i}) =~ "Vim swap file" ]] || continue
+#      ! "${i}" =~ \.md &&
+#      ! "${i}" =~ \.vim\/ ]]
 
       if [[ $(md5sum "${file1}" 2>/dev/null | cut -d" " -f1) != $(md5sum "${file2}" 2>/dev/null | cut -d" " -f1) ]]; then
-         echo $ACTION "$ACTION_OPTIONS" $file1 $file2
-         $ACTION "$ACTION_OPTIONS" $file1 $file2
-         [[ $ACTION =~ ^vimdiff$ ]] && {
-            echo "$file1"
-            echo "$file2"
+         echo ${ACTION} "${ACTION_OPTIONS}" ${file1} ${file2}
+         ${ACTION} "${ACTION_OPTIONS}" ${file1} ${file2}
+         [[ ${ACTION} =~ ^vimdiff$ ]] && {
+            echo "${file1}"
+            echo "${file2}"
          }
       else
-#         [[ "$FILE_LIST" =~ ^"$i" ]] && {
+#         [[ "${FILE_LIST}" =~ ^"${i}" ]] && {
             cat <<-EOF
 
 					no differences between these files:
-					$file1
-					$file2
+					${file1}
+					${file2}
 				EOF
 #         }
       fi
    done
 
    local missed_files
-   for i in $HOME/.shellrc.d/*/*; do
-      [[ -h "$i" ]] && continue
-      [[ -f ${i/$HOME\//$HOME_DIR/} ]] || missed_files+=$'\1'"$i"
+   for i in ${HOME}/.shellrc.d/*/*; do
+      [[ -h "${i}" ]] && continue
+      [[ -f ${i/${HOME}\//${HOME_DIR}/} ]] || missed_files+=$'\1'"${i}"
    done
 
-   if [[ "$missed_files" ]]; then
+   if [[ "${missed_files}" ]]; then
       echo
-      echo "you may want to copy these to $HOME_DIR:"
-      echo "$missed_files" | tr '\1' '\n'
+      echo "you may want to copy these to ${HOME_DIR}:"
+      echo "${missed_files}" | tr '\1' '\n'
    fi
 }
 
 _diff_home_files_completions() {
-   local HOME_DIR="$HOME/home"
+   local HOME_DIR="${HOME}/home"
    local VALUES=""
 #   echo "COMP_WORDS = '${COMP_WORDS[@]}'"
    # if we're going by files, list available files
    if [[ "${#COMP_WORDS[@]}" -gt 2 ]]; then
       if [[ "${COMP_WORDS[1]}" =~ ^file$ ]]; then
-         # output into columns all files tracked in the $HOME_DIR repo
-         VALUES="$(cd "$HOME_DIR" && git ls-tree -r $(git current-branch) --name-only | column -c$(tput cols))"
+         # output into columns all files tracked in the ${HOME_DIR} repo
+         VALUES="$(cd "${HOME_DIR}" && git ls-tree -r $(git current-branch) --name-only | column -c$(tput cols))"
       fi
    elif [[ "${#COMP_WORDS[@]}" -eq 2 ]]; then
       # ${#COMP_WORDS} starts off at 2, so we're at the initial [Tab]
       VALUES="copy vimdiff file"
    fi
-#   echo "VALUES = '$VALUES'"
+#   echo "VALUES = '${VALUES}'"
 #   echo "COMP_WORDS = '${COMP_WORDS[@]}'"
 #   echo "COMP_CWORD = '${COMP_CWORD[*]}'"
    # generate completions based on the last word on the commandline
-   local COMPREPLY=($(compgen -W "$VALUES" "${COMP_WORDS[-1]}"))
+   local COMPREPLY=($(compgen -W "${VALUES}" "${COMP_WORDS[-1]}"))
 }
 
-complete -F _diff_home_files_completions $(basename $BASH_SOURCE)
+complete -F _diff_home_files_completions $(basename ${BASH_SOURCE})

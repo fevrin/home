@@ -6,17 +6,17 @@
 # see the `yessh` file for more info
 
 # ensure we're not resourcing this file in an endless loop
-[[ -r ~/.bashrc && $(readlink -e ~/.bashrc) != $(readlink -e $BASH_SOURCE) ]] && . ~/.bashrc
+[[ -r ~/.bashrc && $(readlink -e ~/.bashrc) != $(readlink -e ${BASH_SOURCE}) ]] && . ~/.bashrc
 
-infocmp -x 2>/dev/null | grep -q $TERM || export TERM=screen
+infocmp -x 2>/dev/null | grep -q ${TERM} || export TERM=screen
 set -o vi
 alias list='ls -halF --color=always'
 alias nmap='nmap -T5 --reason -F -Pn'
 alias mtr='sudo mtr -s 1472 -i.1 -c1000'
 #alias vim='vim -c "set bg=dark" -c "set nu"' # shorter version of below, but limited to 10 '-c' args
 
-if [[ ! -s "$HOME/.vimrc" ]]; then
-   cat <<-EOF >>"$HOME/.vimrc"
+if [[ ! -s "${HOME}/.vimrc" ]]; then
+   cat <<-EOF >>"${HOME}/.vimrc"
 	set bg=dark
 	set nu
 	set is
@@ -59,19 +59,19 @@ dir_color="blue"
 # make the username red if it's root
 [[ $(id -u) -eq 0 ]] && user_color="red"
 
-#echo "PS1 = $PS1"
+#echo "PS1 = ${PS1}"
 
 # default PS1:
-#${debian_chroot:+($debian_chroot)}\u@\h:\w\$
+#${debian_chroot:+(${debian_chroot})}\u@\h:\w\$
 
 # re-arrange the order of items
 PS1="\n\n\D{%F %T %Z}\n\u@\h:\w\n\$ "
 
 # set the desired user color
-PS1="${PS1/\\u/'\[\033[01;${colors[$user_color]}m\]\u\[\033[${colors[none]}m\]'}"
+PS1="${PS1/\\u/'\[\033[01;${colors[${user_color}]}m\]\u\[\033[${colors[none]}m\]'}"
 
 # set the desired  hostname color (typically red to show it's not local)
-PS1="${PS1/\\h/'\[\033[01;${colors[$hostname_color]}m\]\h\[\033[${colors[none]}m\]'}"
+PS1="${PS1/\\h/'\[\033[01;${colors[${hostname_color}]}m\]\h\[\033[${colors[none]}m\]'}"
 
 # expand the hostname if it matches the pattern
 if [[ $(hostname -s) =~ (\.|^)([a-z]{3}[0-9]|s2r[0-9]) || $(hostname -s) =~ (\.|^)nas ]]; then
@@ -80,28 +80,28 @@ if [[ $(hostname -s) =~ (\.|^)([a-z]{3}[0-9]|s2r[0-9]) || $(hostname -s) =~ (\.|
    }
 fi
 
-# export PS1="${debian_chroot:+($debian_chroot)}\u@\h:\w\$ "
+# export PS1="${debian_chroot:+(${debian_chroot})}\u@\h:\w\$ "
 
 # attempt to output the motd
 MOTD_RUN=0
 
 for file in /{var/,}run/motd{,.dynamic} /etc/motd /snap/core/current/etc/motd; do
-   [[ -s "$file" ]] && cat "$file" && MOTD_RUN=1 && break
+   [[ -s "${file}" ]] && cat "${file}" && MOTD_RUN=1 && break
 done
-if [[ $MOTD_RUN -eq 0 ]]; then
+if [[ ${MOTD_RUN} -eq 0 ]]; then
    for i in /etc/update-motd.d/*; do
-      [[ -r "$i" ]] || continue
-      grep -q exec $i || { $i && MOTD_RUN=1; }
+      [[ -r "${i}" ]] || continue
+      grep -q exec ${i} || { ${i} && MOTD_RUN=1; }
    done
 fi
-if [[ $MOTD_RUN -eq 0 && $(which run-parts 2>/dev/null) ]]; then
+if [[ ${MOTD_RUN} -eq 0 && $(which run-parts 2>/dev/null) ]]; then
    run-parts /etc/update-motd.d/ > /dev/null && MOTD_RUN=1
 fi
 unset MOTD_RUN
 
-last -F | awk '/'$USER'/ {print "Last login: " $4 " " $5 " " $6 " " $7 " from " $3}' | head -n1
+last -F | awk '/'${USER}'/ {print "Last login: " $4 " " $5 " " $6 " " $7 " from " $3}' | head -n1
 
-ps -u $USER -o pid,args,etimes | awk '
+ps -u ${USER} -o pid,args,etimes | awk '
 {
    if ($NF >= 86400) {
       commands=sprintf("%s\n%s",commands,$0)

@@ -35,7 +35,7 @@ verbose() {
    local VERBOSE="${VERBOSE:-1}"
 
    # if we got called via the command line or a script, set the index accordingly
-   # this must be in a subshell in order to not overwrite a $BASH_REMATCH array the caller may have
+   # this must be in a subshell in order to not overwrite a ${BASH_REMATCH} array the caller may have
    if ([[ ! ${FUNCNAME[1]} =~ (main) ]]); then
       LINE_OFFSET="+ 2"
    fi
@@ -43,12 +43,12 @@ verbose() {
    # default verbosity threshold
    verbosity=3
 
-   ([[ "$1" =~ -(n|e) ]]) &&
-   flags="$1" &&
+   ([[ "${1}" =~ -(n|e) ]]) &&
+   flags="${1}" &&
    shift
 
-   if ([[ "$1" =~ ^([0-9]+|(emerg|alert|crit|err|warn|notice|info|debug).*)$ ]]); then
-      case "$1" in
+   if ([[ "${1}" =~ ^([0-9]+|(emerg|alert|crit|err|warn|notice|info|debug).*)$ ]]); then
+      case "${1}" in
       # levels taken from syslog
          emerg*) # system is unusable
             verbosity=1;;
@@ -67,15 +67,15 @@ verbose() {
          debug) # debug-level message
             verbosity=8;;
            [0-9]*)
-            verbosity="$1"
-            [[ $verbosity -gt 8 ]] && verbosity=8;;
+            verbosity="${1}"
+            [[ ${verbosity} -gt 8 ]] && verbosity=8;;
       esac
       shift
    fi
 
-   if [[ $VERBOSE -ge $verbosity ]]; then
-      [[ $verbosity -eq 8 ]] && DEBUG="${FUNCNAME[1]} (line $((${BASH_LINENO[0]} ${LINE_OFFSET}))): "
+   if [[ ${VERBOSE} -ge ${verbosity} ]]; then
+      [[ ${verbosity} -eq 8 ]] && DEBUG="${FUNCNAME[1]} (line $((${BASH_LINENO[0]} ${LINE_OFFSET}))): "
 
-      echo $flags "$DEBUG$@" >&2
+      echo ${flags} "${DEBUG}${@}" >&2
    fi
 }

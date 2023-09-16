@@ -18,29 +18,29 @@ get-broken-links() {
 
 	local arg
 	local new_args
-	for arg in $@; do
+	for arg in ${@}; do
 
       # if the path isn't set, and the current arg fits the bill, set it
       # and remove it from the options list
       # inspiration from <https://unix.stackexchange.com/questions/258512/how-to-remove-a-positional-parameter-from/258514#258514>
-      [[ -e "$arg" ]] && path+="$arg " && shift && continue
+      [[ -e "${arg}" ]] && path+="${arg} " && shift && continue
 
-      new_args="$new_args $arg"
+      new_args="${new_args} ${arg}"
 	done
 
    # reset the options to exclude the path since getopts chokes when flags aren't first
 	set -- "${new_args## }"
 
    while getopts ":dt:" opt; do
-      case $opt in
+      case ${opt} in
          d)
             dry_run=1
             ;;
          t)
-            timeout=$OPTARG
+            timeout=${OPTARG}
             ;;
          \?)
-            echo "$FUNCNAME [-d] [-t {timeout}]"
+            echo "${FUNCNAME} [-d] [-t {timeout}]"
             return 1
             ;;
       esac
@@ -55,35 +55,35 @@ get-broken-links() {
    _print_var_vals timeout dry_run path
    parallel --will-cite --max-procs=0 '
    link="$(echo {})";
-      if [[ '$dry_run' -eq 1 ]]; then
-         echo "checking $link" >&2
+      if [[ '${dry_run}' -eq 1 ]]; then
+         echo "checking ${link}" >&2
       else
-         output="$(curl --max-time '$timeout' -o /dev/null -ksSLw "%{http_code}" "$link" 2>&1)";
-         [[ $(echo "$output" | wc -l) -gt 1 ]] && error_msg="$(echo "$output" | head -n1)"
-         exit_code="$(echo "$output" | tail -n1)"
-         if [[ "$exit_code" =~ ^[0-9]+$ ]]; then
-            if [[ "$exit_code" -ge 200 && "$exit_code" -lt 300 ]]; then
+         output="$(curl --max-time '${timeout}' -o /dev/null -ksSLw "%{http_code}" "${link}" 2>&1)";
+         [[ $(echo "${output}" | wc -l) -gt 1 ]] && error_msg="$(echo "${output}" | head -n1)"
+         exit_code="$(echo "${output}" | tail -n1)"
+         if [[ "${exit_code}" =~ ^[0-9]+$ ]]; then
+            if [[ "${exit_code}" -ge 200 && "${exit_code}" -lt 300 ]]; then
                echo -n ".";
             else
                echo
-               echo -n "$exit_code: ";
-               if [[ -n "$error_msg" ]]; then
-                  echo "\"$error_msg\" (\"$link)\"";
+               echo -n "${exit_code}: ";
+               if [[ -n "${error_msg}" ]]; then
+                  echo "\"${error_msg}\" (\"${link})\"";
                else
-                  echo "\"$link\"";
+                  echo "\"${link}\"";
                fi
             fi;
          else
             echo
-            echo "timed out on \"$link\"";
+            echo "timed out on \"${link}\"";
          fi;
          exit_code="";
       fi
-   ' ::: $(egrep -Ihiro "$HTTP_REGEX" $path | sort -u)
-   #for link in $(egrep -Ihoir "$HTTP_REGEX" $path | sort -u); do
-   #   echo "checking $link" >&2
-   #   if [[ $dry_run -ne 1 ]]; then
-   #      timeout $timeout curl -kIL "$link" &>/dev/null || echo "$link"
+   ' ::: $(egrep -Ihiro "${HTTP_REGEX}" ${path} | sort -u)
+   #for link in $(egrep -Ihoir "${HTTP_REGEX}" ${path} | sort -u); do
+   #   echo "checking ${link}" >&2
+   #   if [[ ${dry_run} -ne 1 ]]; then
+   #      timeout ${timeout} curl -kIL "${link}" &>/dev/null || echo "${link}"
    #   fi
    #done
 }

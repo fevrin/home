@@ -6,8 +6,8 @@ clear-swap() {
    local mem=$(LC_ALL=C free  | awk '/Mem:/ {print $4}')
    local swap=$(LC_ALL=C free | awk '/Swap:/ {print $3}')
 
-   if [[ $mem -lt $swap ]]; then
-       echo "ERROR: not enough RAM to write swap back (mem = '$mem', swap = '$swap'), nothing done" >&2
+   if [[ ${mem} -lt ${swap} ]]; then
+       echo "ERROR: not enough RAM to write swap back (mem = '${mem}', swap = '${swap}'), nothing done" >&2
        return 1
    fi
 

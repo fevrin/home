@@ -14,24 +14,24 @@ archive-emails() {
    [1]="u"
    )
    local given_date="${@:-1 week ago}" # default to last week
-   given_date="$(date -d "$given_date")"
+   given_date="$(date -d "${given_date}")"
    _print_var_vals given_date
 #   local weekOf="$(date -d "now - $(($(date +%w) + 6)) days" +%F)" #calculate the beginning of last week
 
-   [[ $(date -d "$given_date" +%j | sed -re 's;^0*([0-9]+)$;\1;') -gt $(date -d "now" +%j | sed -re 's;^0*([0-9]+)$;\1;') ]] && {
+   [[ $(date -d "${given_date}" +%j | sed -re 's;^0*([0-9]+)$;\1;') -gt $(date -d "now" +%j | sed -re 's;^0*([0-9]+)$;\1;') ]] && {
       echo "date must be in the past or present!"
       return 1
    }
 
    # calculate the beginning of the week of the given day
-   weekOf="$(date -d "$given_date - $(($(date -d "$given_date" +%${beginning_of_week_designation[$beginning_of_week]}) - $beginning_of_week)) days" +%F)" # editorconfig-checker-disable-line
+   weekOf="$(date -d "${given_date} - $(($(date -d "${given_date}" +%${beginning_of_week_designation[${beginning_of_week}]}) - ${beginning_of_week})) days" +%F)" # editorconfig-checker-disable-line
    _print_var_vals given_date weekOf beginning_of_week
 
-   date -d "$weekOf" +%w &>/dev/null || return 1
+   date -d "${weekOf}" +%w &>/dev/null || return 1
 
-   local weekStart="$(date -d "$weekOf - 1 day")"
-   local weekEnd="$(date -d "$weekStart + 8 days")"
+   local weekStart="$(date -d "${weekOf} - 1 day")"
+   local weekEnd="$(date -d "${weekStart} + 8 days")"
    _print_var_vals weekOf weekStart weekEnd
 
-   echo "https://mail.google.com/mail/u/0/#search/after%3A$(date -d "$weekStart" "+$dateFormat")+before%3A$(date -d "$weekEnd" "+$dateFormat")+in%3Ainbox" # editorconfig-checker-disable-line
+   echo "https://mail.google.com/mail/u/0/#search/after%3A$(date -d "${weekStart}" "+${dateFormat}")+before%3A$(date -d "${weekEnd}" "+${dateFormat}")+in%3Ainbox" # editorconfig-checker-disable-line
 }

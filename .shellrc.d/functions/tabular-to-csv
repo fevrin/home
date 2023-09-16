@@ -7,7 +7,7 @@ tabular-to-csv() {
       _get_stdin
 	EOF
 
-   local tabular_contents="$(_get_stdin "$1")"
+   local tabular_contents="$(_get_stdin "${1}")"
 
-   echo "$tabular_contents" | sed -rne 's; *\| *;,;gp' | sed -re 's;(^,|,$);;g'
+   echo "${tabular_contents}" | sed -rne 's; *\| *;,;gp' | sed -re 's;(^,|,$);;g'
 }

@@ -6,11 +6,11 @@ hash_pw() {
 
    #<http://www.slashroot.in/how-are-passwords-stored-linux-understanding-hashing-shadow-utils>
    #<http://unix.stackexchange.com/questions/81240/manually-generate-password-for-etc-shadow>
-   #$1 = MD5 hashing algorithm.
-   #$2 =Blowfish Algorithm is in use.
-   #$2a=eksblowfish Algorithm
-   #$5 =SHA-256 Algorithm
-   #$6 =SHA-512 Algorithm
+   #${1} = MD5 hashing algorithm.
+   #${2} =Blowfish Algorithm is in use.
+   #${2a}=eksblowfish Algorithm
+   #${5} =SHA-256 Algorithm
+   #${6} =SHA-512 Algorithm
 
    _verify_reqs <<-EOF || return 1
    openssl

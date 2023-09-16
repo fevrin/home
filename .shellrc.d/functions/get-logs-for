@@ -4,11 +4,11 @@ get-logs-for() {
    # this retrieves and formats journald logs for the given service,
    # regardless whether the logs are in a /var/log/ file or not
 
-   local service="$1"
+   local service="${1}"
 
-   if [[ -n "$service" ]]; then
+   if [[ -n "${service}" ]]; then
       if which gawk &>/dev/null; then
-         sudo journalctl -xf -t "$service" |
+         sudo journalctl -xf -t "${service}" |
             tee >(
                   awk '
                   m=gensub(/^.*\{.*timestamp":([0-9]+)[^0-9].*$/,"\\1","g",$0)
@@ -24,12 +24,12 @@ get-logs-for() {
 #         tee \
 #            >(sed -urne 's;\\;;g; s;^.*MESSAGE[^{]+(\{.*\})",$;\1;p' | jq --unbuffered '.timestamp |= strftime("%Y-%m-%d %H:%M:%S %Z")') \
 #            >(egrep -v '^$') >/dev/null
-         sudo journalctl -xf -t "$service" |
+         sudo journalctl -xf -t "${service}" |
             tee \
                >(sed -urne 's;^.*(\{.*)$;\1;p' | jq --unbuffered '.timestamp |= strftime("%Y-%m-%d %H:%M:%S %Z")') \
                >(egrep -v '^$') >/dev/null
       fi
-#      sudo journalctl -xf -t "$service" | sed -rne 's;^.*(\{.*)$;\1;p' | { jq . 2>/dev/null || cat; }
+#      sudo journalctl -xf -t "${service}" | sed -rne 's;^.*(\{.*)$;\1;p' | { jq . 2>/dev/null || cat; }
    else
       echo "error: you must provide a service name"
    fi

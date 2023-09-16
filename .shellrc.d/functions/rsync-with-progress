@@ -93,8 +93,8 @@ rsync-with-progress() {
    )
    local SUDO
 
-   for arg in "$@"; do
-      case "$arg" in
+   for arg in "${@}"; do
+      case "${arg}" in
          sudo)
             SUDO="sudo"
             ;;
@@ -109,55 +109,55 @@ rsync-with-progress() {
                   local flag
                   # convert short options to their long variants here before adding them
                   flag="${ALL_RSYNC_FLAGS[${arg}]}"
-#                  echo "flag = '$flag'" #&& echo "'${flag// /}' != '$flag'" && continue
+#                  echo "flag = '${flag}'" #&& echo "'${flag// /}' != '${flag}'" && continue
 
-                  [[ "${flag// /}" != "$flag" ]] && {
+                  [[ "${flag// /}" != "${flag}" ]] && {
                      # the flag stands for multiple other flags, like -P = "--partial --progress", so we should add each individually
-                     for x in $flag; do
+                     for x in ${flag}; do
                         RSYNC_FLAGS+=("--no-${x##--}")
                      done
                      continue
                   }
 
-                  [[ -z "$flag" ]] && echo "unknown flag: '$flag'" && continue
+                  [[ -z "${flag}" ]] && echo "unknown flag: '${flag}'" && continue
                   RSYNC_FLAGS_NEGATIONS+=("--no-${flag##--}")
                else
-                  RSYNC_FLAGS_NEGATIONS+=("$arg")
+                  RSYNC_FLAGS_NEGATIONS+=("${arg}")
                fi
                continue
             ;;
          -[A-Za-z]*)
             # process combined short options
-            if ([[ "$arg" =~ ^-([A-Za-z]+)$ ]]); then
+            if ([[ "${arg}" =~ ^-([A-Za-z]+)$ ]]); then
 #               echo "${arg}"
 #               echo "${#arg}"
                local flag
                for ((i=1; i<"${#arg}"; i++)); do
-#                  echo "i = '$i'"
-#                  echo "letter \${arg:$i:1} = '${arg:i:1}'"
+#                  echo "i = '${i}'"
+#                  echo "letter \${arg:${i}:1} = '${arg:i:1}'"
                   # possibly convert short options to their long variants here before adding them
-                  flag="${ALL_RSYNC_FLAGS[-${arg:$i:1}]}"
-#                  echo "flag = '$flag'" && echo "'${flag// /}' != '$flag'" && continue
+                  flag="${ALL_RSYNC_FLAGS[-${arg:${i}:1}]}"
+#                  echo "flag = '${flag}'" && echo "'${flag// /}' != '${flag}'" && continue
 
-                  [[ "${flag// /}" != "$flag" ]] && {
+                  [[ "${flag// /}" != "${flag}" ]] && {
                      # the flag stands for multiple other flags, like -P = "--partial --progress", so we should add each individually
-                     for x in $flag; do
-                        RSYNC_FLAGS+=("$x")
+                     for x in ${flag}; do
+                        RSYNC_FLAGS+=("${x}")
                      done
                      continue
                   }
-                  [[ -z "$flag" ]] && echo "unknown flag: '$flag'" && continue
-                  RSYNC_FLAGS+=("$flag")
+                  [[ -z "${flag}" ]] && echo "unknown flag: '${flag}'" && continue
+                  RSYNC_FLAGS+=("${flag}")
                done
             fi
             ;;
          --[-a-z]*)
-            RSYNC_FLAGS+=("$arg")
+            RSYNC_FLAGS+=("${arg}")
             ;;
          *)
-            if [[ -r "$arg" && -z "$SRC" ]]; then
-               SRC="$arg"
-            elif [[ -z "$DST" ]]; then
+            if [[ -r "${arg}" && -z "${SRC}" ]]; then
+               SRC="${arg}"
+            elif [[ -z "${DST}" ]]; then
                DST="${arg%/}"
                [[ -f "${DST}" ]] && continue
                [[ -d "${DST}" ]] || {
@@ -165,7 +165,7 @@ rsync-with-progress() {
                   echo "${DST}"
                   echo
                   echo -n "the above directory doesn't exist; create this path? [Y/n] "; read
-                  ([[ $REPLY =~ ^n$ ]]) || mkdir -p "${DST}"
+                  ([[ ${REPLY} =~ ^n$ ]]) || mkdir -p "${DST}"
                }
                LINK_DEST="${DST/drive_backups\/google\/drive\/}"
             fi
@@ -173,16 +173,16 @@ rsync-with-progress() {
       esac
       shift
    done
-   [[ -r "$SRC" && ( -r "$DST" || "${RSYNC_FLAGS[@]}" =~ --list-only ) ]] || {
+   [[ -r "${SRC}" && ( -r "${DST}" || "${RSYNC_FLAGS[@]}" =~ --list-only ) ]] || {
       echo "error: source and destination must be provided and exist"
       return 1
    }
 #   VERBOSE=8 _print_var_vals RSYNC_FLAGS[@]
 
    for i in "${RSYNC_FLAGS[@]}"; do
-      ([[ "$i" =~ ^(-n|--dry-run)$ ]]) && DRY_RUN=1
+      ([[ "${i}" =~ ^(-n|--dry-run)$ ]]) && DRY_RUN=1
    done
-   [[ $USE_LINK_DEST -eq 1 && -n "$LINK_DEST" && "$LINK_DEST" != "$DST" ]] && RSYNC_FLAGS+=(--link-dest="$LINK_DEST")
+   [[ ${USE_LINK_DEST} -eq 1 && -n "${LINK_DEST}" && "${LINK_DEST}" != "${DST}" ]] && RSYNC_FLAGS+=(--link-dest="${LINK_DEST}")
 
    _clean_up_rsync_flags() {
       declare -a temparray
@@ -195,8 +195,8 @@ rsync-with-progress() {
          for y in "${RSYNC_FLAGS_NEGATIONS[@]}"; do
             [[ "${x/=*/}" =~ ^--${y/#--no-}$ ]] && NEGATE_OPTION=1 && break
          done
-         [[ "$NEGATE_OPTION" -eq 1 ]] && NEGATE_OPTION=0 && continue
-         temparray+=("$x")
+         [[ "${NEGATE_OPTION}" -eq 1 ]] && NEGATE_OPTION=0 && continue
+         temparray+=("${x}")
       done
       RSYNC_FLAGS=("${temparray[@]}")
    }
@@ -207,28 +207,28 @@ rsync-with-progress() {
          --partial
          --progress
       )
-#      for i in  rsync "${RSYNC_FLAGS[@]}" "$SRC" "$DST"; do
-#         echo "$i"
+#      for i in  rsync "${RSYNC_FLAGS[@]}" "${SRC}" "${DST}"; do
+#         echo "${i}"
 #      done
       _clean_up_rsync_flags
-      for i in "${SUDO}" rsync "${RSYNC_FLAGS[@]}" "$SRC" "$DST"; do
-         echo "$i"
+      for i in "${SUDO}" rsync "${RSYNC_FLAGS[@]}" "${SRC}" "${DST}"; do
+         echo "${i}"
       done
       echo
-      if [[ $DRY_RUN -ne 1 ]]; then
+      if [[ ${DRY_RUN} -ne 1 ]]; then
          echo -n "proceed (y) or dry run (d) first? [y/d/N] "; read
-         if ([[ $REPLY =~ ^d$ ]]); then
+         if ([[ ${REPLY} =~ ^d$ ]]); then
             echo
             echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
             echo "DRY RUN"
             echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-            ${SUDO} rsync --dry-run "${RSYNC_FLAGS[@]}" "$SRC" "$DST"
+            ${SUDO} rsync --dry-run "${RSYNC_FLAGS[@]}" "${SRC}" "${DST}"
             echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
             echo
             echo -n "proceed? [y/N] "
             read
          fi
-         ([[ $REPLY =~ ^y$ ]]) || return 1
+         ([[ ${REPLY} =~ ^y$ ]]) || return 1
       fi
 
       # add --info=progress2 after if no dry runs remain
@@ -238,47 +238,47 @@ rsync-with-progress() {
          )
       }
       echo
-      echo "${SUDO}" rsync "${RSYNC_FLAGS[@]}" "$SRC" "$DST"
+      echo "${SUDO}" rsync "${RSYNC_FLAGS[@]}" "${SRC}" "${DST}"
       echo
-      time ${SUDO} rsync "${RSYNC_FLAGS[@]}" "$SRC" "$DST"
+      time ${SUDO} rsync "${RSYNC_FLAGS[@]}" "${SRC}" "${DST}"
    }
 
    _pv_method() {
-      verbose 8 "$FUNCNAME"
-      for i in "${SUDO}" rsync "${RSYNC_FLAGS[@]}" "$SRC" "$DST" \| pv --eta --line-mode --progress --size "$file_count"; do
-         echo "$i"
+      verbose 8 "${FUNCNAME}"
+      for i in "${SUDO}" rsync "${RSYNC_FLAGS[@]}" "${SRC}" "${DST}" \| pv --eta --line-mode --progress --size "${file_count}"; do
+         echo "${i}"
       done
       echo
-      if [[ $DRY_RUN -ne 1 ]]; then
+      if [[ ${DRY_RUN} -ne 1 ]]; then
          echo -n "proceed (y) or dry run (d) first? [y/d/N] "; read
-         if ([[ $REPLY =~ ^d$ ]]); then
+         if ([[ ${REPLY} =~ ^d$ ]]); then
             echo
             echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
             echo "DRY RUN"
             echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-            ${SUDO} rsync --dry-run "${RSYNC_FLAGS[@]}" "$SRC" "$DST" | pv --eta --line-mode --progress --size "$file_count"
+            ${SUDO} rsync --dry-run "${RSYNC_FLAGS[@]}" "${SRC}" "${DST}" | pv --eta --line-mode --progress --size "${file_count}"
             echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
             echo
             echo -n "proceed? [y/N] "
             read
          fi
-         ([[ $REPLY =~ ^y$ ]]) || return 1
+         ([[ ${REPLY} =~ ^y$ ]]) || return 1
       fi
 
       echo
-      echo "${SUDO}" rsync "${RSYNC_FLAGS[@]}" "$SRC" "$DST" \| pv --eta --line-mode --progress --size "$file_count"
+      echo "${SUDO}" rsync "${RSYNC_FLAGS[@]}" "${SRC}" "${DST}" \| pv --eta --line-mode --progress --size "${file_count}"
       echo
-      time ${SUDO} rsync "${RSYNC_FLAGS[@]}" "$SRC" "$DST" | pv --eta --line-mode --progress --size "$file_count"
+      time ${SUDO} rsync "${RSYNC_FLAGS[@]}" "${SRC}" "${DST}" | pv --eta --line-mode --progress --size "${file_count}"
    }
 
 #   echo -n "do you want to skip updating times? [Y/n] "; read
-#   [[ $REPLY =~ ^n$ ]] || rsync_flags+=" --size-only"
+#   [[ ${REPLY} =~ ^n$ ]] || rsync_flags+=" --size-only"
 
 
-   if has pv && [[ $PV_METHOD -eq 1 && "$file_count" -le 100 ]]; then
+   if has pv && [[ ${PV_METHOD} -eq 1 && "${file_count}" -le 100 ]]; then
       local file_count
       echo "calculating file count for 'pv'..."
-      file_count="$("${SUDO}" find "$SRC" | wc --lines)"
+      file_count="$("${SUDO}" find "${SRC}" | wc --lines)"
       _pv_method
    else
       _rsync_only_method
@@ -289,10 +289,10 @@ rsync-with-progress() {
    # If you have few huge files, then some of the rsync built in progress reports might be of more help
 
    # To see progress when you are updating (or comparing) an existing copy:
-   # rsync "$RSYNC_FLAGS" -ii --delete "$SRC" "$DST" | pv -l -s "$file_count" > logfile
+   # rsync "${RSYNC_FLAGS}" -ii --delete "${SRC}" "${DST}" | pv -l -s "${file_count}" > logfile
 
    # This command will print to screen in real time the files that differ:
-   # rsync "$RSYNC_FLAGS" -ii --delete "$SRC" "$DST" | pv -l -s "$file_count" | tee logfile | grep -v "^\."
+   # rsync "${RSYNC_FLAGS}" -ii --delete "${SRC}" "${DST}" | pv -l -s "${file_count}" | tee logfile | grep -v "^\."
 
 
 

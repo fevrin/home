@@ -9,21 +9,21 @@ function get-ips() {
    # output: a list of either the specified or the common interfaces and their assigned IPv4 IPs
 
    local IP_ONLY
-   local ints="$@"
-   [[ -n "$ints" ]] && IP_ONLY=1 # used later to print just the IPs, not the interfaces
+   local ints="${@}"
+   [[ -n "${ints}" ]] && IP_ONLY=1 # used later to print just the IPs, not the interfaces
    local ip
 
-   [[ -n "$ints" ]] || ints=($(ifconfig | sed -rne "s;^([^ :]+)[ :].*;\1;p"))
+   [[ -n "${ints}" ]] || ints=($(ifconfig | sed -rne "s;^([^ :]+)[ :].*;\1;p"))
 
    local int
    for int in ${ints[@]}; do
-      if [[ "$int" =~ ^([-a-z_0-9]+)$ && $(ip address show "$int" &>/dev/null; echo $?) -eq 0 ]]; then
-         ip="$(ip address show $int | grep -Po "inet \K$IP_REGEX")"
-         if [[ -n "$ip" ]]; then
-            if [[ "$IP_ONLY" -eq 1 ]]; then
-               echo "$ip"
+      if [[ "${int}" =~ ^([-a-z_0-9]+)$ && $(ip address show "${int}" &>/dev/null; echo $?) -eq 0 ]]; then
+         ip="$(ip address show ${int} | grep -Po "inet \K${IP_REGEX}")"
+         if [[ -n "${ip}" ]]; then
+            if [[ "${IP_ONLY}" -eq 1 ]]; then
+               echo "${ip}"
             else
-               echo "$int: $ip"
+               echo "${int}: ${ip}"
             fi
          fi
       fi

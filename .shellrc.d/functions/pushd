@@ -1,71 +1,71 @@
 #!/bin/bash
 
 pushd() {
-   local dir="$1"
+   local dir="${1}"
    local newdir
    local VERBOSE="${VERBOSE:-1}"
 
-#   verbose 2 "builtin pushd $(printf '%q' $newdir) >/dev/null"
-   if [[ -n "$dir" ]]; then
-      if [[ -d "$dir" || -h "$dir" ]]; then
+#   verbose 2 "builtin pushd $(printf '%q' ${newdir}) >/dev/null"
+   if [[ -n "${dir}" ]]; then
+      if [[ -d "${dir}" || -h "${dir}" ]]; then
          # we've been given an actual directory
 
          local dir_list="$(builtin dirs -p -l)"
 
-         local dir="$(realpath "$1")"
+         local dir="$(realpath "${1}")"
 
 #         # generate an array of the current dir stack and its indices
 #         declare -A dirstack
 #         local line
 #         while read line; do
-#            verbose 2 "$(($LINENO + 2)): line = '$line'"
+#            verbose 2 "$((${LINENO} + 2)): line = '${line}'"
 #            local path="${line#*$'\1'}"     # grab the path from the line
 #            local position="${line%$'\1'*}" # grab the position in the dir stack from the line
 #
 #            # popd the directory if it's already in the dir stack and is in a different position
 #            if [[ -n ${dirstack["$(realpath "${path}")"]} ]]; then
-#               verbose 2 "$(($LINENO + 2)): [[ -n \${dirstack["\$\(realpath "\${path}"\)"]} ]]; [[ -n ${dirstack["$(realpath "${path}")"]} ]]"
-#               [[ ${dirstack["$(realpath "${path}")"]} != "$position" ]] &&
-#                  verbose -n 2 "$(($LINENO + 2)): [[ \${dirstack["\$\(realpath "\${path}"\)"]} != "\$position" ]]; " &&
-#                  verbose -n 2 "[[ ${dirstack["$(realpath "${path}")"]} != "$position" ]]" &&
-#                  verbose 2 "$(($LINENO + 2)): popd +$position" &&
-#                  builtin popd "+$position"
+#               verbose 2 "$((${LINENO} + 2)): [[ -n \${dirstack["\$\(realpath "\${path}"\)"]} ]]; [[ -n ${dirstack["$(realpath "${path}")"]} ]]"
+#               [[ ${dirstack["$(realpath "${path}")"]} != "${position}" ]] &&
+#                  verbose -n 2 "$((${LINENO} + 2)): [[ \${dirstack["\$\(realpath "\${path}"\)"]} != "\${position}" ]]; " &&
+#                  verbose -n 2 "[[ ${dirstack["$(realpath "${path}")"]} != "${position}" ]]" &&
+#                  verbose 2 "$((${LINENO} + 2)): popd +${position}" &&
+#                  builtin popd "+${position}"
 #            else
-#               verbose 2 "$(($LINENO + 2)): [[ -n \${dirstack["\$\(realpath "\${path}"\)"]} ]]; [[ -n ${dirstack["$(realpath "${path}")"]} ]]"
-#               dirstack["$(realpath "${path}")"]="$position"
+#               verbose 2 "$((${LINENO} + 2)): [[ -n \${dirstack["\$\(realpath "\${path}"\)"]} ]]; [[ -n ${dirstack["$(realpath "${path}")"]} ]]"
+#               dirstack["$(realpath "${path}")"]="${position}"
 #            fi
 #            unset path
 #            unset position
-#         done <<<$(echo "$dir_list" | sed -re "s;^ +([0-9]+) +(.*)$;\1\o1\2;") # delimit each field in the entry with octal 001
+#         done <<<$(echo "${dir_list}" | sed -re "s;^ +([0-9]+) +(.*)$;\1\o1\2;") # delimit each field in the entry with octal 001
 #
-#         verbose 2 "$(($LINENO + 2)): [[ ${dirstack[$dir]} ]]"
+#         verbose 2 "$((${LINENO} + 2)): [[ ${dirstack[${dir}]} ]]"
 
-         if echo "$dir_list" | grep -x "$dir" &>/dev/null; then
-            verbose 2 "$(($LINENO + 2)): echo "$dir_list" \| grep -x "$dir"; $(echo "$dir_list" | grep -x "$dir")"
+         if echo "${dir_list}" | grep -x "${dir}" &>/dev/null; then
+            verbose 2 "$((${LINENO} + 2)): echo "${dir_list}" \| grep -x "${dir}"; $(echo "${dir_list}" | grep -x "${dir}")"
             # the desired directory is already in the stack, so let's not duplicate it
-            echo "$dir is already in the stack"
-            newdir="+$(builtin dirs -v -l | sed -rne "s;^ +([0-9]+) +$dir$;\1;p")"
+            echo "${dir} is already in the stack"
+            newdir="+$(builtin dirs -v -l | sed -rne "s;^ +([0-9]+) +${dir}$;\1;p")"
          else
-            verbose 2 "$(($LINENO + 2)): newdir=\"$dir\"; newdir=$dir"
-            newdir="$dir"
+            verbose 2 "$((${LINENO} + 2)): newdir=\"${dir}\"; newdir=${dir}"
+            newdir="${dir}"
          fi
       else
-         if [[ "$dir" =~ ^([-+])?([0-9]+)$ ]]; then
+         if [[ "${dir}" =~ ^([-+])?([0-9]+)$ ]]; then
             newdir="${BASH_REMATCH[1]:-+}${BASH_REMATCH[2]}";
-            verbose 2 "newdir='$newdir'"
+            verbose 2 "newdir='${newdir}'"
          else
-            verbose 2 "$(($LINENO + 2)): [[ -n "\$dir" && ! -d "\$dir" ]]; [[ -n "$dir" && ! -d "$dir" ]]"
-            echo "'$dir' doesn't exist!"
+            verbose 2 "$((${LINENO} + 2)): [[ -n "\${dir}" && ! -d "\${dir}" ]]; [[ -n "${dir}" && ! -d "${dir}" ]]"
+            echo "'${dir}' doesn't exist!"
             return 1
          fi
       fi
-      verbose 2 "$(($LINENO + 2)): newdir = '$newdir'"
+      verbose 2 "$((${LINENO} + 2)): newdir = '${newdir}'"
 #      echo "dir = ${dir/~/\~}"
 
-      builtin pushd "$newdir" >/dev/null
+      builtin pushd "${newdir}" >/dev/null
    else
       if dirs -1 &>/dev/null; then
-         builtin pushd $newdir >/dev/null
+         builtin pushd ${newdir} >/dev/null
       else
          echo "error: you must \`pushd\` one or more directories first"
          return 1

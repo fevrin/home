@@ -10,45 +10,45 @@ clipit-copy() {
    # display a better alternative and cut off leading spaces (kept just for prettier code)
    echo -n "
    A better option, if possible, is to:
-   1) open '$file' with a GUI editor, like gvim
+   1) open '${file}' with a GUI editor, like gvim
    2) Ctrl-A to select it all
    3) Ctrl-C to copy it
 
-   Do you still wish to use $FUNCNAME? [y/n/G(vim)] " | sed -re 's;^\s+;;g'
+   Do you still wish to use ${FUNCNAME}? [y/n/G(vim)] " | sed -re 's;^\s+;;g'
 
    read
 
-   [[ $REPLY =~ [Nn] ]] && return
+   [[ ${REPLY} =~ [Nn] ]] && return
 
    # if the user input anything but "Y" or "y", run gvim and exit
-   [[ $REPLY =~ [Yy] ]] || {
-      gvim "$file"
+   [[ ${REPLY} =~ [Yy] ]] || {
+      gvim "${file}"
       return
    }
    echo
 
-   local total_remaining_bytes="$(wc -c $file | cut -d' ' -f1)"
+   local total_remaining_bytes="$(wc -c ${file} | cut -d' ' -f1)"
 
    local buffer_size=4000
-   local bytes_to_grab="$buffer_size"
+   local bytes_to_grab="${buffer_size}"
    local chunk_ending_byte=0
 
-   while [[ $total_remaining_bytes -gt 0 ]]; do
-      if [[ $total_remaining_bytes -lt $buffer_size ]]; then
-         bytes_to_grab="$total_remaining_bytes"
+   while [[ ${total_remaining_bytes} -gt 0 ]]; do
+      if [[ ${total_remaining_bytes} -lt ${buffer_size} ]]; then
+         bytes_to_grab="${total_remaining_bytes}"
       fi
 
       chunk_ending_byte="$((chunk_ending_byte + bytes_to_grab))"
 
-      #echo -e "chunk_ending_byte=$chunk_ending_byte for $bytes_to_grab"
+      #echo -e "chunk_ending_byte=${chunk_ending_byte} for ${bytes_to_grab}"
 
-      head -c"$chunk_ending_byte" "$file" | tail -c$bytes_to_grab | xsel -b
+      head -c"${chunk_ending_byte}" "${file}" | tail -c${bytes_to_grab} | xsel -b
 
       total_remaining_bytes=$((total_remaining_bytes - bytes_to_grab))
 
-      #echo -e "total_remaining_bytes=$total_remaining_bytes"
+      #echo -e "total_remaining_bytes=${total_remaining_bytes}"
 
-      if [[ $bytes_to_grab -ge $buffer_size ]]; then
+      if [[ ${bytes_to_grab} -ge ${buffer_size} ]]; then
          echo -n "paste the current buffer, then press Enter to copy the next block of data"
          read
       fi
