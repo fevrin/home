@@ -102,7 +102,10 @@ if has tmux; then
    unset TMUX_LIST
 else
    SCREEN_LIST=$(screen -ls)
-   [[ ! ${TERM} =~ screen && $(env | sed -n "s;SHLVL=\([1-9][1-9]*\);\1;p") = ${SHLVL_threshold} && ! $(echo "${SCREEN_LIST}" | grep -i detached) ]] && {
+   [[ ! ${TERM} =~ screen &&
+      $(env | sed -n "s;SHLVL=\([1-9][1-9]*\);\1;p") = ${SHLVL_threshold} &&
+      ! $(echo "${SCREEN_LIST}" | grep -i detached)
+   ]] && {
       screen
    }
 
