@@ -62,7 +62,7 @@ diff-home-files() {
          for file in "${@}"; do
             file="${1##${HOME}/}"
             [[ "${file}" =~ ^${HOME} ]] || file="${HOME_DIR}/${file}"
-            for i in ${!skip_files[*]}; do
+            for i in "${!skip_files[*]}"; do
                # if the file would normally be skipped, remove it from the
                # skip list since the user explicitly specified it
                { echo "${file}" | grep -q "${skip_files[${i}]}"; } && unset skip_files[${i}]
