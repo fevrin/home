@@ -209,6 +209,16 @@ pre-commit: pre-commit-install ## Linting: Lints all files changed between the d
    -@echo
    -pipenv run pre-commit run -v --show-diff-on-failure --color=always --files $(CHANGED_FILES)
 
+.PHONY: install
+install: ## Copies all dotfiles to the user's home directory
+   -@echo
+   -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   -@echo $(shell echo '$@' | tr '[:lower:]' '[:upper:]')
+   -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   @echo "Interpolating variables..."
+   @ci/scripts/interpolate.sh
+   @bash -ic 'echo cp --archive --no-clobber --verbose home/{*,.[a-z]*} "${HOME}"/'
+
 .PHONY: help
 help: ## Miscellaneous: returns this Makefile's commands and their descriptions in a formatted table
    @ci/scripts/makefile_help.sh $(MAKEFILE_LIST) 1
