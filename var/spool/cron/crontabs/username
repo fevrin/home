@@ -50,7 +50,10 @@ SHELL=/bin/bash
 # attempt to stop a service needed only during certain hours
 */30 11-19 * * Sat-Sun sudo chmod 640 /full/path/to/service/bin/binary && sudo chmod 600 /full/path/to/service/bin/binary && sudo /bin/systemctl stop service_d 2>&1 && sudo pkill -9 -f service_d >>/tmp/2 && sudo pkill -9 -f /full/path/to/service/bin/binary >>/tmp/2
 */30 00-10,20-23 * * * sudo chmod 640 /full/path/to/service/bin/binary && sudo chmod 600 /full/path/to/service/bin/binary && sudo /bin/systemctl stop service_d 2>&1 && sudo pkill -9 -f service_d >>/tmp/2 && sudo pkill -9 -f /full/path/to/service/bin/binary >>/tmp/2
-#
+
+# change light/dark theme based on time of day
+0 * * * *  /lib/systemd/system-sleep/change_theme
+
 # keep password session open
 #  */25   12-20  *   *   Mon-Fri   tempfile="$(mktemp -up "${HOME}")"; tac /home/user/passman.log >"${tempfile}" && truncate -s 1k "${tempfile}" && tac "${tempfile}" >/home/user/passman.log && echo >>/home/user/passman.log && echo "$(date): " >>/home/user/passman.log && source /home/user/.config/op/session && op account get &>>/home/user/passman.log
 # truncate the first entry
