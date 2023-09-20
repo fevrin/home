@@ -257,8 +257,10 @@ if is_zsh; then
    pushd() {
       if [[ "${1}" =~ ^[0-9]+$ ]]; then
          builtin pushd -q +"${1}"
-      else
+      elif [[ -n "${1}" ]]; then
          builtin pushd -q "${1}"
+      else
+         builtin pushd -q
       fi
       dirs
    }
