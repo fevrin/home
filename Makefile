@@ -125,9 +125,11 @@ check-defs: $(shell find -regex '.*\.md\(\.tpl\)?') ## Miscellaneous: checks all
 .PHONY: check-md-links
 check-md-links: $(shell find -regex '.*\.md\(\.tpl\)?') ## Miscellaneous: checks all Markdown files for unused definitions
    -@echo
+   -@echo
    -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
    -@echo $(shell echo '$@' | tr '[:lower:]' '[:upper:]')
    -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   -@echo
    @for file in $^; do \
       refs="$$(grep -Eo '\[[^]]+\]\[[^]]*\]' $${file} | sort -u | wc -l)"; \
       defs="$$(grep -Eo '^\[[^]]+\]: ' $${file} | sort -u | wc -l)"; \
@@ -146,6 +148,7 @@ generate-docs: check-md-links $(shell find -regex '.*\.md\(\.tpl\)?') ## Generat
    -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
    -@echo $(shell echo '$@' | tr '[:lower:]' '[:upper:]')
    -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   -@echo
    @echo "Generating docs..."
    @for file in $^; do \
       [ -s $${file} ] || continue; \
@@ -180,6 +183,7 @@ pre-commit-install: ## Linting: Install pre-commit
    -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
    -@echo $(shell echo '$@' | tr '[:lower:]' '[:upper:]')
    -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   -@echo
    -@command -v -- pipenv >/dev/null 2>&1 || pip3 install pipenv
    -@if pipenv run pre-commit -V >/dev/null 2>&1; then \
         echo "$(shell pipenv run pre-commit -V) already installed"; \
@@ -194,6 +198,7 @@ pre-commit-install-hooks: pre-commit-install ## Linting: Install pre-commit hook
    -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
    -@echo $(shell echo '$@' | tr '[:lower:]' '[:upper:]')
    -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   -@echo
    -pipenv run pre-commit install
 
 .PHONY: pre-commit
@@ -202,6 +207,7 @@ pre-commit: pre-commit-install ## Linting: Lints all files changed between the d
    -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
    -@echo $(shell echo '$@' | tr '[:lower:]' '[:upper:]')
    -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   -@echo
    -pipenv run pre-commit run -v --show-diff-on-failure --color=always --files $(CHANGED_FILES)
 
 .PHONY: help
