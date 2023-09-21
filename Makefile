@@ -174,15 +174,34 @@ generate-docs: check-md-links $(shell find -regex '.*\.md\(\.tpl\)?') ## Generat
       fi; \
    done
 
-
-.PHONY: pre-commit
-pre-commit: ## Lints all files changed between the default branch and the current branch
+.PHONY: pre-commit-install
+pre-commit-install: ## Linting: Install pre-commit
    -@echo
    -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
    -@echo $(shell echo '$@' | tr '[:lower:]' '[:upper:]')
    -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
    -@command -v -- pipenv >/dev/null 2>&1 || pip3 install pipenv
-   -@pipenv run pre-commit -V >/dev/null 2>&1 || pipenv install pre-commit
+   -@if pipenv run pre-commit -V >/dev/null 2>&1; then \
+        echo "$(shell pipenv run pre-commit -V) already installed"; \
+     else \
+        echo "installing pre-commit..." && \
+           pipenv install pre-commit; \
+     fi
+
+.PHONY: pre-commit-install-hooks
+pre-commit-install-hooks: pre-commit-install ## Linting: Install pre-commit hooks
+   -@echo
+   -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   -@echo $(shell echo '$@' | tr '[:lower:]' '[:upper:]')
+   -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   -pipenv run pre-commit install
+
+.PHONY: pre-commit
+pre-commit: pre-commit-install ## Linting: Lints all files changed between the default branch and the current branch
+   -@echo
+   -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   -@echo $(shell echo '$@' | tr '[:lower:]' '[:upper:]')
+   -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
    -pipenv run pre-commit run -v --show-diff-on-failure --color=always --files $(CHANGED_FILES)
 
 .PHONY: help
