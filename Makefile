@@ -204,6 +204,7 @@ pre-commit-install-hooks: pre-commit-install ## Linting: Install pre-commit hook
 .PHONY: pre-commit
 pre-commit: pre-commit-install ## Linting: Lints all files changed between the default branch and the current branch
    -@echo
+   -@echo
    -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
    -@echo $(shell echo '$@' | tr '[:lower:]' '[:upper:]')
    -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
