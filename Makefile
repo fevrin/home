@@ -151,7 +151,7 @@ generate-docs: check-md-links $(shell find -regex '.*\.md\(\.tpl\)?') ## Generat
       [ -s $${file} ] || continue; \
       TEMP_FILE="$$(mktemp -p $(REPO_ROOT))"; \
       OUTPUT_FILENAME="$${file%%.tpl}"; \
-      MAKEFILE_HELP="$$($(REPO_ROOT)/scripts/makefile_help.sh $(MAKEFILE_LIST))" \
+      MAKEFILE_HELP="$$($(REPO_ROOT)/ci/scripts/makefile_help.sh $(MAKEFILE_LIST))" \
       TOC="$$( \
          sed -rne 's;^(##+) (.*);\1- [\2](\#\L\2);p' $(REPO_ROOT)/$${file} | \
          sed -Ee 's;^(#+);\1\1;' | \
@@ -187,7 +187,7 @@ pre-commit: ## Lints all files changed between the default branch and the curren
 
 .PHONY: help
 help: ## Miscellaneous: returns this Makefile's commands and their descriptions in a formatted table
-   @scripts/makefile_help.sh $(MAKEFILE_LIST) 1
+   @ci/scripts/makefile_help.sh $(MAKEFILE_LIST) 1
 
 #test:
 #   @DIR="config.d"; \
