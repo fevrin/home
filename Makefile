@@ -125,7 +125,6 @@ check-defs: $(shell find -regex '.*\.md\(\.tpl\)?') ## Miscellaneous: checks all
 .PHONY: check-md-links
 check-md-links: $(shell find -regex '.*\.md\(\.tpl\)?') ## Miscellaneous: checks all Markdown files for unused definitions
    -@echo
-   -@echo
    -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
    -@echo $(shell echo '$@' | tr '[:lower:]' '[:upper:]')
    -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
@@ -203,7 +202,6 @@ pre-commit-install-hooks: pre-commit-install ## Linting: Install pre-commit hook
 
 .PHONY: pre-commit
 pre-commit: pre-commit-install ## Linting: Lints all files changed between the default branch and the current branch
-   -@echo
    -@echo
    -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
    -@echo $(shell echo '$@' | tr '[:lower:]' '[:upper:]')
