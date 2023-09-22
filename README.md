@@ -29,20 +29,25 @@ The following the available Makefile commands:
 $ make help
 
 [Aliases]
-dev              runs 'git-hooks'
+dev                       runs 'git-hooks'
 
 [Automatic]
-.git/hooks/%     creates symlinks for all git hooks from '.githooks' to '.git/hooks'
+.git/hooks/%              creates symlinks for all git hooks from '.githooks' to '.git/hooks'
 
 [Generators]
-generate-docs    Regenerates Markdown files (including ToC and 'make help' output)
-git              generates "${HOME}/.gitconfig" file using 'includes' directives
-ssh              generates "${HOME}/.ssh/config" file using 'includes' directives
+generate-docs             Regenerates Markdown files (including ToC and 'make help' output)
+git                       generates "${HOME}/.gitconfig" file using 'includes' directives
+ssh                       generates "${HOME}/.ssh/config" file using 'includes' directives
+
+[Linting]
+pre-commit-install-hooks  Install pre-commit hooks
+pre-commit-install        Install pre-commit
+pre-commit                Lints all files changed between the default branch and the current branch
 
 [Miscellaneous]
-check-defs       checks all Markdown files for unused definitions
-check-md-links   checks all Markdown files for unused definitions
-help             returns this Makefile's commands and their descriptions in a formatted table
+check-defs                checks all Markdown files for unused definitions
+check-md-links            checks all Markdown files for unused definitions
+help                      returns this Makefile's commands and their descriptions in a formatted table
 ```
 
 ## Linting
