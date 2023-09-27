@@ -44,7 +44,7 @@ spaces_around_brackets = false
 # Max line length (not supported by all editors)
 max_line_length = 150
 
-[.git/COMMIT_EDITMSG]
+[**.git/COMMIT_EDITMSG]
 indent_style = space
 max_line_length = 72
 
