@@ -155,7 +155,7 @@ generate-docs: check-md-links $(shell find -regex '.*\.md\(\.tpl\)?') ## Generat
       OUTPUT_FILENAME="$${file%%.tpl}"; \
       MAKEFILE_HELP="$$($(REPO_ROOT)/ci/scripts/makefile_help.sh $(MAKEFILE_LIST))" \
       TOC="$$( \
-         sed -rne 's;^(##+) (.*);\1- [\2](\#\L\2);p' $(REPO_ROOT)/$${file} | \
+         sed -rne 's;^(#{2,4}) (.*);\1- [\2](\#\L\2);p' $(REPO_ROOT)/$${file} | \
          sed -Ee 's;^(#+);\1\1;' | \
          awk 'BEGIN{FS=OFS="-"} {gsub(/#/, " ", $$1)} $$1' | \
          awk 'BEGIN{FS="[]][(]"; OFS="]("} {gsub(/[ ]/, "-", $$2)} {gsub(/[/()`.]/, "", $$2)}; $$2=$$2")"' | \
