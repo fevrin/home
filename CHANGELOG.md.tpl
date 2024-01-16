@@ -1,6 +1,27 @@
 <!-- # vim: set ft=markdown: -->
 # CHANGELOG
 
+## v3.1.2
+
+### 2024-01-16 (Tue, Jan 16, 2024)
+* fix: update regex Lychee uses to exclude the Reddit URL
+
+### 2024-01-16 (Tue, Jan 16, 2024)
+* fix: use sudo with 'check-zshrc' since that's apparently needed
+
+### 2024-01-16 (Tue, Jan 16, 2024)
+* fix: exclude problematic Reddit URL that Lychee has issues with
+
+### 2024-01-16 (Tue, Jan 16, 2024)
+* fix: add required 'needs' directive to 'check-zshrc'
+
+### 2024-01-16 (Tue, Jan 16, 2024)
+* fix: Reddit URL that Lychee has issues with
+
+### 2024-01-16 (Tue, Jan 16, 2024)
+* docs: bump version and add changelog notes
+
+
 ## v3.1.1
 
 ### 2024-01-16 (Tue, Jan 16, 2024)
