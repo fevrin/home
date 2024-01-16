@@ -289,7 +289,7 @@ get_creds() {
 
          # attempt to retrieve the values from LastPass if the local cache is incomplete
          # FIXME: find missing templates with this and automatically create those templates:
-         # for file in ~/digitalocean/.creds/keys/*; do
+         # for file in ~/work/.creds/keys/*; do
          #    orig_file="${file}"
          #    file="${file/keys/templates}"
          #    [[ -f "${file}" ]] || {
