@@ -1,30 +1,30 @@
 #!/bin/bash
 
 _find_unscoped_vars() {
-   local files="${@:-$HOME/.bashrc.d/functions/*}"
+   local files="${@:-${HOME}/.bashrc.d/functions/*}"
    local unscoped_vars
    local var_chars="[a-zA-Z_0-9]"
    local var_assignment_chars="([][()*/%+&^|<>-]|<<|>>)"
    local FILES_PROCESSED=0
 
-   for file in $files; do
-      file -L --mime-type "$file" | grep -q 'text/x-shellscript' || {
-         echo "can't read file: '$file'"
+   for file in ${files}; do
+      file -L --mime-type "${file}" | grep -q 'text/x-shellscript' || {
+         echo "can't read file: '${file}'"
          echo "skipping..."
          continue
       }
 
       # grab all vars from the given file, including those with special assignment operators
       # this assumes Bash is the language used, and there could be issues with arrays
-      for var in $(sed -rne "s;^\s*([^ #=[]$var_chars+)$var_assignment_chars?=.*;\1;p" "$file" | sort -u); do
-#         echo "var = '$var'"
+      for var in $(sed -rne "s;^\s*([^ #=[]${var_chars}+)${var_assignment_chars}?=.*;\1;p" "${file}" | sort -u); do
+#         echo "var = '${var}'"
          # ensure the variable is locally defined
-         egrep -q "(((declare|typeset)( -[^g])?)|local) $var(=|$)" "$file" || {
+         egrep -q "(((declare|typeset)( -[^g])?)|local) ${var}(=|$)" "${file}" || {
             # if it's not locally defined
-#            echo [[ ${unscoped_vars[*]} =~ $var ]]
-            [[ ${unscoped_vars[*]} =~ $var ]] || {
+#            echo [[ ${unscoped_vars[*]} =~ ${var} ]]
+            [[ ${unscoped_vars[*]} =~ ${var} ]] || {
                # and it's not already in the unscoped_vars array, then add it to the array
-               unscoped_vars+=("$(cat -n "$file" | sed -rne "s;^\s+([0-9]+)\s+("$var")\+?=.*;\1:\2;p" | head -n1)")
+               unscoped_vars+=("$(cat -n "${file}" | sed -rne "s;^\s+([0-9]+)\s+("${var}")\+?=.*;\1:\2;p" | head -n1)")
             }
          }
       done
@@ -32,17 +32,17 @@ _find_unscoped_vars() {
       FILES_PROCESSED=1
 
       if [[ ${#unscoped_vars[*]} -gt 0 ]]; then
-         echo -e "$file\nthese vars need to be scoped to 'local':"
+         echo -e "${file}\nthese vars need to be scoped to 'local':"
 
          for i in ${unscoped_vars[*]}; do
-            echo "$i"
+            echo "${i}"
          done | sort -nu
 
          echo
       fi
       unset unscoped_vars
    done
-   if [[ "$FILES_PROCESSED" -eq 0 ]]; then
+   if [[ "${FILES_PROCESSED}" -eq 0 ]]; then
       echo "no Bash script files found"
    fi
 }

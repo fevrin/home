@@ -5,11 +5,11 @@ fix-session-manager() {
    if [[ "${TERM_PROGRAM}" =~ ^tmux ]]; then
       if [[ "${SESSION_MANAGER}" =~ "${SESSION_PID}"$ ]]; then
          echo "the variable is already correct:"
-         echo "SESSION_MANAGER = '$SESSION_MANAGER'"
+         echo "SESSION_MANAGER = '${SESSION_MANAGER}'"
       else
          # FIXME: fix for slow vim startup in tmux
          export SESSION_MANAGER="local/${HOSTNAME}:@/tmp/.ICE-unix/${SESSION_PID},unix/${HOSTNAME}:/tmp/.ICE-unix/${SESSION_PID}"
-         echo "fixed SESSION_MANAGER = '$SESSION_MANAGER'"
+         echo "fixed SESSION_MANAGER = '${SESSION_MANAGER}'"
       fi
    fi
 }

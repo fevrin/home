@@ -1,6 +1,146 @@
 <!-- # vim: set ft=markdown: -->
 # CHANGELOG
 
+## v3.1.2
+
+### 2024-01-16 (Tue, Jan 16, 2024)
+* fix: update regex Lychee uses to exclude the Reddit URL
+
+### 2024-01-16 (Tue, Jan 16, 2024)
+* fix: use sudo with 'check-zshrc' since that's apparently needed
+
+### 2024-01-16 (Tue, Jan 16, 2024)
+* fix: exclude problematic Reddit URL that Lychee has issues with
+
+### 2024-01-16 (Tue, Jan 16, 2024)
+* fix: add required 'needs' directive to 'check-zshrc'
+
+### 2024-01-16 (Tue, Jan 16, 2024)
+* fix: Reddit URL that Lychee has issues with
+
+### 2024-01-16 (Tue, Jan 16, 2024)
+* docs: bump version and add changelog notes
+
+
+## v3.1.1
+
+### 2024-01-16 (Tue, Jan 16, 2024)
+* feat: update actions versions and corresponding configurations
+
+### 2024-01-16 (Tue, Jan 16, 2024)
+* docs: bump version and add changelog notes
+
+
+## v3.1.0
+
+### 2024-01-16 (Tue, Jan 16, 2024)
+* fix: rename directory in example
+
+### 2024-01-16 (Tue, Jan 16, 2024)
+* feat: add image aliases and ensure containers are removed after use
+
+### 2024-01-16 (Tue, Jan 16, 2024)
+* fix: move single quote so it's colorized
+
+### 2024-01-16 (Tue, Jan 16, 2024)
+* feat: add some safety checks and modularize some code
+
+### 2024-01-16 (Tue, Jan 16, 2024)
+* feat: update copyq font configuration
+
+### 2024-01-16 (Tue, Jan 16, 2024)
+* feat: add default binary dir in home dir and prevent path dupes
+
+### 2024-01-16 (Tue, Jan 16, 2024)
+* fix: text width value for git commits
+
+### 2023-09-29 (Fri, Sep 29, 2023)
+* fix: consider only a subset of headers for ToCs in Markdown files
+
+### 2023-09-27 (Wed, Sep 27, 2023)
+* fix: update an editorconfig directive to properly match git commit files
+
+### 2023-09-22 (Fri, Sep 22, 2023)
+* style: remove extra whitespace
+
+### 2023-09-20 (Wed, Sep 20, 2023)
+* fix: 'base' file syntax
+
+### 2023-09-21 (Thu, Sep 21, 2023)
+* style: add effective whitespace
+
+### 2023-09-21 (Thu, Sep 21, 2023)
+* feat: update htoprc
+
+### 2023-09-21 (Thu, Sep 21, 2023)
+* refactor: rename htoprc
+
+### 2023-09-22 (Fri, Sep 22, 2023)
+* fix: specify 'LANG' value to avoid unexpected 'sort' output
+
+### 2023-09-21 (Thu, Sep 21, 2023)
+* docs: update Makefile help content
+
+### 2023-09-21 (Thu, Sep 21, 2023)
+* style: add effective whitespace
+
+### 2023-09-21 (Thu, Sep 21, 2023)
+* feat: update Makefile targets for working with 'pre-commit'
+
+### 2023-09-21 (Thu, Sep 21, 2023)
+* refactor: move 'makefile_help.sh' to 'ci/scripts/'
+
+### 2023-09-19 (Tue, Sep 19, 2023)
+* fix: zsh 'pushd' function
+
+* Apparently, using empty quotes as a directory duplicates the current
+directory in the directory stack
+
+### 2023-09-19 (Tue, Sep 19, 2023)
+* feat: add script to change the GNOME desktop theme depending on the time
+
+### 2023-09-19 (Tue, Sep 19, 2023)
+* feat: add copyq configuration
+
+### 2023-09-19 (Tue, Sep 19, 2023)
+* fix: syntax issues and linting
+
+### 2023-09-16 (Sat, Sep 16, 2023)
+* feat: remove unused Align vim plugin (EasyAlign is more up-to-date)
+
+### 2023-09-16 (Sat, Sep 16, 2023)
+* fix: various syntax fixes
+
+### 2023-09-16 (Sat, Sep 16, 2023)
+* style: reduce line length to conform with editorconfig
+
+### 2023-09-16 (Sat, Sep 16, 2023)
+* style: prefer double quoting variables (SC2248)
+
+### 2023-09-16 (Sat, Sep 16, 2023)
+* style: prefer putting braces around Bash variable names (SC2250)
+
+### 2023-09-15 (Fri, Sep 15, 2023)
+* fix: update shellcheck arguments for parity between linters
+
+### 2023-09-15 (Fri, Sep 15, 2023)
+* style: update formatting in README.md
+
+### 2023-09-15 (Fri, Sep 15, 2023)
+* refactor: use recommended alternative to 'always()'
+
+* Per:
+https://docs.github.com/en/actions/learn-github-actions/expressions#always
+
+### 2023-09-15 (Fri, Sep 15, 2023)
+* feat: run all MegaLinter linters when using 'nektos/act'
+
+### 2023-09-15 (Fri, Sep 15, 2023)
+* ci: split out pre-commit local vs. CI jobs
+
+### 2023-09-15 (Fri, Sep 15, 2023)
+* docs: update wording in contributing guidelines
+
 ## v3.0.0
 
 ### 2023-09-14 (Thu, Sep 14, 2023)

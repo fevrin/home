@@ -44,18 +44,18 @@ yessh() {
 
    if [[ $# -gt 1 ]]; then
       while [[ $# -ge 1 ]]; do
-         local arg="$1"
-         verbose 8 "arg = $arg"
-         verbose 8 "\$* = '$*'"
-         case $arg in
+         local arg="${1}"
+         verbose 8 "arg = ${arg}"
+         verbose 8 "\${*} = '${*}'"
+         case ${arg} in
             -p|--port)
                shift
-               port="$1"
+               port="${1}"
                ;;
             *@*)
-               if [[ "$arg" =~ $DOMAIN_REGEX$ ]]; then
-                  username="$(echo "$arg" | cut -d@ -f1)"
-                  hostname="$(echo "$arg" | cut -d@ -f2)"
+               if [[ "${arg}" =~ ${DOMAIN_REGEX}$ ]]; then
+                  username="$(echo "${arg}" | cut -d@ -f1)"
+                  hostname="$(echo "${arg}" | cut -d@ -f2)"
                fi
                ;;
             --copy-config)
@@ -65,20 +65,20 @@ yessh() {
                   KEEP_CONFIG=1
                ;;
             -*)
-               if [[ "$arg" =~ -[46AaCfGgKkMNnqsTtVvXxYy]+ ]]; then
-                  ssh_args="$ssh_args $arg"
+               if [[ "${arg}" =~ -[46AaCfGgKkMNnqsTtVvXxYy]+ ]]; then
+                  ssh_args="${ssh_args} ${arg}"
                else
-                  ssh_args="$ssh_args $arg"
+                  ssh_args="${ssh_args} ${arg}"
                   shift
-                  ssh_args="$ssh_args $1"
+                  ssh_args="${ssh_args} ${1}"
                fi
                ;;
             *)
-               if [[ -z "$hostname" ]]; then
-                  [[ "$arg" =~ $DOMAIN_REGEX$ || "$arg" =~ $IP_REGEX$ ]] && hostname="$arg"
+               if [[ -z "${hostname}" ]]; then
+                  [[ "${arg}" =~ ${DOMAIN_REGEX}$ || "${arg}" =~ ${IP_REGEX}$ ]] && hostname="${arg}"
                else
                   # the last argument(s) should be the command, like with the ssh client
-                  orig_command="$@"
+                  orig_command="${@}"
                   break
                fi
                ;;
@@ -94,27 +94,27 @@ yessh() {
          verbose 8
       done
    else
-      if [[ "$1" =~ .*@.* ]]; then
-         username="$(echo "$1" | cut -d@ -f1)"
-         hostname="$(echo "$1" | cut -d@ -f2)"
+      if [[ "${1}" =~ .*@.* ]]; then
+         username="$(echo "${1}" | cut -d@ -f1)"
+         hostname="$(echo "${1}" | cut -d@ -f2)"
       else
-         hostname="$1"
+         hostname="${1}"
       fi
    fi
 
    port="${port:-22}"
-   username="${username:-$USER}"
+   username="${username:-${USER}}"
 
-   verbose 8 "final hostname = $hostname"
-   verbose 8 "final port = $port"
-   verbose 8 "final username = $username"
-   verbose 8 "final ssh_args = $ssh_args"
-   verbose 8 "final orig_command = $orig_command"
-   verbose 8 "final COPY_CONFIG = '$COPY_CONFIG'"
+   verbose 8 "final hostname = ${hostname}"
+   verbose 8 "final port = ${port}"
+   verbose 8 "final username = ${username}"
+   verbose 8 "final ssh_args = ${ssh_args}"
+   verbose 8 "final orig_command = ${orig_command}"
+   verbose 8 "final COPY_CONFIG = '${COPY_CONFIG}'"
 
-   if [[ "$hostname" ]]; then
-      [[ -d "$HOME/.shellrc.d" ]] ||
-         verbose "$HOME/.shellrc.d doesn't exist!"
+   if [[ "${hostname}" ]]; then
+      [[ -d "${HOME}/.shellrc.d" ]] ||
+         verbose "${HOME}/.shellrc.d doesn't exist!"
 
       # inspired by <https://superuser.com/a/1078431>
       local bashrc_contents="$(
@@ -126,7 +126,7 @@ yessh() {
             base64 -w0
       )"
 
-      if [[ $(echo "$bashrc_contents" | wc -c) -le 20480 && "${COPY_CONFIG}" -ne 1 ]]; then
+      if [[ $(echo "${bashrc_contents}" | wc -c) -le 20480 && "${COPY_CONFIG}" -ne 1 ]]; then
          read -r -d '' command <<-EOF
             bash --rcfile <(
                which bunzip2 &>/dev/null || {
@@ -134,26 +134,26 @@ yessh() {
                      echo "echo \"installing bzip2...\"" &&
                      yum install -qy bzip2 &>/dev/null;
                };
-               echo "$bashrc_contents" | base64 --decode | bunzip2
+               echo "${bashrc_contents}" | base64 --decode | bunzip2
             )
 			EOF
       else
          # ssh will complain the argument list is too long, so there's no way around just uploading the files to temporary files
 
-         verbose 1 "copying rc content as a file due to its size ($(echo "$bashrc_contents" | wc -c))"
+         verbose 1 "copying rc content as a file due to its size ($(echo "${bashrc_contents}" | wc -c))"
 
          # generate a temp file name
          local tempbashrc="$(mktemp /tmp/tmp.XXXXXXXXXX)"
          # workaround for use on Mac OS X, which has no option for a dry run
-         [[ -f "$tempbashrc" ]] && rm -f "$tempbashrc"
-         echo "$bashrc_contents" >"$tempbashrc"
+         [[ -f "${tempbashrc}" ]] && rm -f "${tempbashrc}"
+         echo "${bashrc_contents}" >"${tempbashrc}"
 
          # copy the temporary bashrc file to the remote host, then delete it locally
-         rsync -avzPi -e "ssh -p $port" "$tempbashrc" ${username}@${hostname}:"$tempbashrc"
-         [[ "${KEEP_CONFIG}" -eq 1 ]] || rm -fv "$tempbashrc"
-         #scp -P $port "$tempbashrc" ${username}@${hostname}:"$tempbashrc"
+         rsync -avzPi -e "ssh -p ${port}" "${tempbashrc}" ${username}@${hostname}:"${tempbashrc}"
+         [[ "${KEEP_CONFIG}" -eq 1 ]] || rm -fv "${tempbashrc}"
+         #scp -P ${port} "${tempbashrc}" ${username}@${hostname}:"${tempbashrc}"
 
-         command="bash --rcfile <(cat '$tempbashrc' | base64 --decode | bunzip2)"
+         command="bash --rcfile <(cat '${tempbashrc}' | base64 --decode | bunzip2)"
       fi
 
          # inspired by <https://superuser.com/questions/671372/running-command-in-new-bash-shell-with-rcfile-and-c/671488#671488>
@@ -162,19 +162,19 @@ yessh() {
          # \o2 = \n
          # \03 = start of output
          # those numbers are arbitrary but not likely to occur in typical output
-         [[ -n "$orig_command" ]] &&
-         orig_command="$(printf '%q' "$orig_command")" &&
+         [[ -n "${orig_command}" ]] &&
+         orig_command="$(printf '%q' "${orig_command}")" &&
          _print_var_vals orig_command &&
-         command="$command -ic ${orig_command}\" |
+         command="${command} -ic ${orig_command}\" |
          tr '\n' '\2' |                         # convert all newlines to octal #2 so the output is a single line
          sed -re 's;^;\o3;'\" |                 # insert an octal #3 at the beginning of the command output's one line
          sed -rne 's;.*\o3;;' -e 's;\o2;\n;gp'" # now with the command's output alongside any other output from the rcfile, delete everything before
                                                 # the command output marker (octal #3) and convert back all octal #2s to newlines
 
-      [[ $(echo "$bashrc_contents" | wc -c) -le 20480 && "${COPY_CONFIG}" -ne 1 ]] || command="$command; rm '$tempbashrc'"
+      [[ $(echo "${bashrc_contents}" | wc -c) -le 20480 && "${COPY_CONFIG}" -ne 1 ]] || command="${command}; rm '${tempbashrc}'"
 
-      verbose 8 ssh -qt -p $port $ssh_args ${username}@${hostname} "$command"
-      ssh -qt -p $port $ssh_args ${username}@${hostname} "$command"
+      verbose 8 ssh -qt -p ${port} ${ssh_args} ${username}@${hostname} "${command}"
+      ssh -qt -p ${port} ${ssh_args} ${username}@${hostname} "${command}"
    else
       echo "you must specify a host!"
    fi

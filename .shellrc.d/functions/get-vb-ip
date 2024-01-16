@@ -4,7 +4,7 @@ get-vb-ip() {
    # get a VirtualBox guest's IP address (if Linux)
    # from <https://forums.virtualbox.org/viewtopic.php?f=1&t=36592>
 
-   local guest="$1"
-   [[ -z "$guest" ]] && local guest="$(VBoxManage list runningvms | sed 's;"\([^"]\+\)".*;\1;')"
-   VBoxManage guestproperty get $guest "/VirtualBox/GuestInfo/Net/0/V4/IP" | cut -d' ' -f2
+   local guest="${1}"
+   [[ -z "${guest}" ]] && local guest="$(VBoxManage list runningvms | sed 's;"\([^"]\+\)".*;\1;')"
+   VBoxManage guestproperty get ${guest} "/VirtualBox/GuestInfo/Net/0/V4/IP" | cut -d' ' -f2
 }

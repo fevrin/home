@@ -8,10 +8,10 @@ blueconnect() {
    verbose
 	EOF
 
-   local device="$1"
+   local device="${1}"
    local already_connected=0
 
-   case "$device" in
+   case "${device}" in
       buds)
          device="buds";;
       speaker)
@@ -30,26 +30,26 @@ blueconnect() {
       [11]="5.2"
    )
 
-   _print_var_vals bluetooth_versions[\$bluetooth_version] device
+   _print_var_vals bluetooth_versions[\${bluetooth_version}] device
 
-   local OIFS="$IFS"
+   local OIFS="${IFS}"
    local IFS=$'\n'
    local connected_devs="$(bluetoothctl info 2>&1 | sed -rne "s;.*Name: (.+)$;\1;p")"
       _print_var_vals connected_devs device
-   for dev in $connected_devs; do
+   for dev in ${connected_devs}; do
       _print_var_vals dev device
-      [[ "${dev,,}" =~ "$device" ]] && already_connected=1 && echo "$device is already connected" && break
+      [[ "${dev,,}" =~ "${device}" ]] && already_connected=1 && echo "${device} is already connected" && break
    done
-   IFS="$OIFS"
+   IFS="${OIFS}"
 
-   [[ "$already_connected" -eq 1 ]] || {
-      [[ "${bluetooth_versions[$bluetooth_version]%%.*}" -lt 5 && "$connected_devs" ]] && {
+   [[ "${already_connected}" -eq 1 ]] || {
+      [[ "${bluetooth_versions[${bluetooth_version}]%%.*}" -lt 5 && "${connected_devs}" ]] && {
             echo "turning volume off before disconnecting..."
             #amixer -D pulse sset Master mute
             bluetoothctl disconnect;
       }
-      if bluetoothctl connect $(bluetoothctl paired-devices | awk "tolower(\$0) ~ /$device/ { print \$2 }"); then
-         [[ "${bluetooth_versions[$bluetooth_version]%%.*}" -lt 5 ]] && {
+      if bluetoothctl connect $(bluetoothctl paired-devices | awk "tolower(\$0) ~ /${device}/ { print \$2 }"); then
+         [[ "${bluetooth_versions[${bluetooth_version}]%%.*}" -lt 5 ]] && {
                echo "turning volume back up..."
                #sleep 3
                #amixer -D pulse sset Master unmute
@@ -58,32 +58,32 @@ blueconnect() {
                #amixer -D pulse sset Master 25%
          }
       else
-         echo "error connecting to $device"
-         echo "try powering $device off and on"
+         echo "error connecting to ${device}"
+         echo "try powering ${device} off and on"
          return 1
       fi
    }
 }
 
 _blueconnect_completions() {
-   local HOME_DIR="$HOME/home"
+   local HOME_DIR="${HOME}/home"
    local VALUES=""
 #   echo "COMP_WORDS = '${COMP_WORDS[@]}'"
    # if we're going by files, list available files
    if [[ "${#COMP_WORDS[@]}" -gt 2 ]]; then
       if [[ "${COMP_WORDS[1]}" =~ ^file$ ]]; then
-         # output into columns all files tracked in the $HOME_DIR repo
+         # output into columns all files tracked in the ${HOME_DIR} repo
          VALUES="$(bluetoothctl paired-devices | cut -d' ' -f3-)"
       fi
    elif [[ "${#COMP_WORDS[@]}" -eq 2 ]]; then
       # ${#COMP_WORDS} starts off at 2, so we're at the initial [Tab]
       VALUES="buds speaker"
    fi
-#   echo "VALUES = '$VALUES'"
+#   echo "VALUES = '${VALUES}'"
 #   echo "COMP_WORDS = '${COMP_WORDS[@]}'"
 #   echo "COMP_CWORD = '${COMP_CWORD[*]}'"
    # generate completions based on the last word on the commandline
-   local COMPREPLY=($(compgen -W "$VALUES" "${COMP_WORDS[-1]}"))
+   local COMPREPLY=($(compgen -W "${VALUES}" "${COMP_WORDS[-1]}"))
 }
 
-complete -F _blueconnect_completions $(basename $BASH_SOURCE)
+complete -F _blueconnect_completions $(basename ${BASH_SOURCE})

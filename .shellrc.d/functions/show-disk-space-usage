@@ -10,44 +10,44 @@ show-disk-space-usage() {
 
    seek-disk-usage() {
 #      echo "entering seek-disk-usage()" >&2
-      local dirs="$1"
-#      echo "dirs = '$dirs'" >&2
-#      echo "dirs_array = '$dirs_array'" >&2
+      local dirs="${1}"
+#      echo "dirs = '${dirs}'" >&2
+#      echo "dirs_array = '${dirs_array}'" >&2
       echo sudo sh -c "du -xsh --exclude=/home --exclude=/proc ${dirs}" >&2
       sudo sh -c "du -xsh --exclude=/home --exclude=/proc ${dirs}" 2>&1 | grep -v 'Permission denied' | sort -h
 #      echo "exiting seek-disk-usage()" >&2
    }
 
-   until [[ $REPLY =~ ^[Nn][Oo]?$ ]]; do
+   until [[ ${REPLY} =~ ^[Nn][Oo]?$ ]]; do
       clear
-      output="$(seek-disk-usage "${dirs_array[*]}" | tail -n$tail_count)"
-      echo "$output"
+      output="$(seek-disk-usage "${dirs_array[*]}" | tail -n${tail_count})"
+      echo "${output}"
 
       unset dirs_array
       declare -a dirs_array
       readarray possible_dirs < <(
-         echo "$output" |
+         echo "${output}" |
          egrep '^[0-9.]+[GM]' |
          cut -d$'\t' -f2 |
          grep ^/
       )
 #      echo "possible_dirs = '${possible_dirs[*]}'"
       for i in ${possible_dirs[*]}; do
-#         echo "i = '$i'"
-         sudo file -L --mime-type "$i" | grep -q 'inode/directory' && dirs_array+=("$i/*")
+#         echo "i = '${i}'"
+         sudo file -L --mime-type "${i}" | grep -q 'inode/directory' && dirs_array+=("${i}/*")
       done
 #      echo "length = '${#dirs_array[*]}'"
       local dirs_array_length="${#dirs_array[*]}"
 
       echo
-      if [[ $dirs_array_length -eq 1 ]]; then
+      if [[ ${dirs_array_length} -eq 1 ]]; then
          dir_singular_plural="directory"
-      elif [[ $dirs_array_length -gt 1 ]]; then
-         dir_singular_plural="$dirs_array_length directories"
+      elif [[ ${dirs_array_length} -gt 1 ]]; then
+         dir_singular_plural="${dirs_array_length} directories"
       else
          echo "those are all of the largest directories we could find :3"
          return
       fi
-      echo -n "delve into the top $dir_singular_plural? [Y/n] "; read
+      echo -n "delve into the top ${dir_singular_plural}? [Y/n] "; read
    done
 }

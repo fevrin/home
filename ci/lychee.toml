@@ -92,6 +92,7 @@ exclude = [
     '^https://www\.linkedin\.com',
     '^https://web\.archive\.org/web/',
     '[0-9]+\+[^@]+@users.noreply.github.com',
+    'https://www\.reddit\.com/r/golang/comments/n628db/go_install_fails_with_can_only_use_pathversion',
 ]
 
 # Exclude these filesystem paths from getting checked.

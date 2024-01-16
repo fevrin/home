@@ -7,7 +7,7 @@ list-to-quoted-csv() {
       _get_stdin
 	EOF
 
-   local input="$(_get_stdin "$1")"
+   local input="$(_get_stdin "${1}")"
    local start_quote="${2:-}"
    [[ "${#start_quote}" -ne 1 ]] && {
       echo "error: must be a single character (excluding an escape)"
@@ -21,6 +21,6 @@ list-to-quoted-csv() {
    [[ "${start_quote}" =~ [[{\(] ]] && end_quote="$(echo "${start_quote}" | tr '{[(' '}])')"
 
 
-#   echo "$input" | sed -rne "s;^.*$;${quotes}&${quotes}\,;gp" | tr -d '\n' | sed -re 's;(^,|,$);;g' -e 's;$;\n;'
-   echo "$input" | sed -rne "s;^.*$;${start_quote}&${end_quote};gp" | paste -sd,
+#   echo "${input}" | sed -rne "s;^.*$;${quotes}&${quotes}\,;gp" | tr -d '\n' | sed -re 's;(^,|,$);;g' -e 's;$;\n;'
+   echo "${input}" | sed -rne "s;^.*$;${start_quote}&${end_quote};gp" | paste -sd,
 }

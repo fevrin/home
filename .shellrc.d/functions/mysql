@@ -18,7 +18,7 @@ mysql() {
    #
    # SHOW tables;
    #
-   # $output
+   # ${output}
 
    # NOTE: the CRED_NAME variables should be set to the name of the get_creds()
    # formatted template files containing environment variables with the creds
@@ -68,19 +68,19 @@ mysql() {
     PERMITTED_OPS+=("DELETE")
 
    verbose 8 "\${FUNCNAME[*]}=${FUNCNAME[*]}"
-   verbose 8 "CRED_NAME=$CRED_NAME"
+   verbose 8 "CRED_NAME=${CRED_NAME}"
    verbose 8 "PERMITTED_OPS=${PERMITTED_OPS[*]}"
    # shellcheck disable=SC2145
-   verbose 8 "\$@='${@}'"
+   verbose 8 "\${@}='${@}'"
 
    local PERMITTED_OPS_REGEX="^[ "$'\n'"]*("
    for i in $(seq 0 ${#PERMITTED_OPS[*]}); do
-      PERMITTED_OPS_REGEX+="${PERMITTED_OPS[$i]}"
-      [[ $i -lt $((${#PERMITTED_OPS[*]} - 1)) ]] && PERMITTED_OPS_REGEX+="|"
-      [[ $i -eq $((${#PERMITTED_OPS[*]} - 1)) ]] && PERMITTED_OPS_REGEX+=")"
+      PERMITTED_OPS_REGEX+="${PERMITTED_OPS[${i}]}"
+      [[ ${i} -lt $((${#PERMITTED_OPS[*]} - 1)) ]] && PERMITTED_OPS_REGEX+="|"
+      [[ ${i} -eq $((${#PERMITTED_OPS[*]} - 1)) ]] && PERMITTED_OPS_REGEX+=")"
    done
 
-   if [[ -z "$CRED_NAME" ]]; then
+   if [[ -z "${CRED_NAME}" ]]; then
       cat <<-EOF
 		you must set CRED_NAME to be the standardized lowercase name of the corresponding LP entry
 
@@ -100,43 +100,43 @@ mysql() {
    )
 
    for i in ${!db_creds[*]}; do
-      db_creds[$i]="$(get_creds $CRED_NAME $i 2>&1)" || {
+      db_creds[${i}]="$(get_creds ${CRED_NAME} ${i} 2>&1)" || {
          cat <<-EOF >&2
 			error from get_creds():
 
-			'${db_creds[$i]}'
+			'${db_creds[${i}]}'
 
 			EOF
          return 1
       }
-      _print_var_vals {db_creds[$i]}
+      _print_var_vals {db_creds[${i}]}
    done
 
    local arg
-   for arg in "$@"; do
+   for arg in "${@}"; do
       # add support for disabling the default of formatting output in a table
-      [[ $arg =~ --no-table ]] && flags="${flags/-t/}" && shift && continue
+      [[ ${arg} =~ --no-table ]] && flags="${flags/-t/}" && shift && continue
 
       # add other args as-is
-      [[ $arg =~ ^- ]] && {
-         if [[ "$arg" =~ ^(--?execute)$ ]]; then
+      [[ ${arg} =~ ^- ]] && {
+         if [[ "${arg}" =~ ^(--?execute)$ ]]; then
             _print_var_vals arg
             arg="${arg//${BASH_REMATCH[0]}/}"
             _print_var_vals arg
-         elif [[ $arg =~ ^-[^-]+$ ]]; then
+         elif [[ ${arg} =~ ^-[^-]+$ ]]; then
             arg="${arg//e/}"
-            [[ $arg =~ ^-$ ]] &&
+            [[ ${arg} =~ ^-$ ]] &&
                arg=""
          fi
-         flags="$flags $arg"
+         flags="${flags} ${arg}"
          shift
       }
    done
 
-   local query="$@"
+   local query="${@}"
 
    _print_var_vals query PERMITTED_OPS_REGEX
-   if [[ "${query^^}" =~ $PERMITTED_OPS_REGEX ]]; then
+   if [[ "${query^^}" =~ ${PERMITTED_OPS_REGEX} ]]; then
 
       local words_array=(
          and
@@ -179,20 +179,20 @@ mysql() {
 
       for word in "${words_array[@]}"; do
          local newline
-         if [[ "$word" =~ (having|like|on|as) ]]; then
+         if [[ "${word}" =~ (having|like|on|as) ]]; then
             newline=""
          else
             # do the normal query, but prepend a newline
             newline="\n"
          fi
 
-#         echo "$LINENO: word = '$word'"
-#         echo "$LINENO: query = '$query'"
+#         echo "${LINENO}: word = '${word}'"
+#         echo "${LINENO}: query = '${query}'"
 #         query=$(
-#            echo "$query" |
+#            echo "${query}" |
 #            sed -rf /dev/fd/5 5<<-SED_SCRIPT
-#				s;(^| +|\()$word([=;, \(]);\
-#				$newline\1${word^^*}\2;gi
+#				s;(^| +|\()${word}([=;, \(]);\
+#				${newline}\1${word^^*}\2;gi
 #				SED_SCRIPT
 ##            |                 # first, capture any leading blank characters and any trailing left parentheses
 ##                              # next, output a newline (if applicable), the word transformed to uppercase, and any trailing parentheses
@@ -200,32 +200,32 @@ mysql() {
 #         )
 
          # for the below sed commands:
-         # first, capture any leading blank characters, $word and any trailing left parentheses
-         # next, output a newline (if applicable), $word transformed to uppercase, and any trailing parentheses
+         # first, capture any leading blank characters, ${word} and any trailing left parentheses
+         # next, output a newline (if applicable), ${word} transformed to uppercase, and any trailing parentheses
          # lastly, remove leading blank characters
 #            sed -r \
-#            -e "s;(^| +|\()$word([=;, \(]);\
-#            "$newline"\1${word^^*}\2;gi" \
+#            -e "s;(^| +|\()${word}([=;, \(]);\
+#            "${newline}"\1${word^^*}\2;gi" \
 #            -e "s;([[:space:]]+)?\o2;;g" \
 #            -e 's;^ \+;;'
          query=$(
-            echo "$query" |
+            echo "${query}" |
             sed -re "{
-               s;^(\()?((left|right|outer|inner) $word|$word)([=;, \(]);\U&;gi  # don't add ${newline} if word is already at the beginning of the line
-               s;(\(| )((left|right|outer|inner) $word|$word)([=;, \(]);${newline}\U&;gi   # add a newline and convert to uppercase
+               s;^(\()?((left|right|outer|inner) ${word}|${word})([=;, \(]);\U&;gi # don't add ${newline} if word is already at the line beginning
+               s;(\(| )((left|right|outer|inner) ${word}|${word})([=;, \(]);${newline}\U&;gi   # add a newline and convert to uppercase
             }"
          )
 #         query=$(
-#            echo "$query" |
+#            echo "${query}" |
 #            sed -re "{
-#               s;(^|\()$word([=;, \(]);\1${newline}${word^^*}\2;gi
+#               s;(^|\()${word}([=;, \(]);\1${newline}${word^^*}\2;gi
 #            }"
 #         )
       done
 
       local indentation='   '
       # some post-processing
-      echo -e "$query" |
+      echo -e "${query}" |
       sed -re "{
          # just for SELECT lines that have commas (thus multiple fields)
          /^SELECT .+,.+.*/{
@@ -246,18 +246,29 @@ mysql() {
          echo -n "are you sure you wish to run this update? [y/N] "
          read
 
-         [[ $REPLY =~ y ]] || { echo "cancelling request"; return 1; }
+         [[ ${REPLY} =~ y ]] || { echo "cancelling request"; return 1; }
       fi
       if [[ "${query^^}" =~ (^|;(' '|$'\n'))DELETE ]]; then
          echo
          echo -n "are you sure you wish to run this delete (type YES to confirm)? "
          read
 
-         [[ $REPLY =~ ^YES$ ]] || { echo "cancelling request"; return 1; }
+         [[ ${REPLY} =~ ^YES$ ]] || { echo "cancelling request"; return 1; }
       fi
 
-      verbose 2 mysql $flags -h "${db_creds[hostname]}" -u "${db_creds[username]}" -p"${db_creds[password]}" "${db_creds[database]}" -e "${query@Q}"
-      command mysql $flags -h "${db_creds[hostname]}" -u "${db_creds[username]}" -p"${db_creds[password]}" "${db_creds[database]}" -e "$query" 2>&1 |
+      verbose 2 mysql ${flags} \
+         -h "${db_creds[hostname]}" \
+         -u "${db_creds[username]}" \
+         -p"${db_creds[password]}" \
+         "${db_creds[database]}" \
+         -e "${query@Q}"
+
+      command mysql ${flags} \
+         -h "${db_creds[hostname]}" \
+         -u "${db_creds[username]}" \
+         -p"${db_creds[password]}" \
+         "${db_creds[database]}" \
+         -e "${query}" 2>&1 |
          sed -e 's;.*Warning.*;;'
 
       # this ensures we get the exit code of the MySQL command, rather than the sed one
@@ -270,7 +281,7 @@ mysql() {
       echo
       echo 'query must start with one of these operators:'
       for i in $(seq 0 ${#PERMITTED_OPS[*]}); do
-         echo "${PERMITTED_OPS[$i]}"
+         echo "${PERMITTED_OPS[${i}]}"
       done
 
    fi

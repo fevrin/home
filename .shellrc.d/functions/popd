@@ -1,10 +1,10 @@
 #!/bin/bash
 
 popd() {
-   if [[ "$1" =~ ^[0-9]+$ ]]; then
-      local dir="+$1";
+   if [[ "${1}" =~ ^[0-9]+$ ]]; then
+      local dir="+${1}";
    else
       local dir=
    fi
-   builtin popd $dir >/dev/null && dirs
+   builtin popd ${dir} >/dev/null && dirs
 }

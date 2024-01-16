@@ -2,10 +2,10 @@
 
 systemctl() {
    # wrapper for `systemctl` just so we can control the pager settings depending on the subcommand
-   local subcommand="$1"
-   local PAGER_OPTS="$LESS"
+   local subcommand="${1}"
+   local PAGER_OPTS="${LESS}"
    shift
 
    [[ "${subcommand}" =~ ^status$ ]] || PAGER_OPTS+=" -S"
-   SYSTEMD_LESS="${PAGER_OPTS}" command systemctl "${subcommand}" "$@"
+   SYSTEMD_LESS="${PAGER_OPTS}" command systemctl "${subcommand}" "${@}"
 }

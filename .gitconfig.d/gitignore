@@ -11,7 +11,7 @@ config
 *.orig
 
 # swap files
-.*s[a-z][a-z]
+.*sw[a-z]
 
 # sensitive data
 *.pem

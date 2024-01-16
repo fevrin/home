@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [[ "$TERM_PROGRAM" = "Apple_Terminal" || "$TERM_PROGRAM" =~ iTerm ]]; then
+if [[ "${TERM_PROGRAM}" = "Apple_Terminal" || "${TERM_PROGRAM}" =~ iTerm ]]; then
    # additional config for Mac OS X to maintain sanity
    alias aptsearch='brew search'
    alias aptshow='brew info'
@@ -35,13 +35,13 @@ if [[ "$TERM_PROGRAM" = "Apple_Terminal" || "$TERM_PROGRAM" =~ iTerm ]]; then
    for option in \
    AppleShowAllFiles \
    _FXShowPosixPathInTitle; do
-      if [[ $(defaults read com.apple.finder "$option" | egrep -qi "no|0"; echo $?) = 0 ]]; then
-         defaults write com.apple.finder "$option" YES
+      if [[ $(defaults read com.apple.finder "${option}" | egrep -qi "no|0"; echo $?) = 0 ]]; then
+         defaults write com.apple.finder "${option}" YES
          DEFAULTS_CHANGED=1
       fi
    done
 
-   if [[ "$DEFAULTS_CHANGED" = 1 ]]; then
+   if [[ "${DEFAULTS_CHANGED}" = 1 ]]; then
       killall Finder /System/Library/CoreServices/Finder.app
    fi
 
@@ -68,18 +68,18 @@ if [[ "$TERM_PROGRAM" = "Apple_Terminal" || "$TERM_PROGRAM" =~ iTerm ]]; then
    fi
 
    # enable color support of ls and also add handy aliases
-   if [[ "$TERM" != "dumb" ]]; then
+   if [[ "${TERM}" != "dumb" ]]; then
       alias ls='ls -G'
    fi
 
    # remove any references to :/usr/local/bin in the PATH
-   [[ "$PATH" =~ :/usr/local/bin(:|$) ]] && PATH="${PATH//:\/usr\/local\/bin}"
+   [[ "${PATH}" =~ :/usr/local/bin(:|$) ]] && PATH="${PATH//:\/usr\/local\/bin}"
 
    # ensure /usr/local/bin is the first directory in the user's PATH
-   if [[ ! $(echo $PATH | grep "^/usr/local/bin") ]]; then
-      export PATH="/usr/local/bin:$PATH"
+   if [[ ! $(echo ${PATH} | grep "^/usr/local/bin") ]]; then
+      export PATH="/usr/local/bin:${PATH}"
    fi
-   [[ "$PATH" =~ /usr/local/Cellar/bin ]] || export PATH="$PATH:/usr/local/Cellar/bin/"
+   [[ "${PATH}" =~ /usr/local/Cellar/bin ]] || export PATH="${PATH}:/usr/local/Cellar/bin/"
 
    # don't disconnect from the network when locking the screen
    # from <http://apple.stackexchange.com/a/97047>

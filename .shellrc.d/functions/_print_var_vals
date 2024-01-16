@@ -7,7 +7,7 @@ _print_var_vals() {
    # any argumentsthat aren't variables, are unset, or have no assigned
    # value are still accepted and simply printed to indicate no value
 
-   # note that this can't resolve certain reserved variables ($@, $1, etc.)
+   # note that this can't resolve certain reserved variables (${@}, ${1}, etc.)
 
    # input: a list of variable names
    # output: the list of variable names, along with their values, if any
@@ -22,18 +22,19 @@ _print_var_vals() {
    local LINE_OFFSET
 
    # if we got called via the command line or a script, set the index accordingly
-   # this must be in a subshell in order to not overwrite a $BASH_REMATCH array the caller may have
-   if ([[ ! ${FUNCNAME[1]} =~ main ]]); then
-      LINE_OFFSET="+ 2"
+   # this must be in a subshell in order to not overwrite a ${BASH_REMATCH} array the caller may have
+   LINE_OFFSET="0"
+   if ([[ ! "${FUNCNAME[1]}" =~ main ]]); then
+      LINE_OFFSET="2"
    fi
 
-   # this must be in a subshell in order to not overwrite a $BASH_REMATCH array the caller may have
-   ([[ "$1" =~ -(n|e) ]]) &&
-   flags="$1" &&
+   # this must be in a subshell in order to not overwrite a ${BASH_REMATCH} array the caller may have
+   ([[ "${1}" =~ -(n|e) ]]) &&
+   flags="${1}" &&
    shift
 
-   if ([[ "$1" =~ ^([0-9]+|(emerg|alert|crit|err|warn|notice|info|debug).*)$ ]]); then
-      case "$1" in
+   if ([[ "${1}" =~ ^([0-9]+|(emerg|alert|crit|err|warn|notice|info|debug).*)$ ]]); then
+      case "${1}" in
       # levels taken from syslog
          emerg*) # system is unusable
             verbosity=1;;
@@ -52,17 +53,17 @@ _print_var_vals() {
          debug) # debug-level message
             verbosity=8;;
            [0-9]*)
-            verbosity="$1"
-            [[ $verbosity -gt 8 ]] && verbosity=8;;
+            verbosity="${1}"
+            [[ "${verbosity}" -gt 8 ]] && verbosity=8;;
       esac
       shift
    fi
 
    local i
-   for i in $@; do
+   for i in "${@}"; do
       # ensure the given arg is actually a variable and has been set
-      [[ -v $i ]] || continue
-      declare -n _variable="$i"
-      verbose $flags $verbosity "${FUNCNAME[1]} (line $((${BASH_LINENO[0]} ${LINE_OFFSET}))): $i = '$_variable'"
+      [[ -v "${i}" ]] || continue
+      declare -n _variable="${i}"
+      verbose "${flags}" "${verbosity}" "${FUNCNAME[1]} (line $(( ${BASH_LINENO[0]} + ${LINE_OFFSET} ))): ${i} = '${_variable}'"
    done
 }

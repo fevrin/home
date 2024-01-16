@@ -57,7 +57,7 @@ board-starship() {
    elif [[ -z "${starship_config_file}" ]]; then
       echo "boarding default starship..."
    else
-      echo "${RED}no such starship '${starship_to_board}${END_COLOR}'"
+      echo "${RED}no such starship '${starship_to_board}'${END_COLOR}"
       echo
       echo "available starships:"
       echo "${starships}"
@@ -257,8 +257,10 @@ if is_zsh; then
    pushd() {
       if [[ "${1}" =~ ^[0-9]+$ ]]; then
          builtin pushd -q +"${1}"
-      else
+      elif [[ -n "${1}" ]]; then
          builtin pushd -q "${1}"
+      else
+         builtin pushd -q
       fi
       dirs
    }

@@ -17,25 +17,25 @@ ctrl_r=105
 #alt_l=64
 alt_r=108
 #super_l=133
-#cmd_l=$super_l
+#cmd_l=${super_l}
 cmd_r=134
 
 reset_keyboard() {
    setxkbmap -layout us
 }
 
-[[ $1 =~ (-f|--force) ]] && FORCE=1
+[[ ${1} =~ (-f|--force) ]] && FORCE=1
 # alternate behavior depending on if an Apple keyboard is plugged in
 if grep -qi 'apple keyboard' /proc/bus/input/devices; then
    # make Cmd-R behave like Ctrl-R
    # and make Alt-R actually behave like Alt-R
    addtl_cmds="
-    keycode $cmd_r = Control_R NoSymbol Control_R
-    keycode $alt_r = Alt_R Meta_R"
+    keycode ${cmd_r} = Control_R NoSymbol Control_R
+    keycode ${alt_r} = Alt_R Meta_R"
 
    if [[ ! $(grep -s 2 /sys/module/hid_apple/parameters/fnmode) ]]; then
       echo "try enforcing function key mode on the Apple keyboard permanently? [y/N] "; read
-      if [[ $REPLY =~ [Yy] ]]; then
+      if [[ ${REPLY} =~ [Yy] ]]; then
          if [[ $(grep -s 'fnmode = 2' /etc/sysfs.conf) ]]; then
             # from <https://help.ubuntu.com/community/AppleKeyboard#Change_Function_Key_behavior>
             echo 'options hid_apple fnmode=2' | sudo tee -a /etc/modprobe.d/hid_apple.conf &>/dev/null
@@ -53,8 +53,8 @@ if grep -qi 'apple keyboard' /proc/bus/input/devices; then
 else
    # swap Ctrl-R and Alt-R
    addtl_cmds="
-    keycode $alt_r = Control_R NoSymbol Control_R
-    keycode $ctrl_r = Alt_R Meta_R"
+    keycode ${alt_r} = Control_R NoSymbol Control_R
+    keycode ${ctrl_r} = Alt_R Meta_R"
 
    { grep -E -q "replace key <RALT>.*Control_R, Control_R" /usr/share/X11/xkb/symbols/ctrl &&
       grep -E -q "replace key <RCTL>.*Alt_R, Meta_R" /usr/share/X11/xkb/symbols/ctrl; } || {
@@ -120,12 +120,12 @@ else
    dconf write "/org/gnome/desktop/input-sources/xkb-options" "['ctrl:swap_ralt_rctl']"
 fi
 
-if ! w | awk "/${USER}/ { print \$2 }" | grep -q 'pts/2' || [[ $FORCE -eq 1 ]]; then
+if ! w | awk "/${USER}/ { print \$2 }" | grep -q 'pts/2' || [[ ${FORCE} -eq 1 ]]; then
    # we're not in a new login session
 
    echo -n "are the keybindings working as expected? [Y/n] "; read
 
-   if [[ $REPLY =~ ^n$ ]]; then
+   if [[ ${REPLY} =~ ^n$ ]]; then
       echo "ok, running alternative commands"
       xmodmap - <<-EOF
 			! from <http://www.chrisamiller.com/blog/posts/remapping-your-macbooks-keyboard-in-ubuntu-1204>
@@ -147,7 +147,7 @@ if ! w | awk "/${USER}/ { print \$2 }" | grep -q 'pts/2' || [[ $FORCE -eq 1 ]]; 
 			! ------------------
 			! right side
 			! -------------------
-			$addtl_cmds
+			${addtl_cmds}
 
 			!add mod4 = Super_L
 			add mod1 = Alt_L Meta_L

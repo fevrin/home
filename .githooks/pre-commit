@@ -4,11 +4,11 @@ exec < /dev/tty
 # shellcheck disable=SC2016
 echo -n 'run `check-scripts`? [Y/n] '; read -r
 
-[[ "$REPLY" =~ [Nn] ]] || {
+[[ "${REPLY}" =~ [Nn] ]] || {
    # run the `check-scripts` function, which should already be sourced
    check-scripts || {
       echo
       echo -n "continue committing, despite the above errors? [y/N] "; read -r
-      [[ "$REPLY" =~ [Yy] ]] || exit 1
+      [[ "${REPLY}" =~ [Yy] ]] || exit 1
    }
 }

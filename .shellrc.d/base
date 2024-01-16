@@ -33,10 +33,10 @@ if grep -q deep /sys/power/mem_sleep; then
 fi
 
 # output the following messages only on my local computer, not on servers
-if [[ -z "$SSH_CLIENT" && -n "$DISPLAY" ]]; then
+if [[ -z "${SSH_CLIENT}" && -n "${DISPLAY}" ]]; then
    # for LFS use (as recommended by <http://www.linuxfromscratch.org/hints/downloads/files/lfs_next_to_existing_systems.txt>
    export LFS=/mnt/lfs
-#   echo don\'t forget to execute: sudo mount --bind /media/programs/linux_from_scratch "$LFS"
+#   echo don\'t forget to execute: sudo mount --bind /media/programs/linux_from_scratch "${LFS}"
 #   echo
 
    #remove the right alt hotkey behavior in unity
@@ -44,7 +44,7 @@ if [[ -z "$SSH_CLIENT" && -n "$DISPLAY" ]]; then
 
    #process the Apple keyboard mod if using an Apple keyboard
    # this adds a noticeable lag time when sourcing in a new terminal
-   $HOME/.apple_keyboard_mod.rc force
+   ${HOME}/.apple_keyboard_mod.rc force
 fi
 
 # print out the todo list
@@ -55,7 +55,7 @@ if [[ -f ~/.todo && -s ~/.todo ]]; then
 fi
 
 # enable color support of ls and also add handy aliases
-if [[ "$TERM" != "dumb" && "$TERM_PROGRAM" != "Apple_Terminal" && ! "$TERM_PROGRAM" =~ iTerm ]]; then
+if [[ "${TERM}" != "dumb" && "${TERM_PROGRAM}" != "Apple_Terminal" && ! "${TERM_PROGRAM}" =~ iTerm ]]; then
    eval "`dircolors -b`"
 fi
 
@@ -68,20 +68,20 @@ SHLVL_threshold=1
 if has tmux; then
    TMUX_LIST=$(tmux ls 2>/dev/null)
    if [[
-      ! $TERM =~ tmux-256color && # we're not currently in a tmux session
-                           # (tmux sets $TERM to "tmux-256color", per ~/.tmux.conf
-      $(env | sed -n "s;SHLVL=\([0-9][0-9]*\);\1;p") -le $SHLVL_threshold # we're in the main bash instance (not nested)
+      ! ${TERM} =~ tmux-256color && # we're not currently in a tmux session
+                           # (tmux sets ${TERM} to "tmux-256color", per ~/.tmux.conf
+      $(env | sed -n "s;SHLVL=\([0-9][0-9]*\);\1;p") -le ${SHLVL_threshold} # we're in the main bash instance (not nested)
    ]]; then
 
-      if [[ -n "$TMUX_LIST" && $(echo "$TMUX_LIST" | grep -cvi attached) -ne 0 ]]; then
-         if [[ $(echo "$TMUX_LIST" | grep -cvi attached) -eq 1 ]]; then
+      if [[ -n "${TMUX_LIST}" && $(echo "${TMUX_LIST}" | grep -cvi attached) -ne 0 ]]; then
+         if [[ $(echo "${TMUX_LIST}" | grep -cvi attached) -eq 1 ]]; then
             # there's just one session, so attach to it
             tmux attach
          else
             # list detached tmux instances, if any, to explain why tmux wasn't started
             cat <<-EOF
 					can't start tmux due to these detached sessions:
-					$(echo "$TMUX_LIST" | grep -vi attached)
+					$(echo "${TMUX_LIST}" | grep -vi attached)
 				EOF
          fi
       else
@@ -102,12 +102,16 @@ if has tmux; then
    unset TMUX_LIST
 else
    SCREEN_LIST=$(screen -ls)
-   [[ ! $TERM =~ screen && $(env | sed -n "s;SHLVL=\([1-9][1-9]*\);\1;p") = $SHLVL_threshold && ! $(echo "$SCREEN_LIST" | grep -i detached) ]] && {
+   [[
+      ! ${TERM} =~ screen &&
+      $(env | sed -n "s;SHLVL=\([1-9][1-9]*\);\1;p") = ${SHLVL_threshold} &&
+      ! $(echo "${SCREEN_LIST}" | grep -i detached) \
+   ]] && {
       screen
    }
 
    # list detached screens, if any, to explain why screen wasn't started
-   [[ $(echo "$SCREEN_LIST" | grep -i detached) ]] && echo "$SCREEN_LIST"
+   [[ $(echo "${SCREEN_LIST}" | grep -i detached) ]] && echo "${SCREEN_LIST}"
    unset SCREEN_LIST
 fi
 
@@ -130,7 +134,7 @@ grep -q 10 /proc/sys/vm/swappiness || {
    # shellcheck disable=SC2296
    is_zsh && SOURCE="${(%):-%x}"
    cat <<-EOF | sudo tee /etc/sysctl.d/local-swappiness.conf &>/dev/null
-		# set via $([[ -L "$SOURCE" ]] && readlink "$SOURCE" || echo "$SOURCE")
+		# set via $([[ -L "${SOURCE}" ]] && readlink "${SOURCE}" || echo "${SOURCE}")
 		vm.swappiness = 10
 	EOF
 }

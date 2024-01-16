@@ -9,25 +9,25 @@ find-dupes() {
    # if there is more than 1 match for the filename (there will always be at least one match, for the file itself), then print it out
 
    # editorconfig-checker-disable
-   sudo find "$dirname" -type f \! -iregex '.*\(\/\(\/\.[^/]+\|\.\(config\|mozilla\|config\|purple\|git\|fontconfig\|cache\|compiz-1\|thumbnail\|wine\)\/\)\|maverick-root\|\/lfs\/\|livedvd\|\.unison\.[^/]+\.unison\.tmp\/\).*' >"$tempfile"
+   sudo find "${dirname}" -type f \! -iregex '.*\(\/\(\/\.[^/]+\|\.\(config\|mozilla\|config\|purple\|git\|fontconfig\|cache\|compiz-1\|thumbnail\|wine\)\/\)\|maverick-root\|\/lfs\/\|livedvd\|\.unison\.[^/]+\.unison\.tmp\/\).*' >"${tempfile}"
    # editorconfig-checker-enable
 
-   echo "using temp file $tempfile"
+   echo "using temp file ${tempfile}"
 
-   sed 's;.*/;;' "$tempfile" |
+   sed 's;.*/;;' "${tempfile}" |
     sort |
     uniq -d |
     grep -i '[a-z]' |
     while read fileName; do
-      local matches="$(sudo grep "/$fileName$" $tempfile)"
-      if [[ $(echo "$matches" | wc -l) -gt 1 ]]; then
+      local matches="$(sudo grep "/${fileName}$" ${tempfile})"
+      if [[ $(echo "${matches}" | wc -l) -gt 1 ]]; then
         # list the full filename, as well as file size and other attributes
         #this enables easier determination of largest likely duplicated files
 
-        echo "$matches" | xargs -d'\n' sudo ls -halFdtr
+        echo "${matches}" | xargs -d'\n' sudo ls -halFdtr
         echo
       fi
    done
 
-   echo "remove $tempfile once done"
+   echo "remove ${tempfile} once done"
 }

@@ -128,6 +128,7 @@ check-md-links: $(shell find -regex '.*\.md\(\.tpl\)?') ## Miscellaneous: checks
    -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
    -@echo $(shell echo '$@' | tr '[:lower:]' '[:upper:]')
    -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   -@echo
    @for file in $^; do \
       refs="$$(grep -Eo '\[[^]]+\]\[[^]]*\]' $${file} | sort -u | wc -l)"; \
       defs="$$(grep -Eo '^\[[^]]+\]: ' $${file} | sort -u | wc -l)"; \
@@ -146,14 +147,15 @@ generate-docs: check-md-links $(shell find -regex '.*\.md\(\.tpl\)?') ## Generat
    -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
    -@echo $(shell echo '$@' | tr '[:lower:]' '[:upper:]')
    -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   -@echo
    @echo "Generating docs..."
    @for file in $^; do \
       [ -s $${file} ] || continue; \
       TEMP_FILE="$$(mktemp -p $(REPO_ROOT))"; \
       OUTPUT_FILENAME="$${file%%.tpl}"; \
-      MAKEFILE_HELP="$$($(REPO_ROOT)/scripts/makefile_help.sh $(MAKEFILE_LIST))" \
+      MAKEFILE_HELP="$$($(REPO_ROOT)/ci/scripts/makefile_help.sh $(MAKEFILE_LIST))" \
       TOC="$$( \
-         sed -rne 's;^(##+) (.*);\1- [\2](\#\L\2);p' $(REPO_ROOT)/$${file} | \
+         sed -rne 's;^(#{2,4}) (.*);\1- [\2](\#\L\2);p' $(REPO_ROOT)/$${file} | \
          sed -Ee 's;^(#+);\1\1;' | \
          awk 'BEGIN{FS=OFS="-"} {gsub(/#/, " ", $$1)} $$1' | \
          awk 'BEGIN{FS="[]][(]"; OFS="]("} {gsub(/[ ]/, "-", $$2)} {gsub(/[/()`.]/, "", $$2)}; $$2=$$2")"' | \
@@ -174,20 +176,42 @@ generate-docs: check-md-links $(shell find -regex '.*\.md\(\.tpl\)?') ## Generat
       fi; \
    done
 
-
-.PHONY: pre-commit
-pre-commit: ## Lints all files changed between the default branch and the current branch
+.PHONY: pre-commit-install
+pre-commit-install: ## Linting: Install pre-commit
    -@echo
    -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
    -@echo $(shell echo '$@' | tr '[:lower:]' '[:upper:]')
    -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   -@echo
    -@command -v -- pipenv >/dev/null 2>&1 || pip3 install pipenv
-   -@pipenv run pre-commit -V >/dev/null 2>&1 || pipenv install pre-commit
+   -@if pipenv run pre-commit -V >/dev/null 2>&1; then \
+        echo "$(shell pipenv run pre-commit -V) already installed"; \
+     else \
+        echo "installing pre-commit..." && \
+           pipenv install pre-commit; \
+     fi
+
+.PHONY: pre-commit-install-hooks
+pre-commit-install-hooks: pre-commit-install ## Linting: Install pre-commit hooks
+   -@echo
+   -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   -@echo $(shell echo '$@' | tr '[:lower:]' '[:upper:]')
+   -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   -@echo
+   -pipenv run pre-commit install
+
+.PHONY: pre-commit
+pre-commit: pre-commit-install ## Linting: Lints all files changed between the default branch and the current branch
+   -@echo
+   -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   -@echo $(shell echo '$@' | tr '[:lower:]' '[:upper:]')
+   -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   -@echo
    -pipenv run pre-commit run -v --show-diff-on-failure --color=always --files $(CHANGED_FILES)
 
 .PHONY: help
 help: ## Miscellaneous: returns this Makefile's commands and their descriptions in a formatted table
-   @scripts/makefile_help.sh $(MAKEFILE_LIST) 1
+   @ci/scripts/makefile_help.sh $(MAKEFILE_LIST) 1
 
 #test:
 #   @DIR="config.d"; \

@@ -29,27 +29,27 @@ Contributions to updating these guidelines are welcome and encouraged!
 ## Submission Rules
 
 **Always:**
-* Make changes in a feature branch that's named in the form `<username>/<jira-id>-<brief-description>`; example:
+* Make changes in a feature branch that's named in the form `<username>/<ticket-id>-<brief-description>`; example:
 
       jdoe/devtools-1234-defusing-fork-bomb
 
-* Open a PR prior to merging to master
+* Open a PR prior to merging to the default branch
 * Provide clear context in the PR around the changes, including the following:
    * purpose
    * expectations
    * links to conversations about them
    * etc.
 
-  If needed, create and reference in the PR a Jira and/or GHE issue for further context
+  If needed, create and reference in the PR a ticket ID and/or GHE issue for further context
 
 * Obtain at least one other teammate's +1 prior to merging
 * Update relevant bits of documentation affected by your code changes (including outside the repo)
-* Delete the feature branch in GHE once it's been merged into master
+* Delete the feature branch in GHE once it's been merged into the default branch
 * Advertise changes in tool behavior, outputs, expected inputs, or other requirements to the rest of the team
 
 **Never:**
-* Make changes in master directly
-* Merge into master without first obtaining at least one teammate's +1
+* Make changes in the default branch directly
+* Merge into the default branch without first obtaining at least one teammate's +1
 * Revert someone else's change without first consulting with another teammate (unless it's a clearly breaking change)
 
 Exceptions to any of these rules can be made with approval from the rest of the team.

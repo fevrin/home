@@ -3,12 +3,12 @@
 copy-skey() {
    # copy an encrypted ssh key to memory
 
-   local file="$1"
+   local file="${1}"
 
    local tmp_file="$(mktemp -p /tmp/)"
 
-   gpg -d $file >$tmp_file 2>/dev/null &&
-    chmod 400 $tmp_file &&
-    ssh-add $tmp_file &&
-    rm -f $tmp_file
+   gpg -d ${file} >${tmp_file} 2>/dev/null &&
+    chmod 400 ${tmp_file} &&
+    ssh-add ${tmp_file} &&
+    rm -f ${tmp_file}
 }
