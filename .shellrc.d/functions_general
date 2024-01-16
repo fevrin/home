@@ -57,7 +57,7 @@ board-starship() {
    elif [[ -z "${starship_config_file}" ]]; then
       echo "boarding default starship..."
    else
-      echo "${RED}no such starship '${starship_to_board}${END_COLOR}'"
+      echo "${RED}no such starship '${starship_to_board}'${END_COLOR}"
       echo
       echo "available starships:"
       echo "${starships}"
