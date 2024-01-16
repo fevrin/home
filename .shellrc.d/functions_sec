@@ -217,14 +217,17 @@ format_external_luks_lvm() {
 
    # close the mount if it's already encrypted
    local existing_map="$(sudo lsblk -lo NAME,PATH,PKNAME | awk "{ if (\$3 ~ /${drive_info[path]##*/}/) {print \$2} }")"
-   echo sudo cryptsetup isLuks "${drive_info[path]}" &&
-      echo sudo cryptsetup status "${existing_map}" &&
-      echo sudo cryptsetup close "${existing_map}" &&
-      echo sudo umount "${existing_map}"
-   sudo cryptsetup isLuks "${drive_info[path]}" &>/dev/null &&
-      sudo cryptsetup status "${existing_map}" &>/dev/null &&
-      sudo cryptsetup close "${existing_map}" &&
-      sudo umount "${existing_map}"
+   if [[ -n "${existing_map}" ]]; then
+      echo sudo cryptsetup isLuks "${drive_info[path]}" &&
+         echo sudo cryptsetup status "${existing_map}" &&
+         echo sudo cryptsetup close "${existing_map}" &&
+         echo sudo umount "${existing_map}"
+      echo -n "press Enter when ready to execute"; read
+      sudo cryptsetup isLuks "${drive_info[path]}" &>/dev/null &&
+         sudo cryptsetup status "${existing_map}" &>/dev/null &&
+         sudo cryptsetup close "${existing_map}" &&
+         sudo umount "${existing_map}"
+   fi
 
    # print the current partition table
    sudo sgdisk --print "${drive_info[device]}"
@@ -236,6 +239,12 @@ format_external_luks_lvm() {
       echo sudo sgdisk --typecode=1:8301 "${drive_info[device]}" &&
       echo sudo sgdisk --change-name=1:"${keyfile_name}" "${drive_info[device]}" &&
       echo sudo sgdisk --print "${drive_info[device]}"
+      echo -n "press Enter when ready to execute"; read
+      sudo sgdisk --zap-all "${drive_info[device]}" &&
+      sudo sgdisk --new=1:0:0 "${drive_info[device]}" &&
+      sudo sgdisk --typecode=1:8301 "${drive_info[device]}" &&
+      sudo sgdisk --change-name=1:"${keyfile_name}" "${drive_info[device]}" &&
+      sudo sgdisk --print "${drive_info[device]}"
       echo
       echo -n "does the new partition table look correct? [y/N] "; read
       [[ ${REPLY} =~ [Yy] ]] || {
@@ -244,27 +253,43 @@ format_external_luks_lvm() {
          return 1
       }
    }
-#   generate_luks_keyfile /etc/"${keyfile_name}"
-   echo -n "ready to encrypt the drive? [y/N] "; read
-   [[ ${REPLY} =~ [Yy] ]] && {
-      echo sudo cryptsetup luksFormat --verbose --verify-passphrase --type=luks2 "${drive_info[path]}" &&
-      sudo cryptsetup luksFormat --verbose --verify-passphrase --type=luks2 "${drive_info[path]}" &&
-      echo cryptsetup open --verbose --type=luks2 "${drive_info[path]}" "${keyfile_name}" &&
-      cryptsetup open --verbose --type=luks2 "${drive_info[path]}" "${keyfile_name}" &&
-      echo cryptsetup luksDump "${drive_info[path]}" &&
-      cryptsetup luksDump "${drive_info[path]}" &&
-      # sudo cryptsetup luksAddKey "${drive_info[path]}" /etc/crypt."${keyfile_name}"
-      # sudo chown "${USER}" /etc/crypt."${keyfile_name}"
-      # sudo cryptsetup luksHeaderBackup "${drive_info[path]}" --header-backup-file=/etc/crypt."${keyfile_name}".header
-      # echo "${keyfile_name} UUID=$(blkid -o value -s PARTUUID ${drive_info[path]}) /etc/crypt.${keyfile_name} luks,discard,noearly" #>>/etc/crypttab
-      # echo pvcreate /dev/mapper/"${keyfile_name}"
-      # echo vgcreate "${keyfile_name}-vg" /dev/mapper/"${keyfile_name}"
-      # echo lvcreate -L 100%FREE -n "${keyfile_name}-lv" "${keyfile_name}-vg"
-      echo mkfs.ext4 -vL "${fs_label}" /dev/mapper/"${keyfile_name}" &&
-      mkfs.ext4 -vL "${fs_label}" /dev/mapper/"${keyfile_name}" &&
-      echo udisksctl mount -b /dev/mapper/"${keyfile_name}" /media/${USER}/"${keyfile_name}" &&
-      udisksctl mount -b /dev/mapper/"${keyfile_name}" /media/${USER}/"${keyfile_name}"
-#      sudo cryptsetup close --verbose "${keyfile_name}"
-#      sudo cryptsetup unlock -b "${drive_info[path]}"
+   _encrypt_drive() {
+      # generate_luks_keyfile /etc/"${keyfile_name}"
+      echo -n "ready to encrypt the drive? [y/N] "; read
+      [[ ${REPLY} =~ [Yy] ]] && {
+         echo sudo cryptsetup luksFormat --verbose --verify-passphrase --type=luks2 "${drive_info[path]}" &&
+         sudo cryptsetup luksFormat --verbose --verify-passphrase --type=luks2 "${drive_info[path]}" &&
+         echo cryptsetup open --verbose --type=luks2 "${drive_info[path]}" "${keyfile_name}" &&
+         sudo cryptsetup open --verbose --type=luks2 "${drive_info[path]}" "${keyfile_name}" &&
+         echo cryptsetup luksDump "${drive_info[path]}" &&
+         sudo cryptsetup luksDump "${drive_info[path]}" &&
+         # sudo cryptsetup luksAddKey "${drive_info[path]}" /etc/crypt."${keyfile_name}"
+         # sudo chown "${USER}" /etc/crypt."${keyfile_name}"
+         # sudo cryptsetup luksHeaderBackup "${drive_info[path]}" --header-backup-file=/etc/crypt."${keyfile_name}".header
+         # echo \
+         # "${keyfile_name} UUID=$(blkid -o value -s PARTUUID ${drive_info[path]}) /etc/crypt.${keyfile_name} luks,discard,noearly" #>>/etc/crypttab
+         # echo pvcreate /dev/mapper/"${keyfile_name}"
+         # echo vgcreate "${keyfile_name}-vg" /dev/mapper/"${keyfile_name}"
+         # echo lvcreate -L 100%FREE -n "${keyfile_name}-lv" "${keyfile_name}-vg"
+         echo mkfs.ext4 -vL "${fs_label}" /dev/mapper/"${keyfile_name}" &&
+         sudo mkfs.ext4 -vL "${fs_label}" /dev/mapper/"${keyfile_name}" &&
+         sleep 1 &&
+         echo udisksctl mount -b /dev/mapper/"${keyfile_name}" /media/${USER}/"${keyfile_name}" &&
+         udisksctl mount -b /dev/mapper/"${keyfile_name}" /media/${USER}/"${keyfile_name}"
+#         sudo cryptsetup close --verbose "${keyfile_name}"
+#         sudo cryptsetup unlock -b "${drive_info[path]}"
+      }
    }
+   _encrypt_drive
+   ENCRYPT_EXIT_CODE="$?"
+   [[ "${ENCRYPT_EXIT_CODE}" -eq 0 ]] || echo "try one more time? [y/N] "; read
+   [[ "${REPLY}" =~ [Yy] ]] && _encrypt_drive
+
+   [[ "${ENCRYPT_EXIT_CODE}" -eq 0 ]] &&
+   echo -n "change ownership of '${keyfile_name}' to '${USER}:${USER}'? [y/N] " && read &&
+   [[ ${REPLY} =~ [Yy] ]] && {
+      sudo chown -R ${USER}:${USER} /media/${USER}/"${keyfile_name}"
+   }
+
+   has smartctl && sudo smartctl -a -d scsi /dev/${drive}
 }
