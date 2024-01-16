@@ -7,6 +7,10 @@ REPO_ROOT ?= $(shell git rev-parse --show-toplevel)
 # from <https://stackoverflow.com/questions/2131213/can-you-make-valid-makefiles-without-tab-characters/60363121#60363121>
 .RECIPEPREFIX := $(.RECIPEPREFIX) # switch to using spaces instead of tabs for recipe separators
 
+.PHONY: help
+help: ## Miscellaneous: returns this Makefile's commands and their descriptions in a formatted table
+   @ci/scripts/makefile_help.sh $(MAKEFILE_LIST) 1
+
 CONFIG_FILE := "config.new.$$$$"
 ssh: ## Generators: generates "${HOME}/.ssh/config" file using 'includes' directives
 ifeq ($(notdir $(CURDIR)), .ssh)
@@ -208,10 +212,6 @@ pre-commit: pre-commit-install ## Linting: Lints all files changed between the d
    -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
    -@echo
    -pipenv run pre-commit run -v --show-diff-on-failure --color=always --files $(CHANGED_FILES)
-
-.PHONY: help
-help: ## Miscellaneous: returns this Makefile's commands and their descriptions in a formatted table
-   @ci/scripts/makefile_help.sh $(MAKEFILE_LIST) 1
 
 #test:
 #   @DIR="config.d"; \
