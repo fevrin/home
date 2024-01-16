@@ -185,8 +185,8 @@ jobs:
 
       - name: Check zshrc syntax
         run: |
-          apt-get update &&
-          apt-get install -y zsh
+          sudo apt-get update &&
+          sudo apt-get install -y zsh
           zsh -n .zshrc
 
   # this only checks if the README had been generated; it can't itself commit
