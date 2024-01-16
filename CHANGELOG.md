@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## v3.1.1
+
+### 2024-01-16 (Tue, Jan 16, 2024)
+* feat: update actions versions and corresponding configurations
+
+### 2024-01-16 (Tue, Jan 16, 2024)
+* docs: bump version and add changelog notes
+
+
 ## v3.1.0
 
 ### 2024-01-16 (Tue, Jan 16, 2024)
