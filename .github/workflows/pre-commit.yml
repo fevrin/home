@@ -133,7 +133,7 @@ jobs:
         # 'nektos/act' requires this conditional step due to the following
         # issue when running 'shfmt' from pre-commit-config.yaml:
         # package mvdan.cc/sh/v3/cmd/shfmt@v3.7.0: can only use path@version syntax with 'go get'
-        # https://www.reddit.com/r/golang/comments/n628db/go_install_fails_with_can_only_use_pathversion/
+        # https://www.reddit.com/r/golang/comments/n628db/go_install_fails_with_can_only_use_pathversion
         uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
         with:
           go-version: '>=1.21'
