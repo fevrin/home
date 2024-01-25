@@ -61,6 +61,8 @@ jobs:
           # some useful GitHub Actions SHA information:
           # https://www.kenmuse.com/blog/the-many-shas-of-a-github-pull-request/
 
+          # if GHA complains that the BASE_REF is bad, you might need to create a new commit, then force push:
+          # git commit --amend -C HEAD
           if [[ -n "${{ github.event.pull_request.base.sha }}" ]]; then
             # use GHA's variable
             BASE_REF=${{ github.event.pull_request.base.sha }}
