@@ -83,7 +83,19 @@ jobs:
           #            echo ${files[*]}
           #            echo EOF
           #          }  >> $GITHUB_OUTPUT
-          files="$(git diff --diff-filter=d --name-only $BASE_REF..HEAD | jq -cRn '[inputs | select(length>0)]')"
+          git_diff_output="$(git diff --diff-filter=d --name-only $BASE_REF..HEAD 2>&1)" || {
+            git_diff_exit_code=$?
+            echo "${git_diff_output}"
+            echo
+            if [[ "${git_diff_output}" =~ ^fatal.*unknown\ revision ]]; then
+              # if GHA complains that the BASE_REF is bad, you might need to create a fake new commit, then force push:
+              echo "::error:: YOU MAY NEED TO RUN THIS COMMAND, THEN FORCE PUSH TO '${GITHUB_HEAD_REF:-THE BRANCH}':"
+              echo "::error:: git commit --amend -C HEAD"
+              echo
+            fi
+            exit 1
+          }
+          files="$(echo "${git_diff_output}" | jq -cRn '[inputs | select(length>0)]')"
           echo "CHANGED_FILES=${files}" >> $GITHUB_OUTPUT
         shell: bash
 
