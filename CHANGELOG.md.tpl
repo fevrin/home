@@ -1,6 +1,68 @@
 <!-- # vim: set ft=markdown: -->
 # CHANGELOG
 
+## v3.2.0
+
+### 2024-04-13 (Sat, Apr 13, 2024)
+* Revert "refactor: use a global variable for the actions/checkout version"
+
+  This reverts commit bf53861e89a33d0ede64bbac84f74a895a92cae9.
+
+### 2024-04-13 (Sat, Apr 13, 2024)
+* feat: update Makefile help output in the README
+
+### 2024-04-13 (Sat, Apr 13, 2024)
+* refactor: use a global variable for the actions/checkout version
+
+### 2024-04-13 (Sat, Apr 13, 2024)
+* feat: update pre-commit-install Makefile target conditional logic
+
+### 2024-04-13 (Sat, Apr 13, 2024)
+* feat: add Makefile targets for linting and related activities
+
+### 2024-04-13 (Sat, Apr 13, 2024)
+* style: capitalize some leading words
+
+### 2024-04-13 (Sat, Apr 13, 2024)
+* feat: bump pre-commit-hooks to v4.5.0
+
+### 2024-04-12 (Fri, Apr 12, 2024)
+* fix: correct logic for attaching to existing tmux session
+
+### 2024-04-12 (Fri, Apr 12, 2024)
+* feat: check $LC_TERMINAL in addition to other TERM variables
+
+### 2024-04-12 (Fri, Apr 12, 2024)
+* fix: fix up session fixer logic
+
+### 2024-04-12 (Fri, Apr 12, 2024)
+* feat: add cspell linting
+
+### 2024-04-12 (Fri, Apr 12, 2024)
+* feat: add editorconfig for swap files
+
+### 2024-01-25 (Thu, Jan 25, 2024)
+* feat: update image that nektos/act uses
+
+  It will now use an image in which the user is 'runner' instead of 'root'
+
+### 2024-01-16 (Tue, Jan 16, 2024)
+* fix: make 'help' the default Makefile target
+
+### 2024-02-21 (Wed, Feb 21, 2024)
+* Merge pull request #9 from fevrin/fix-get-changed-files
+* fix: get-changed-files error handling
+
+### 2024-02-21 (Wed, Feb 21, 2024)
+* fix: update get-changed-files error handling
+
+### 2024-01-16 (Tue, Jan 16, 2024)
+* Merge pull request #8 from fevrin/linux-dev
+* Linux dev
+
+### 2024-01-16 (Tue, Jan 16, 2024)
+* docs: bump version and update changelog notes
+
 ## v3.1.2
 
 ### 2024-01-16 (Tue, Jan 16, 2024)
