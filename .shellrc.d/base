@@ -55,7 +55,7 @@ if [[ -f ~/.todo && -s ~/.todo ]]; then
 fi
 
 # enable color support of ls and also add handy aliases
-if [[ "${TERM}" != "dumb" && "${TERM_PROGRAM}" != "Apple_Terminal" && ! "${TERM_PROGRAM}" =~ iTerm ]]; then
+if [[ "${TERM}" != "dumb" && "${TERM_PROGRAM}" != "Apple_Terminal" && ! "${TERM_PROGRAM}" =~ iTerm && ! "${LC_TERMINAL}" =~ iTerm ]]; then
    eval "`dircolors -b`"
 fi
 
