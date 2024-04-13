@@ -8,11 +8,11 @@ REPO_ROOT ?= $(shell git rev-parse --show-toplevel)
 .RECIPEPREFIX := $(.RECIPEPREFIX) # switch to using spaces instead of tabs for recipe separators
 
 .PHONY: help
-help: ## Miscellaneous: returns this Makefile's commands and their descriptions in a formatted table
+help: ## Miscellaneous: Returns this Makefile's commands and their descriptions in a formatted table
    @ci/scripts/makefile_help.sh $(MAKEFILE_LIST) 1
 
 CONFIG_FILE := "config.new.$$$$"
-ssh: ## Generators: generates "${HOME}/.ssh/config" file using 'includes' directives
+ssh: ## Generators: Generates "${HOME}/.ssh/config" file using 'includes' directives
 ifeq ($(notdir $(CURDIR)), .ssh)
    $(info running $@)
 
@@ -43,7 +43,7 @@ else
    @$(MAKE) -sC .ssh -f $(abspath $(lastword $(MAKEFILE_LIST))) ssh
 endif
 
-git: ## Generators: generates "${HOME}/.gitconfig" file using 'includes' directives
+git: ## Generators: Generates "${HOME}/.gitconfig" file using 'includes' directives
 ifeq ($(notdir $(CURDIR)), .gitconfig.d)
    $(info running $@)
 
@@ -75,16 +75,16 @@ else
 endif
 
 .PHONY: dev
-dev: ## Aliases: runs 'git-hooks'
+dev: ## Aliases: Runs 'git-hooks'
    @$(MAKE_COMMAND) git-hooks
 
 git-hooks:
    @$(MAKE_COMMAND) $(subst .githooks, .git/hooks, $(wildcard .githooks/*))
-.git/hooks/%: .githooks/% ## Automatic: creates symlinks for all git hooks from '.githooks' to '.git/hooks'
+.git/hooks/%: .githooks/% ## Automatic: Creates symlinks for all git hooks from '.githooks' to '.git/hooks'
    @[ -h $@ ] || ln -siv ../../$< $@
 
 .PHONY: check-defs
-check-defs: $(shell find -regex '.*\.md\(\.tpl\)?') ## Miscellaneous: checks all Markdown files for unused definitions
+check-defs: $(shell find -regex '.*\.md\(\.tpl\)?') ## Miscellaneous: Checks all Markdown files for unused definitions
    @/bin/bash -c '\
       for file in $^; do \
          for footnote in $$(\
@@ -127,7 +127,7 @@ check-defs: $(shell find -regex '.*\.md\(\.tpl\)?') ## Miscellaneous: checks all
    '
 
 .PHONY: check-md-links
-check-md-links: $(shell find -regex '.*\.md\(\.tpl\)?') ## Miscellaneous: checks all Markdown files for unused definitions
+check-md-links: $(shell find -regex '.*\.md\(\.tpl\)?') ## Miscellaneous: Checks all Markdown files for unused definitions
    -@echo
    -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
    -@echo $(shell echo '$@' | tr '[:lower:]' '[:upper:]')
