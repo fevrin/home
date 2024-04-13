@@ -61,6 +61,10 @@ To run a specific job:
 
     gh act --rm -j lint -W .github/workflows/pre-commit.yml
 
+To run jobs that use `actions/upload-artifact` and `actions/download-artifact`:
+
+    gh act --artifact-server-path /tmp/artifacts -W .github/workflows/pre-commit.yml
+
 ### Local `pre-commit` linting
 
 If `pip` is installed, `make pre-commit` will run all `pre-commit` hooks on all changed files. Note, however, that the `pre-commit` linting is a
@@ -89,6 +93,6 @@ done
 ```
 
 
-[install `gh`]: https://github.com/cli/cli#installation
-[install `nektos/act`]: https://github.com/nektos/act#installation
+[install `gh`]: https://github.com/cli/cli/blob/trunk/docs/install_linux.md#debian-ubuntu-linux-raspberry-pi-os-apt
+[install `nektos/act`]: https://nektosact.com/installation/gh.html
 [install docker]: https://docs.docker.com/get-docker/
