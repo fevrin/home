@@ -4,7 +4,7 @@ exclude: ^ansible/collections/
 #   python: python3.8
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v4.5.0
     hooks:
       # to check the files types these support:
       # https://github.com/pre-commit/pre-commit-hooks/blob/main/.pre-commit-hooks.yaml

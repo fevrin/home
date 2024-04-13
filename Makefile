@@ -7,8 +7,12 @@ REPO_ROOT ?= $(shell git rev-parse --show-toplevel)
 # from <https://stackoverflow.com/questions/2131213/can-you-make-valid-makefiles-without-tab-characters/60363121#60363121>
 .RECIPEPREFIX := $(.RECIPEPREFIX) # switch to using spaces instead of tabs for recipe separators
 
+.PHONY: help
+help: ## Miscellaneous: Returns this Makefile's commands and their descriptions in a formatted table
+   @ci/scripts/makefile_help.sh $(MAKEFILE_LIST) 1
+
 CONFIG_FILE := "config.new.$$$$"
-ssh: ## Generators: generates "${HOME}/.ssh/config" file using 'includes' directives
+ssh: ## Generators: Generates "${HOME}/.ssh/config" file using 'includes' directives
 ifeq ($(notdir $(CURDIR)), .ssh)
    $(info running $@)
 
@@ -39,7 +43,7 @@ else
    @$(MAKE) -sC .ssh -f $(abspath $(lastword $(MAKEFILE_LIST))) ssh
 endif
 
-git: ## Generators: generates "${HOME}/.gitconfig" file using 'includes' directives
+git: ## Generators: Generates "${HOME}/.gitconfig" file using 'includes' directives
 ifeq ($(notdir $(CURDIR)), .gitconfig.d)
    $(info running $@)
 
@@ -71,16 +75,16 @@ else
 endif
 
 .PHONY: dev
-dev: ## Aliases: runs 'git-hooks'
+dev: ## Aliases: Runs 'git-hooks'
    @$(MAKE_COMMAND) git-hooks
 
 git-hooks:
    @$(MAKE_COMMAND) $(subst .githooks, .git/hooks, $(wildcard .githooks/*))
-.git/hooks/%: .githooks/% ## Automatic: creates symlinks for all git hooks from '.githooks' to '.git/hooks'
+.git/hooks/%: .githooks/% ## Automatic: Creates symlinks for all git hooks from '.githooks' to '.git/hooks'
    @[ -h $@ ] || ln -siv ../../$< $@
 
 .PHONY: check-defs
-check-defs: $(shell find -regex '.*\.md\(\.tpl\)?') ## Miscellaneous: checks all Markdown files for unused definitions
+check-defs: $(shell find -regex '.*\.md\(\.tpl\)?') ## Miscellaneous: Checks all Markdown files for unused definitions
    @/bin/bash -c '\
       for file in $^; do \
          for footnote in $$(\
@@ -123,7 +127,7 @@ check-defs: $(shell find -regex '.*\.md\(\.tpl\)?') ## Miscellaneous: checks all
    '
 
 .PHONY: check-md-links
-check-md-links: $(shell find -regex '.*\.md\(\.tpl\)?') ## Miscellaneous: checks all Markdown files for unused definitions
+check-md-links: $(shell find -regex '.*\.md\(\.tpl\)?') ## Miscellaneous: Checks all Markdown files for unused definitions
    -@echo
    -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
    -@echo $(shell echo '$@' | tr '[:lower:]' '[:upper:]')
@@ -176,6 +180,50 @@ generate-docs: check-md-links $(shell find -regex '.*\.md\(\.tpl\)?') ## Generat
       fi; \
    done
 
+.PHONY: gh-act-install
+gh-act-install: ## Linting: Install 'gh' and the 'nektos/act' extension
+   -@echo
+   -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   -@echo $(shell echo '$@' | tr '[:lower:]' '[:upper:]')
+   -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   -@echo
+   -@if command -v -- gh >/dev/null 2>&1; then \
+        echo "$(shell gh --version | head -n1) installed"; \
+        if gh act -h >/dev/null 2>&1; then \
+           echo "$(shell gh act --version) installed"; \
+        else \
+           echo "installing 'act'..." && \
+              gh extension install nektos/gh-act; \
+        fi; \
+     else \
+       echo "error: install 'gh', then re-run 'make $@'"; \
+       echo "https://github.com/cli/cli/blob/trunk/docs/install_linux.md#debian-ubuntu-linux-raspberry-pi-os-apt"; \
+     fi
+
+.PHONY: lint
+lint: gh-act-install ## Linting: Run MegaLinter with nektos/act
+   -@echo
+   -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   -@echo $(shell echo '$@' | tr '[:lower:]' '[:upper:]')
+   -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   -@echo
+   -gh act --artifact-server-path /tmp/artifacts -W .github/workflows/pre-commit.yml
+
+.PHONY: lint-cleanup
+lint-cleanup: ## Linting: Clean up any leftover docker continers from linting
+   -@echo
+   -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   -@echo $(shell echo '$@' | tr '[:lower:]' '[:upper:]')
+   -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   -@echo
+   -for container in $$(docker container ls -a --format='{{.Names}}' | grep -E '^act-'); do \
+      docker container stop "$${container}"; \
+      docker container rm "$${container}"; \
+   done && \
+   for volume in $$(docker volume ls --format='{{.Name}}' | grep -E '^act-'); do \
+      docker volume rm "$${volume}"; \
+   done
+
 .PHONY: pre-commit-install
 pre-commit-install: ## Linting: Install pre-commit
    -@echo
@@ -184,11 +232,16 @@ pre-commit-install: ## Linting: Install pre-commit
    -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
    -@echo
    -@command -v -- pipenv >/dev/null 2>&1 || pip3 install pipenv
-   -@if pipenv run pre-commit -V >/dev/null 2>&1; then \
-        echo "$(shell pipenv run pre-commit -V) already installed"; \
+   -@if command -v -- pipenv >/dev/null 2>&1; then \
+        echo "$(shell pipenv --version) installed"; \
+        if pipenv run pre-commit -V >/dev/null 2>&1; then \
+           echo "$(shell pipenv run pre-commit -V) installed"; \
+        else \
+           echo "installing pre-commit..." && \
+              pipenv install pre-commit; \
+        fi; \
      else \
-        echo "installing pre-commit..." && \
-           pipenv install pre-commit; \
+       echo "error: install 'pipenv', then re-run 'make $@'"; \
      fi
 
 .PHONY: pre-commit-install-hooks
@@ -208,10 +261,6 @@ pre-commit: pre-commit-install ## Linting: Lints all files changed between the d
    -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
    -@echo
    -pipenv run pre-commit run -v --show-diff-on-failure --color=always --files $(CHANGED_FILES)
-
-.PHONY: help
-help: ## Miscellaneous: returns this Makefile's commands and their descriptions in a formatted table
-   @ci/scripts/makefile_help.sh $(MAKEFILE_LIST) 1
 
 #test:
 #   @DIR="config.d"; \

@@ -1,5 +1,5 @@
--P ubuntu-latest=catthehacker/ubuntu:act-22.04
--P ubuntu-22.04=catthehacker/ubuntu:act-22.04
+-P ubuntu-latest=catthehacker/ubuntu:runner-22.04
+-P ubuntu-22.04=catthehacker/ubuntu:runner-22.04
 -P ubuntu-full-latest=catthehacker/ubuntu:full-latest
 -e .config/act/event.json
 --rm

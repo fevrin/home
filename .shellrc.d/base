@@ -55,7 +55,7 @@ if [[ -f ~/.todo && -s ~/.todo ]]; then
 fi
 
 # enable color support of ls and also add handy aliases
-if [[ "${TERM}" != "dumb" && "${TERM_PROGRAM}" != "Apple_Terminal" && ! "${TERM_PROGRAM}" =~ iTerm ]]; then
+if [[ "${TERM}" != "dumb" && "${TERM_PROGRAM}" != "Apple_Terminal" && ! "${TERM_PROGRAM}" =~ iTerm && ! "${LC_TERMINAL}" =~ iTerm ]]; then
    eval "`dircolors -b`"
 fi
 
@@ -73,11 +73,11 @@ if has tmux; then
       $(env | sed -n "s;SHLVL=\([0-9][0-9]*\);\1;p") -le ${SHLVL_threshold} # we're in the main bash instance (not nested)
    ]]; then
 
-      if [[ -n "${TMUX_LIST}" && $(echo "${TMUX_LIST}" | grep -cvi attached) -ne 0 ]]; then
-         if [[ $(echo "${TMUX_LIST}" | grep -cvi attached) -eq 1 ]]; then
+      if [[ -n "${TMUX_LIST}" ]]; then
+         if [[ $(wc -l <<< "${TMUX_LIST}") -eq 1 ]]; then
             # there's just one session, so attach to it
             tmux attach
-         else
+         elif [[ $(echo "${TMUX_LIST}" | grep -cvi attached) -ne 0 ]]; then
             # list detached tmux instances, if any, to explain why tmux wasn't started
             cat <<-EOF
 					can't start tmux due to these detached sessions:
@@ -96,7 +96,7 @@ if has tmux; then
          # before creating a session:
          # .tmux.conf:117: no current target
          # more info at <https://superuser.com/questions/1413870/tmux-conf-doesnt-work-when-starting-but-does-with-source-file/1414127#1414127>
-         tmux new-window top
+#         tmux new-window top
       fi
    fi
    unset TMUX_LIST
