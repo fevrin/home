@@ -22,13 +22,7 @@ on:
     branches:
       - $GITHUB_BASE_REF
         #if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
-    paths:
-      - '.github/workflows/pre-commit.yml'
-      - '.pre-commit-config.yaml'
   pull_request:
-    paths:
-      - '.github/workflows/pre-commit.yml'
-      - '.pre-commit-config.yaml'
 
 # from the example here:
 # https://docs.github.com/en/actions/examples/using-scripts-to-test-your-code-on-a-runner#example-workflow
