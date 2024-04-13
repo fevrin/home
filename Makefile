@@ -232,11 +232,16 @@ pre-commit-install: ## Linting: Install pre-commit
    -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
    -@echo
    -@command -v -- pipenv >/dev/null 2>&1 || pip3 install pipenv
-   -@if pipenv run pre-commit -V >/dev/null 2>&1; then \
-        echo "$(shell pipenv run pre-commit -V) already installed"; \
+   -@if command -v -- pipenv >/dev/null 2>&1; then \
+        echo "$(shell pipenv --version) installed"; \
+        if pipenv run pre-commit -V >/dev/null 2>&1; then \
+           echo "$(shell pipenv run pre-commit -V) installed"; \
+        else \
+           echo "installing pre-commit..." && \
+              pipenv install pre-commit; \
+        fi; \
      else \
-        echo "installing pre-commit..." && \
-           pipenv install pre-commit; \
+       echo "error: install 'pipenv', then re-run 'make $@'"; \
      fi
 
 .PHONY: pre-commit-install-hooks
