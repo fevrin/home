@@ -87,3 +87,9 @@ trim_trailing_whitespace = false
 [*.{cmd,bat,ps1}]
 end_of_line = crlf
 indent_style = space
+
+# vim swap files
+[*.sw*]
+max_line_length = unset
+insert_final_newline = false
+end_of_line = unset
