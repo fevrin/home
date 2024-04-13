@@ -180,6 +180,50 @@ generate-docs: check-md-links $(shell find -regex '.*\.md\(\.tpl\)?') ## Generat
       fi; \
    done
 
+.PHONY: gh-act-install
+gh-act-install: ## Linting: Install 'gh' and the 'nektos/act' extension
+   -@echo
+   -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   -@echo $(shell echo '$@' | tr '[:lower:]' '[:upper:]')
+   -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   -@echo
+   -@if command -v -- gh >/dev/null 2>&1; then \
+        echo "$(shell gh --version | head -n1) installed"; \
+        if gh act -h >/dev/null 2>&1; then \
+           echo "$(shell gh act --version) installed"; \
+        else \
+           echo "installing 'act'..." && \
+              gh extension install nektos/gh-act; \
+        fi; \
+     else \
+       echo "error: install 'gh', then re-run 'make $@'"; \
+       echo "https://github.com/cli/cli/blob/trunk/docs/install_linux.md#debian-ubuntu-linux-raspberry-pi-os-apt"; \
+     fi
+
+.PHONY: lint
+lint: gh-act-install ## Linting: Run MegaLinter with nektos/act
+   -@echo
+   -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   -@echo $(shell echo '$@' | tr '[:lower:]' '[:upper:]')
+   -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   -@echo
+   -gh act --artifact-server-path /tmp/artifacts -W .github/workflows/pre-commit.yml
+
+.PHONY: lint-cleanup
+lint-cleanup: ## Linting: Clean up any leftover docker continers from linting
+   -@echo
+   -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   -@echo $(shell echo '$@' | tr '[:lower:]' '[:upper:]')
+   -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
+   -@echo
+   -for container in $$(docker container ls -a --format='{{.Names}}' | grep -E '^act-'); do \
+      docker container stop "$${container}"; \
+      docker container rm "$${container}"; \
+   done && \
+   for volume in $$(docker volume ls --format='{{.Name}}' | grep -E '^act-'); do \
+      docker volume rm "$${volume}"; \
+   done
+
 .PHONY: pre-commit-install
 pre-commit-install: ## Linting: Install pre-commit
    -@echo
