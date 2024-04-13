@@ -151,7 +151,7 @@ jobs:
           python-version: '3.11'
 
       - name: Run pre-commit on all files
-        uses: pre-commit/action@646c83fcd040023954eafda54b4db0192ce70507 # v3.0.0
+        uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
         with:
           # this should run the pre-commit hooks only on the files changed between the default branch and the one in the PR
           extra_args: --verbose -a
@@ -173,7 +173,7 @@ jobs:
           python-version: '3.11'
 
       - name: Run pre-commit
-        uses: pre-commit/action@646c83fcd040023954eafda54b4db0192ce70507 # v3.0.0
+        uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
         with:
           # this should run the pre-commit hooks only on the files changed between the default branch and the one in the PR
           extra_args: --verbose --from-ref ${{ needs.get-changed-files.outputs.BASE_REF }} --to-ref HEAD
