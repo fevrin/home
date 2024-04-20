@@ -9,7 +9,38 @@ DARK_START=18
 DARK_STOP=7
 export DBUS_SESSION_BUS_ADDRESS='unix:path=/run/user/1000/bus'
 
-echo "running $0" >>/tmp/theme.log
+log() {
+   echo "$(date '+%F %T %Z') ${*}"
+}
+
+set_theme() {
+   theme_type="${1:-dark}"
+   color_scheme="prefer-${theme_type}"
+
+   if [[ "${theme_type}" =~ ^dark$ ]]; then
+      theme="${DARK_THEME}"
+   elif [[ "${theme_type}" =~ ^light$ ]]; then
+      theme="${LIGHT_THEME}"
+   else
+      echo "error: theme-type must be 'light' or 'dark'"
+      return 1
+   fi
+
+   {
+      log "gsettings set org.gnome.desktop.interface color-scheme '${color_scheme}'"
+      log "gsettings set org.gnome.desktop.interface gtk-theme ${theme}"
+      log "gsettings set org.gnome.gedit.preferences.editor scheme ${theme}"
+   } >>/tmp/theme.log
+   gsettings set org.gnome.desktop.interface color-scheme "${color_scheme}"
+   gsettings set org.gnome.desktop.interface gtk-theme "${theme}"
+   gsettings set org.gnome.gedit.preferences.editor scheme "${theme}"
+}
+
+{
+   echo
+   log "running $0"
+} >>/tmp/theme.log
+
 # set the dark theme if run during the dark theme hours
 
 # normally, cron should run this file
@@ -18,22 +49,30 @@ if [[
       "${PM_ACTION}" =~ ^(thaw|resume)$ ||
       -z "${PM_ACTION}"
    ]]; then
-   if [[
-         "$(date +%H)" -ge "${DARK_START}" ||
-         "$(date +%H)" -lt "${DARK_STOP}"
-      ]]; then
-      echo gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' >>/tmp/theme.log
-      echo gsettings set org.gnome.desktop.interface gtk-theme "${DARK_THEME}" >>/tmp/theme.log
-      echo gsettings set org.gnome.gedit.preferences.editor scheme "${DARK_THEME}" >>/tmp/theme.log
-      gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
-      gsettings set org.gnome.desktop.interface gtk-theme "${DARK_THEME}"
-      gsettings set org.gnome.gedit.preferences.editor scheme "${DARK_THEME}"
+
+   if [[ "${DARK_START}" -gt "${DARK_STOP}" ]]; then
+      if [[
+            "$(date +%H)" -ge "${DARK_START}" &&
+            "$(date +%H)" -le 23
+          ]] || [[
+            "$(date +%H)" -ge 00 &&
+            "$(date +%H)" -lt "${DARK_STOP}"
+         ]]; then
+         set_theme dark
+      else
+         set_theme light
+      fi
    else
-      echo gsettings set org.gnome.desktop.interface color-scheme 'prefer-light' >>/tmp/theme.log
-      echo gsettings set org.gnome.desktop.interface gtk-theme "${LIGHT_THEME}" >>/tmp/theme.log
-      echo gsettings set org.gnome.gedit.preferences.editor scheme "${LIGHT_THEME}" >>/tmp/theme.log
-      gsettings set org.gnome.desktop.interface color-scheme 'prefer-light'
-      gsettings set org.gnome.desktop.interface gtk-theme "${LIGHT_THEME}"
-      gsettings set org.gnome.gedit.preferences.editor scheme "${LIGHT_THEME}"
+      if [[
+            "$(date +%H)" -ge "${DARK_STOP}" &&
+            "$(date +%H)" -le 23
+          ]] || [[
+            "$(date +%H)" -ge 00 &&
+            "$(date +%H)" -lt "${DARK_START}"
+         ]]; then
+         set_theme light
+      else
+         set_theme dark
+      fi
    fi
 fi
