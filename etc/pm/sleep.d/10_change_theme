@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+# this must be copied to /etc/pm/sleep.d/
+
+PM_ACTION="${1}"
+DARK_THEME='Yaru-viridian-dark'
+LIGHT_THEME='Yaru-viridian'
+DARK_START=18
+DARK_STOP=7
+export DBUS_SESSION_BUS_ADDRESS='unix:path=/run/user/1000/bus'
+
+echo "running $0" >>/tmp/theme.log
+# set the dark theme if run during the dark theme hours
+
+# normally, cron should run this file
+# if this file is in /etc/pm/sleep.d/, this will also trigger when waking from sleep/hibernation
+if [[
+      "${PM_ACTION}" =~ ^(thaw|resume)$ ||
+      -z "${PM_ACTION}"
+   ]]; then
+   if [[
+         "$(date +%H)" -ge "${DARK_START}" ||
+         "$(date +%H)" -lt "${DARK_STOP}"
+      ]]; then
+      echo gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' >>/tmp/theme.log
+      echo gsettings set org.gnome.desktop.interface gtk-theme "${DARK_THEME}" >>/tmp/theme.log
+      echo gsettings set org.gnome.gedit.preferences.editor scheme "${DARK_THEME}" >>/tmp/theme.log
+      gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
+      gsettings set org.gnome.desktop.interface gtk-theme "${DARK_THEME}"
+      gsettings set org.gnome.gedit.preferences.editor scheme "${DARK_THEME}"
+   else
+      echo gsettings set org.gnome.desktop.interface color-scheme 'prefer-light' >>/tmp/theme.log
+      echo gsettings set org.gnome.desktop.interface gtk-theme "${LIGHT_THEME}" >>/tmp/theme.log
+      echo gsettings set org.gnome.gedit.preferences.editor scheme "${LIGHT_THEME}" >>/tmp/theme.log
+      gsettings set org.gnome.desktop.interface color-scheme 'prefer-light'
+      gsettings set org.gnome.desktop.interface gtk-theme "${LIGHT_THEME}"
+      gsettings set org.gnome.gedit.preferences.editor scheme "${LIGHT_THEME}"
+   fi
+fi
