@@ -217,7 +217,7 @@ lint-cleanup: ## Linting: Clean up any leftover docker continers from linting
    -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
    -@echo
    -for container in $$(docker container ls -a --format='{{.Names}}' | grep -E '^act-'); do \
-      docker container stop "$${container}"; \
+      docker container stop --signal 9 "$${container}"; \
       docker container rm "$${container}"; \
    done && \
    for volume in $$(docker volume ls --format='{{.Name}}' | grep -E '^act-'); do \
