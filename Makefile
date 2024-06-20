@@ -21,7 +21,7 @@ ifeq ($(notdir $(CURDIR)), .ssh)
 
    @if [ -d $(DIR) ]; then \
       cp -ai $(TEMPLATE) $(CONFIG_FILE); \
-      $(info going through all Include lines and replace them with the file contents) \
+      $(info going through all Include lines and replacing them with the file contents) \
       for line in $(shell grep -n Include $(TEMPLATE) | sed -re 's;Include ;;' | sort -r); do \
          lineno=$${line%%:*}; \
          file=$${line##*:}; \
@@ -52,7 +52,7 @@ ifeq ($(notdir $(CURDIR)), .gitconfig.d)
 
    @if [ -d $(DIR) ]; then \
       cp -ai $(TEMPLATE) $(CONFIG_FILE); \
-      $(info going through all 'include' lines and replace them with the file contents) \
+      $(info going through all 'include' lines and replacing them with the file contents) \
       for line in $(shell grep -n ^include $(TEMPLATE) | sed -re 's;^include ;;' | sort -r); do \
          lineno=$${line%%:*}; \
          file=$${line##*:}; \
@@ -217,7 +217,7 @@ lint-cleanup: ## Linting: Clean up any leftover docker continers from linting
    -@echo '=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='
    -@echo
    -for container in $$(docker container ls -a --format='{{.Names}}' | grep -E '^act-'); do \
-      docker container stop "$${container}"; \
+      docker container stop --signal 9 "$${container}"; \
       docker container rm "$${container}"; \
    done && \
    for volume in $$(docker volume ls --format='{{.Name}}' | grep -E '^act-'); do \

@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+
+# this must be copied to /etc/pm/sleep.d/
+
+PM_ACTION="${1}"
+DARK_THEME='Yaru-viridian-dark'
+LIGHT_THEME='Yaru-viridian'
+DARK_START=18
+DARK_STOP=7
+export DBUS_SESSION_BUS_ADDRESS='unix:path=/run/user/1000/bus'
+
+log() {
+   echo "$(date '+%F %T %Z') ${*}"
+}
+
+set_theme() {
+   theme_type="${1:-dark}"
+   color_scheme="prefer-${theme_type}"
+
+   if [[ "${theme_type}" =~ ^dark$ ]]; then
+      theme="${DARK_THEME}"
+   elif [[ "${theme_type}" =~ ^light$ ]]; then
+      theme="${LIGHT_THEME}"
+   else
+      echo "error: theme-type must be 'light' or 'dark'"
+      return 1
+   fi
+
+   {
+      log "gsettings set org.gnome.desktop.interface color-scheme '${color_scheme}'"
+      log "gsettings set org.gnome.desktop.interface gtk-theme ${theme}"
+      log "gsettings set org.gnome.gedit.preferences.editor scheme ${theme}"
+   } >>/tmp/theme.log
+   gsettings set org.gnome.desktop.interface color-scheme "${color_scheme}"
+   gsettings set org.gnome.desktop.interface gtk-theme "${theme}"
+   gsettings set org.gnome.gedit.preferences.editor scheme "${theme}"
+}
+
+{
+   echo
+   log "running $0"
+} >>/tmp/theme.log
+
+# set the dark theme if run during the dark theme hours
+
+# normally, cron should run this file
+# if this file is in /etc/pm/sleep.d/, this will also trigger when waking from sleep/hibernation
+if [[
+      "${PM_ACTION}" =~ ^(thaw|resume)$ ||
+      -z "${PM_ACTION}"
+   ]]; then
+
+   if [[ "${DARK_START}" -gt "${DARK_STOP}" ]]; then
+      if [[
+            "$(date +%H)" -ge "${DARK_START}" &&
+            "$(date +%H)" -le 23
+          ]] || [[
+            "$(date +%H)" -ge 00 &&
+            "$(date +%H)" -lt "${DARK_STOP}"
+         ]]; then
+         set_theme dark
+      else
+         set_theme light
+      fi
+   else
+      if [[
+            "$(date +%H)" -ge "${DARK_STOP}" &&
+            "$(date +%H)" -le 23
+          ]] || [[
+            "$(date +%H)" -ge 00 &&
+            "$(date +%H)" -lt "${DARK_START}"
+         ]]; then
+         set_theme light
+      else
+         set_theme dark
+      fi
+   fi
+fi
