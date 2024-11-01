@@ -332,9 +332,13 @@ nnoremap <C-H> <C-W><C-H>
 "
 " automatically install vim-plug
 " <https://github.com/junegunn/vim-plug/wiki/tips#automatic-installation>
-let data_dir = has('nvim') ? stdpath('data') . '/site' : s:vim_home_dir
-if empty(glob(data_dir . '/autoload/plug.vim'))
-   exe system('curl -fLo "' . s:vim_home_dir . '/autoload/plug.vim" --create-dirs
+let data_dir = has('nvim') ? stdpath('data') . '/site/autoload' : s:vim_home_dir
+if empty(data_dir)
+   exe system('mkdir -p ' . data_dir)
+endif
+
+if empty(glob(data_dir . '/plug.vim'))
+   exe system('curl -sfLo "' . data_dir . '/plug.vim" --create-dirs
     \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim')
    autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
@@ -344,7 +348,7 @@ endif
 
 " plugins:
 " https://vimawesome.com/
-call plug#begin(s:vim_home_dir . '/plugged')
+call plug#begin(data_dir . '/plugged')
 "   Plug 'airblade/vim-gitgutter'                                            "
 "   Plug 'AndrewRadev/linediff.vim'                                          "
 "   Plug 'arp242/undofile_warn.vim'                                          "
@@ -354,8 +358,10 @@ call plug#begin(s:vim_home_dir . '/plugged')
    Plug 'ekalinin/Dockerfile.vim'                                            " adds syntax highlighting for Dockerfiles
 "   Plug 'ervandew/supertab'                                                 " smart tab completion (old)
    Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries', 'frozen': 'true' }     " go development
+"   Plug 'glts/vim-textobj-comment'                                          "
    Plug 'hashivim/vim-terraform'                                             " syntax highlighting for terraform
 "   Plug 'https://github.com/ElmCast/elm-vim'                                "
+   Plug 'github/copilot.vim'                                                "
    Plug 'https://github.com/fevrin/AnsiEsc.vim', { 'frozen': 'true' }        " converts ANSI escape codes to colors
 "   Plug 'inkarkat/vim-AdvancedDiffOptions'                                  "
 "   Plug 'inkarkat/vim-ConflictMotions'                                      " older conflict marker jumper
@@ -364,7 +370,6 @@ call plug#begin(s:vim_home_dir . '/plugged')
 "   Plug 'junegunn/fzf.vim'                                                  "
    Plug 'junegunn/vim-easy-align'                                            " easily align lines based on a common character expression
 "   Plug 'kana/vim-textobj-user'                                             "
-"   Plug 'glts/vim-textobj-comment'                                          "
 "   Plug 'Konfekt/FastFold'                                                  " fixes slow folding
 "   Plug 'mbbill/undotree'                                                   " lets you visualize a file's undo history
 "   Plug 'mhinz/vim-signify'                                                 "
@@ -395,9 +400,9 @@ call plug#begin(s:vim_home_dir . '/plugged')
 "   Plug 'tpope/vim-surround'                                                " adds commands for surrounding arbitrary text with tags, quotes, etc.
    Plug 'tpope/vim-unimpaired'                                               " add handy mappings for toggling options, jumping, formatting, etc.
 "   Plug 'vim-airline/vim-airline'                                           "
+"   Plug 'Vimjas/vim-python-pep8-indent'                                     " make python code comply with PEP8 recommendation
 "   Plug 'vim-scripts/vcscommand.vim'                                        "
 "   Plug 'vim-syntastic/syntastic'                                           " code syntax checker
-"   Plug 'Vimjas/vim-python-pep8-indent'                                     " make python code comply with PEP8 recommendation
    Plug 'vito/booklit.vim'                                                   " syntax highlighting for Booklit files
 "   Plug 'ycm-core/YouCompleteMe'                                            " speedy code completion, comprehension, and refactoring engine
 "   Plug 'yggdroot/indentline'                                               "
