@@ -335,7 +335,7 @@
   '"
   root-dir = rev-parse --show-toplevel
   save = !git add -A && git commit -m 'chore: commit save point' # from https://snyk.io/blog/10-git-aliases-for-faster-and-productive-git-workflow/
-  st = status
+  st = status --ignored
   sync = "!$HOME/.gitconfig.d/git-sync.sh $@"
   type = cat-file -t
   undo = reset HEAD~1 --mixed # from https://snyk.io/blog/10-git-aliases-for-faster-and-productive-git-workflow/
