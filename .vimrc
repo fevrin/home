@@ -157,8 +157,11 @@ set history=4000 " hi; allow for ample command history
 ":so ~/.vim/extenders/.vim.wrap
 ":so ~/.vim/extenders/.vim.loadtemplate
 
-set term=xterm " needed for the colorscheme to show as more bold and vibrant than 'screen.xterm-256color'
-colorscheme ron
+if version < 901
+   " this block restricts the situations in which the following options are enabled
+   set term=xterm " needed for the colorscheme to show as more bold and vibrant than 'screen.xterm-256color'
+   colorscheme ron
+endif
 
 syntax sync minlines=50 " ensure vim doesn't keep changing syntax highlighting; from <http://vim.wikia.com/wiki/Fix_Syntax_Highlighting>
 
