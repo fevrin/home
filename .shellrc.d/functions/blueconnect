@@ -48,7 +48,7 @@ blueconnect() {
             #amixer -D pulse sset Master mute
             bluetoothctl disconnect;
       }
-      if bluetoothctl connect $(bluetoothctl paired-devices | awk "tolower(\$0) ~ /${device}/ { print \$2 }"); then
+      if bluetoothctl connect $(bluetoothctl devices | awk "tolower(\$0) ~ /${device}/ { print \$2 }"); then
          [[ "${bluetooth_versions[${bluetooth_version}]%%.*}" -lt 5 ]] && {
                echo "turning volume back up..."
                #sleep 3
@@ -73,7 +73,7 @@ _blueconnect_completions() {
    if [[ "${#COMP_WORDS[@]}" -gt 2 ]]; then
       if [[ "${COMP_WORDS[1]}" =~ ^file$ ]]; then
          # output into columns all files tracked in the ${HOME_DIR} repo
-         VALUES="$(bluetoothctl paired-devices | cut -d' ' -f3-)"
+         VALUES="$(bluetoothctl devices | cut -d' ' -f3-)"
       fi
    elif [[ "${#COMP_WORDS[@]}" -eq 2 ]]; then
       # ${#COMP_WORDS} starts off at 2, so we're at the initial [Tab]
