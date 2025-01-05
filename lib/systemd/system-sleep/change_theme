@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-# this must be copied to /lib/systemd/system-sleep/change_theme
-#
-# ensure it also has 755 perms and is owned by root
-
 # REPLACE "\$(id -u)" WITH YOUR USER ID
 # REPLACE "\$(id -un)" WITH YOUR USERNAME
+#
+# afterward, copy this to /lib/systemd/system-sleep/change_theme
+#
+# ensure it also has 755 perms and is owned by root
 
 PM_ACTION="${1}"
 DARK_THEME='Yaru-viridian-dark'
