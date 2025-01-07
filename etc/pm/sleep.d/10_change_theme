@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
 # this must be copied to /etc/pm/sleep.d/
+# that should automatically copy it to /lib/systemd/system-sleep/change_theme
+#
+# ensure both files also have 755 perms
 
 PM_ACTION="${1}"
 DARK_THEME='Yaru-viridian-dark'

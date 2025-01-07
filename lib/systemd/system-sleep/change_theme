@@ -7,7 +7,9 @@
 #
 # ensure it also has 755 perms and is owned by root
 
-PM_ACTION="${1}"
+set -euo pipefail
+
+PM_ACTION="${1:-}"
 DARK_THEME='Yaru-viridian-dark'
 LIGHT_THEME='Yaru-viridian'
 DARK_START=18
@@ -16,6 +18,7 @@ export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/\$(id -u)/bus" # may be nee
 
 log() {
    echo "$(date '+%F %T %Z') ${*}"
+   logger -t change_theme "${*}"
 }
 
 set_theme() {
@@ -56,7 +59,6 @@ if [[
          "$(date +%H)" -ge "${DARK_START}" ||
          "$(date +%H)" -lt "${DARK_STOP}"
       ]]; then
-      # the full command paths may not be necessary
       set_theme dark
    else
       set_theme light
