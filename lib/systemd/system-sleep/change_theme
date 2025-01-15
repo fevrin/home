@@ -7,6 +7,7 @@
 #
 # ensure it also has 755 perms and is owned by root
 
+set -x
 set -euo pipefail
 
 PM_ACTION="${1:-}"
@@ -30,14 +31,14 @@ set_theme() {
    elif [[ "${theme_type}" =~ ^light$ ]]; then
       theme="${LIGHT_THEME}"
    else
-      echo "error: theme-type must be 'light' or 'dark'"
+      log "error: theme-type must be 'light' or 'dark'"
       return 1
    fi
 
    {
       log "gsettings set org.gnome.desktop.interface color-scheme '${color_scheme}'"
       log "gsettings set org.gnome.desktop.interface gtk-theme ${theme}"
-   } >>/tmp/theme.log
+   }
    /bin/su "\$(id -un)" -c "gsettings set org.gnome.desktop.interface color-scheme '${color_scheme}'"
    /bin/su "\$(id -un)" -c "gsettings set org.gnome.desktop.interface gtk-theme '${theme}'"
 }
@@ -45,7 +46,7 @@ set_theme() {
 {
    echo
    log "running $0"
-} >>/tmp/theme.log
+}
 
 # set the dark theme if run during the dark theme hours
 
