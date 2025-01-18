@@ -28,8 +28,10 @@ set_theme() {
 
    if [[ "${theme_type}" =~ ^dark$ ]]; then
       theme="${DARK_THEME}"
+      prefer_dark_theme=1
    elif [[ "${theme_type}" =~ ^light$ ]]; then
       theme="${LIGHT_THEME}"
+      prefer_dark_theme=0
    else
       log "error: theme-type must be 'light' or 'dark'"
       return 1
@@ -39,8 +41,15 @@ set_theme() {
       log "gsettings set org.gnome.desktop.interface color-scheme '${color_scheme}'"
       log "gsettings set org.gnome.desktop.interface gtk-theme ${theme}"
    }
+
    /bin/su "\$(id -un)" -c "gsettings set org.gnome.desktop.interface color-scheme '${color_scheme}'"
    /bin/su "\$(id -un)" -c "gsettings set org.gnome.desktop.interface gtk-theme '${theme}'"
+
+   # since the theme didn't always change for system apps, make a change from here:
+   # https://www.reddit.com/r/Ubuntu/comments/1cfcu62/comment/luzvho0/
+   for i in /home/"\$(id -un)"/.config/gtk-*/settings.ini; do
+      /bin/su "\$(id -un)" -c "sed -i_$(date '+%F_%T_%Z') -Ee 's;^(gtk-application-prefer-dark-theme=)[0-9]$;\1'${prefer_dark_theme}';' $i;"
+   done
 }
 
 {
