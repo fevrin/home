@@ -138,3 +138,17 @@ grep -q 10 /proc/sys/vm/swappiness || {
 		vm.swappiness = 10
 	EOF
 }
+
+for ssh_socket_file in \
+   "${HOME}/.1password/agent.sock" \
+   "${HOME}/.bitwarden-ssh-agent.sock" \
+   "${HOME}/snap/bitwarden/current/.bitwarden-ssh-agent.sock" \
+   "${HOME}/.keeper-ssh-agent.sock" \
+   ; do
+   if [[ -S "${ssh_socket_file}" ]]; then
+      # the default is 'export SSH_AUTH_SOCK=/run/user/1000/keyring/ssh'
+      # but use a password manager's socket file if it exists
+      export SSH_AUTH_SOCK="${ssh_socket_file}"
+      break
+   fi
+done
