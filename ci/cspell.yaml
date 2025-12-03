@@ -1,0 +1,65 @@
+ignorePaths:
+  - '**.sw*'
+
+language: en-US
+
+# Enabled dictionaries
+dictionaries:
+  - technical
+  - software-terms
+  - shell
+  - project
+
+words:
+  - Aftertabs
+  - Architectrure
+  - autoload
+  - bitwarden
+  - bsdextrautils
+  - centralised
+  - checkmake
+  - CHECKMAKE
+  - containerised
+  - EDITMSG
+  - elif
+  - envsubst
+  - esac
+  - gettext
+  - gsub
+  - hadolint
+  - infosec
+  - javac
+  - markdownlint
+  - MARKDOWNLINT
+  - metacharacters
+  - minimise
+  - minphony
+  - mksh
+  - mktemp
+  - nektos
+  - nullary
+  - OIFS
+  - pipenv
+  - pkgs
+  - Plzik
+  - Proto
+  - RACI
+  - readarray
+  - runbook
+  - runbooks
+  - sanitised
+  - shellcheck
+  - SHELLCHECK
+  - shellcheckrc
+  - shellrc
+  - shfmt
+  - SHFMT
+  - shfmt's
+  - sonarqube
+  - SPOF
+  - statefile
+  - toplevel
+  - unmute
+  - usecases
+  - vimdiff
+  - worktree

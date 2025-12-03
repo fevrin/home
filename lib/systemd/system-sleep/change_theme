@@ -2,33 +2,80 @@
 
 # REPLACE "\$(id -u)" WITH YOUR USER ID
 # REPLACE "\$(id -un)" WITH YOUR USERNAME
+#
+# afterward, copy this to /lib/systemd/system-sleep/change_theme
+#
+# ensure it also has 755 perms and is owned by root
 
-PM_ACTION="${1}"
+set -x
+set -euo pipefail
+
+# enable for debugging in journalctl
+#exec &> >(logger -t change_theme)
+
+PM_ACTION="${1:-}"
 DARK_THEME='Yaru-viridian-dark'
 LIGHT_THEME='Yaru-viridian'
 DARK_START=18
 DARK_STOP=7
 export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/\$(id -u)/bus" # may be needed for cron to run when logged out
 
+log() {
+   echo "$(date '+%F %T %Z') ${*}"
+   logger -t change_theme "${*}"
+}
+
+set_theme() {
+   theme_type="${1:-dark}"
+   color_scheme="prefer-${theme_type}"
+
+   if [[ "${theme_type}" =~ ^dark$ ]]; then
+      theme="${DARK_THEME}"
+      prefer_dark_theme=1
+   elif [[ "${theme_type}" =~ ^light$ ]]; then
+      theme="${LIGHT_THEME}"
+      prefer_dark_theme=0
+   else
+      log "error: theme-type must be 'light' or 'dark'"
+      return 1
+   fi
+
+   {
+      log "gsettings set org.gnome.desktop.interface color-scheme '${color_scheme}'"
+      log "gsettings set org.gnome.desktop.interface gtk-theme ${theme}"
+   }
+
+   if [[ "${PM_ACTION}" =~ ^post$ ]]; then
+      /bin/su "\$(id -un)" -c "gsettings set org.gnome.desktop.interface color-scheme '${color_scheme}'"
+      /bin/su "\$(id -un)" -c "gsettings set org.gnome.desktop.interface gtk-theme '${theme}'"
+
+      for i in /home/"\$(id -un)"/.config/gtk-*/settings.ini; do
+         /bin/su "\$(id -un)" -c "sed -i_$(date '+%F_%T_%Z') -Ee 's;^(gtk-application-prefer-dark-theme=)[0-9]$;\1'${prefer_dark_theme}';' $i;"
+      done
+   else
+      gsettings set org.gnome.desktop.interface color-scheme "${color_scheme}"
+      gsettings set org.gnome.desktop.interface gtk-theme "${theme}"
+
+      for i in /home/"$(id -un)"/.config/gtk-*/settings.ini; do
+         sed -i_$(date '+%F_%T_%Z') -Ee 's;^(gtk-application-prefer-dark-theme=)[0-9]$;\1'${prefer_dark_theme}';' $i
+      done
+   fi
+}
+
+{
+   echo
+   log "running $0"
+}
+
 # set the dark theme if run during the dark theme hours
 
 # normally, cron should run this file
 # if this file is in /lib/systemd/system-sleep/ (/etc/pm/sleep.d/ doesn't work), this will also trigger when waking from sleep/hibernation in Ubuntu
 if [[
-      "${PM_ACTION}" =~ ^post$ ||
-      -z "${PM_ACTION}"
+      "$(date +%H)" -ge "${DARK_START}" ||
+      "$(date +%H)" -lt "${DARK_STOP}"
    ]]; then
-   if [[
-         "$(date +%H)" -ge "${DARK_START}" ||
-         "$(date +%H)" -lt "${DARK_STOP}"
-      ]]; then
-      # the full command paths may not be necessary
-      /bin/su "\$(id -un)" -c "/usr/bin/gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'"
-      /bin/su "\$(id -un)" -c "/usr/bin/gsettings set org.gnome.desktop.interface gtk-theme ${DARK_THEME}"
-      /bin/su "\$(id -un)" -c "/usr/bin/gsettings set org.gnome.gedit.preferences.editor scheme ${DARK_THEME}"
-   else
-      /bin/su "\$(id -un)" -c "/usr/bin/gsettings set org.gnome.desktop.interface color-scheme 'prefer-light'"
-      /bin/su "\$(id -un)" -c "/usr/bin/gsettings set org.gnome.desktop.interface gtk-theme ${LIGHT_THEME}"
-      /bin/su "\$(id -un)" -c "/usr/bin/gsettings set org.gnome.gedit.preferences.editor scheme ${LIGHT_THEME}"
-   fi
+   set_theme dark
+else
+   set_theme light
 fi

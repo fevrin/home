@@ -59,6 +59,7 @@ symbol = '🌴 '
 format = '\(on [$symbol$branch(:$remote_branch)]($style) '
 
 [git_commit]
+only_detached = false
 tag_disabled = false
 
 [git_status]

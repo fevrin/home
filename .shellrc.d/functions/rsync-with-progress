@@ -74,6 +74,7 @@ rsync-with-progress() {
       --recursive
       --links
       --perms
+      --times
       --group
       --owner
       --devices
@@ -86,8 +87,6 @@ rsync-with-progress() {
       --hard-links
       --exclude='.trashed-*'
       --sparse
-      --no-times
-      --size-only
    )
    declare -a RSYNC_FLAGS_NEGATIONS=(
    )
@@ -271,8 +270,8 @@ rsync-with-progress() {
       time ${SUDO} rsync "${RSYNC_FLAGS[@]}" "${SRC}" "${DST}" | pv --eta --line-mode --progress --size "${file_count}"
    }
 
-#   echo -n "do you want to skip updating times? [Y/n] "; read
-#   [[ ${REPLY} =~ ^n$ ]] || rsync_flags+=" --size-only"
+   echo -n "do you want to skip updating times? [Y/n] "; read
+   [[ ${REPLY} =~ ^n$ ]] || RSYNC_FLAGS+=(--size-only)
 
 
    if has pv && [[ ${PV_METHOD} -eq 1 && "${file_count}" -le 100 ]]; then

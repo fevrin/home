@@ -22,13 +22,7 @@ on:
     branches:
       - $GITHUB_BASE_REF
         #if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
-    paths:
-      - '.github/workflows/pre-commit.yml'
-      - '.pre-commit-config.yaml'
   pull_request:
-    paths:
-      - '.github/workflows/pre-commit.yml'
-      - '.pre-commit-config.yaml'
 
 # from the example here:
 # https://docs.github.com/en/actions/examples/using-scripts-to-test-your-code-on-a-runner#example-workflow
@@ -101,6 +95,8 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         env:
@@ -109,7 +105,7 @@ jobs:
           fetch-depth: $CHECKOUT_DEPTH
 
       - name: MegaLinter
-        uses: oxsecurity/megalinter/flavors/cupcake@7e042c726c68415475b05a65a686c612120a1232 # v7.7.0
+        uses: oxsecurity/megalinter/flavors/cupcake@55a59b24a441e0e1943080d4a512d827710d4a9d # v9.2.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MEGALINTER_CONFIG: ci/.mega-linter.yaml
@@ -152,15 +148,21 @@ jobs:
           check-latest: true
 
       - name: Install python
-        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
+        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
         with:
-          python-version: '3.11'
+          python-version: '3.12'
 
-      - name: Run pre-commit on all files
-        uses: pre-commit/action@646c83fcd040023954eafda54b4db0192ce70507 # v3.0.0
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
-          # this should run the pre-commit hooks only on the files changed between the default branch and the one in the PR
-          extra_args: --verbose -a
+          path: ~/.cache/pre-commit
+          # Key includes python version and config hash to invalidate cache on changes
+          key: pre-commit-3|${{ env.pythonLocation }}|${{ hashFiles('.pre-commit-config.yaml') }}
+
+      - name: Install pre-commit
+        run: pip install pre-commit
+
+      - name: Run pre-commit
+        run: pre-commit run --show-diff-on-failure --color=always --all-files --verbose
 
   pre-commit:
     if: (!github.event.act)
@@ -174,15 +176,21 @@ jobs:
           fetch-depth: $CHECKOUT_DEPTH
 
       - name: Install python
-        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
+        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
         with:
-          python-version: '3.11'
+          python-version: '3.12'
+
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ~/.cache/pre-commit
+          # Key includes python version and config hash to invalidate cache on changes
+          key: pre-commit-3|${{ env.pythonLocation }}|${{ hashFiles('.pre-commit-config.yaml') }}
+
+      - name: Install pre-commit
+        run: pip install pre-commit
 
       - name: Run pre-commit
-        uses: pre-commit/action@646c83fcd040023954eafda54b4db0192ce70507 # v3.0.0
-        with:
-          # this should run the pre-commit hooks only on the files changed between the default branch and the one in the PR
-          extra_args: --verbose --from-ref ${{ needs.get-changed-files.outputs.BASE_REF }} --to-ref HEAD
+        run: pre-commit run --show-diff-on-failure --color=always --all-files --verbose
 
   check-zshrc:
     runs-on: ubuntu-latest

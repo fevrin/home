@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Exec=env QT_QPA_PLATFORM=xcb /usr/bin/copyq
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+Name[en_US]=CopyQ
+Name=CopyQ
+Comment[en_US]=
+Comment=
+# https://copyq.readthedocs.io/en/latest/known-issues.html#on-linux-global-shortcuts-pasting-or-clipboard-monitoring-does-not-work
