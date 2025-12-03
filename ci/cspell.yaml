@@ -1,6 +1,15 @@
 ignorePaths:
   - '**.sw*'
+
 language: en-US
+
+# Enabled dictionaries
+dictionaries:
+  - technical
+  - software-terms
+  - shell
+  - project
+
 words:
   - Aftertabs
   - Architectrure
